@@ -1,0 +1,10 @@
+# Build artifacts
+build/
+
+# Text editors
+*~
+*.autosave
+
+# CLion
+.idea/
+cmake-build-*/
