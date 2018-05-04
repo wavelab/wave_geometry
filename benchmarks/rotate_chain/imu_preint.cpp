@@ -2,7 +2,7 @@
 
 #include "wave/geometry/geometry.hpp"
 #include "wave/geometry/debug.hpp"
-#include "bechmark_helpers.hpp"
+#include "../bechmark_helpers.hpp"
 
 using namespace wave;
 
