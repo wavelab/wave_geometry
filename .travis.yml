@@ -1,0 +1,32 @@
+dist: trusty
+sudo: false
+
+language: cpp
+
+branches:
+  only:
+  - master
+  - develop
+
+cache:
+  ccache: true
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - g++-5
+      - libboost-dev
+      - libeigen3-dev
+      - clang-format-3.8
+
+before_script:
+  - export CXX=g++-5 CC=gcc-5  # override travis defaults
+
+script:
+  - bash scripts/ci/ci_check.bash
+  - bash scripts/ci/ci_run.bash
+
+notifications:
+  email: false
