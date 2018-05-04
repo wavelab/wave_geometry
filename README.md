@@ -1,6 +1,8 @@
 
 # A manifold geometry library for robotics
 
+[![Build Status](https://travis-ci.com/wavelab/wave_geometry.svg?branch=master)](https://travis-ci.com/wavelab/wave_geometry)
+
 **wave_geometry** is a header-only C++ library for working with rotations and transformations in robotics and computer vision applications. It differs from similar libraries by offering:
 
 * Fast operations using expression templates
