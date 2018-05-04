@@ -43,7 +43,7 @@ wave::Translationd p2 = R * p1;
 Eigen::Matrix3d J_p2_wrt_R = (R * p1).jacobian(R);
 ```
 
-Above, `J_p2_wrt_R` is the 3x3 Jacobian of `p2 = R * p1` with respect to small changes in `R`. `wave_geometry` computes *local Jacobians*, which are independent of the choice of parametrization for `R` (e.g., rotation matrix or quaternion), and are useful for on-manifold parametrization.
+Above, `J_p2_wrt_R` is the 3x3 Jacobian of `p2 = R * p1` with respect to small changes in `R`. `wave_geometry` computes *local Jacobians*, which are independent of the choice of parametrization for `R` (e.g., rotation matrix or quaternion), and are useful for on-manifold optimization.
 
 It is possible (and more efficient) to combine evaluation and multiple Jacobian calculations:
 
