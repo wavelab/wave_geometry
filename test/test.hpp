@@ -167,24 +167,13 @@ void checkValueAndJacobiansUntyped(const std::tuple<Value, Jacobians...> &ref,
     (void) foreach;
 }
 
-template <typename T>
-std::string getTypeString() {
-    std::stringstream s;
-    const auto &name = boost::core::demangle(typeid(T).name());
-    s << (std::is_const<T>{} ? "const" : "");
-    s << wave::internal::getTemplateName(name, true);
-    s << (std::is_lvalue_reference<T>{} ? "&" : "");
-    s << (std::is_rvalue_reference<T>{} ? "&&" : "");
-    return s.str();
-}
-
 template <typename... T>
 void printTupleTypes(const std::string &msg, const std::tuple<T...> &, int n_jacobians) {
     ASSERT_EQ(n_jacobians, sizeof...(T)) << "In " << msg << " results";
 
     std::cerr << std::setw(15) << std::left << msg << " types are: ";
     bool first = true;
-    for (auto &&s : {getTypeString<T>()...}) {
+    for (auto &&s : {wave::internal::getTypeString<T>()...}) {
         std::cerr << (first ? "" : ", ") << s;
         first = false;
     }

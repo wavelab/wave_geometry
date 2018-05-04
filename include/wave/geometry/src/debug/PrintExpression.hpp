@@ -7,10 +7,28 @@
 
 #include <iostream>
 #include <regex>
+
+#include <boost/version.hpp>
+#if BOOST_VERSION < 105600
+#include <boost/units/detail/utility.hpp>
+#else
 #include <boost/core/demangle.hpp>
+#endif
 
 namespace wave {
 namespace internal {
+
+/** Gets demangled name of a type_info object - call as demangleName(typeid(T));
+ *
+ * Wrapper to handle different versions of Boost
+ */
+inline std::string demangleName(const std::type_info &ti) {
+#if BOOST_VERSION < 105600
+    return boost::units::detail::demangle(ti.name());
+#else
+    return boost::core::demangle(ti.name());
+#endif
+}
 
 /** Get the unqualified template name of a type name */
 inline std::string getTemplateName(const std::string &full_name, bool include_tp) {
@@ -29,10 +47,22 @@ inline std::string getTemplateName(const std::string &full_name, bool include_tp
     }
 }
 
+/** Print demangled name of type T with "const" and "&" qualifiers */
+template <typename T>
+std::string getTypeString() {
+    std::stringstream s;
+    const auto &name = demangleName(typeid(T));
+    s << (std::is_const<T>{} ? "const" : "");
+    s << getTemplateName(name, true);
+    s << (std::is_lvalue_reference<T>{} ? "&" : "");
+    s << (std::is_rvalue_reference<T>{} ? "&&" : "");
+    return s.str();
+}
+
 /** Get the unqualified typename of an expression for debugging purposes.*/
 template <typename Derived>
 inline std::string getExpressionTypeName(const ExpressionBase<Derived> &) {
-    const auto full_name = boost::core::demangle(typeid(Derived).name());
+    const auto full_name = demangleName(typeid(Derived));
 
     // For leaf expression, include the template parameters (typically ImplType)
     const bool include_template_parameters = is_leaf_expression<Derived>();
@@ -45,7 +75,7 @@ inline std::string getExpressionTypeName(const ExpressionBase<Derived> &) {
  * This variation includes the first template parameter (the To type) */
 template <typename To, typename From>
 inline std::string getExpressionTypeName(const Conversion<To, From> &) {
-    const auto to_name = boost::core::demangle(typeid(To).name());
+    const auto to_name = demangleName(typeid(To));
     return "Conversion to " + getTemplateName(to_name, true);
 }
 
@@ -66,20 +96,6 @@ struct PrintExpressionFunctor {
 };
 
 }  // namespace internal
-
-/** Recursively pretty-print the expression tree.
- *
- * @warning This function relies on boost::core::demangle and
- * std::type_info::name(),
- * which is implementation-defined. It may not work on all platforms, and is
- * intended for
- * debugging use only.
- */
-template <typename Tree>
-inline void printExpression(const Tree &expr, std::ostream &os = std::cout) {
-    visitTree(expr, internal::PrintExpressionFunctor{os});
-}
-
 }  // namespace wave
 
 #endif  // WAVE_GEOMETRY_PRINTEXPRESSION_HPP

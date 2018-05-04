@@ -1,6 +1,8 @@
 
 # A manifold geometry library for robotics
 
+[![Build Status](https://travis-ci.com/wavelab/wave_geometry.svg?branch=master)](https://travis-ci.com/wavelab/wave_geometry)
+
 **wave_geometry** is a header-only C++ library for working with rotations and transformations in robotics and computer vision applications. It differs from similar libraries by offering:
 
 * Fast operations using expression templates
@@ -144,7 +146,7 @@ CMake install and link commands will be added soon.
 ### Dependencies
 
 `wave_geometry` requires:
-  * an existing installation of [Eigen](http://eigen.tuxfamily.org) 3.3-beta2 or above
+  * an existing installation of [Eigen](http://eigen.tuxfamily.org) 3.3.2 or above
   * an existing installation of Boost (only the header-only Optional library is used)
   * a compiler supporting C++11
 
