@@ -67,23 +67,27 @@ TEST(Imu, compareToHand) {
     const auto &expr1 = inverse(delta_R_ij * exp(wg)) * inverse(R_i) * R_j;
     const auto &expr = log(expr1);
 
-    const auto[res, exp1, exp2, exp3, exp4] =
+    wave::RelativeRotationFd<FrameJ, FrameJ, FrameJ> res;
+    Eigen::Matrix3d res1, res2, res3, res4;
+
+
+    std::tie(res, res1, res2, res3, res4) =
       expr.evalWithJacobians(delta_R_ij, wg, R_i, R_j);
 
     Eigen::Matrix3d expwg = expMap(wg.value());
     Eigen::Matrix3d t0 = (delta_R_ij.value() * expwg).transpose();
     Eigen::Matrix3d t1 = (t0) *R_i.value().transpose();
-    Eigen::Vector3d r = logMap(t1 * R_j.value());
+    Eigen::Vector3d expected = logMap(t1 * R_j.value());
 
-    Eigen::Matrix3d Jlogmap = jacOfLogMap(r);
+    Eigen::Matrix3d Jlogmap = jacOfLogMap(expected);
     Eigen::Matrix3d J_R = Jlogmap * (-t0);
     Eigen::Matrix3d J_wg = J_R * delta_R_ij.value() * jacOfExpMap(expwg, wg.value());
     Eigen::Matrix3d J_phi_j = Jlogmap * t1;
     Eigen::Matrix3d J_phi_i = -J_phi_j;
 
-    EXPECT_APPROX(res.value(), r);
-    EXPECT_APPROX(exp1, J_R);
-    EXPECT_APPROX(exp2, J_wg);
-    EXPECT_APPROX(exp3, J_phi_i);
-    EXPECT_APPROX(exp4, J_phi_j);
+    EXPECT_APPROX(expected, res.value());
+    EXPECT_APPROX(J_R, res1);
+    EXPECT_APPROX(J_wg, res2);
+    EXPECT_APPROX(J_phi_i, res3);
+    EXPECT_APPROX(J_phi_j, res4);
 }
