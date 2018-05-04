@@ -19,10 +19,10 @@ wave_add_test(rigid_transform_test rigid_transform_test.cpp)
 wave_add_test(manifold_test manifold_test.cpp)
 
 # benchmarks
-wave_add_test(imu_preint imu_preint.cpp)
+wave_add_test(imu_preint_test imu_preint_test.cpp)
 
 # core
-wave_add_test(is_same is_same.cpp)
+wave_add_test(is_same_test is_same_test.cpp)
 
 # util
 wave_add_test(index_sequence_test util/index_sequence_test.cpp)
