@@ -144,7 +144,7 @@ CMake install and link commands will be added soon.
 ### Dependencies
 
 `wave_geometry` requires:
-  * an existing installation of [Eigen](http://eigen.tuxfamily.org) 3.3-beta2 or above
+  * an existing installation of [Eigen](http://eigen.tuxfamily.org) 3.3.2 or above
   * an existing installation of Boost (only the header-only Optional library is used)
   * a compiler supporting C++11
 

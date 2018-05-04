@@ -15,6 +15,7 @@ addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
+      - sourceline: 'ppa:lkoppel/robotics'
     packages:
       - g++-5
       - libboost-dev
