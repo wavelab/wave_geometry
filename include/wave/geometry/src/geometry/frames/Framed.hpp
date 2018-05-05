@@ -44,6 +44,9 @@ class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Fra
                          internal::is_vector_leaf<WrappedLeaf>{} &&
                          typename tmp::conjunction<std::is_arithmetic<Args>...>{}>;
 
+    // Workaround for clang 3 bug. `Framed` must be treated as a template here
+    using Tag = internal::expr<Framed::template Framed>;
+
     using Scalar = internal::scalar_t<WrappedLeaf>;
 
  private:
@@ -121,13 +124,13 @@ class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Fra
     friend struct internal::FramedLeafAccessBase<Framed>;
 
     // Strip frames at the start of evaluation
-    friend auto evalImpl(internal::expr<Framed>, const Framed &f) -> const WrappedLeaf & {
+    friend auto evalImpl(Tag, const Framed &f) -> const WrappedLeaf & {
         return f.wrapped_leaf;
     }
-    friend auto evalImpl(internal::expr<Framed>, Framed &f) -> WrappedLeaf & {
+    friend auto evalImpl(Tag, Framed &f) -> WrappedLeaf & {
         return f.wrapped_leaf;
     }
-    friend auto evalImpl(internal::expr<Framed>, Framed &&f) -> WrappedLeaf && {
+    friend auto evalImpl(Tag, Framed &&f) -> WrappedLeaf && {
         return std::move(f).wrapped_leaf;
     }
 

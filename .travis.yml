@@ -11,20 +11,51 @@ branches:
 cache:
   ccache: true
 
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-      - sourceline: 'ppa:lkoppel/robotics'
-    packages:
-      - g++-5
-      - libboost-dev
-      - libeigen3-dev
-      - libgtest-dev
-      - clang-format-3.8
+_common_packages: &common_packages
+  - libboost1.54-dev
+  - libeigen3-dev
+  - libgtest-dev
+  - clang-format-3.8
+
+jobs:
+  include:
+    - stage: test
+      env: WAVE_CXX=g++-5 WAVE_CC=gcc-5
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - sourceline: 'ppa:lkoppel/robotics'
+          packages:
+            - *common_packages
+            - g++-5
+    - stage: test
+      env: WAVE_CXX=clang++-4.0 WAVE_CC=clang-4.0
+      addons:
+        apt:
+          sources:
+            - llvm-toolchain-trusty-4.0
+            - sourceline: 'ppa:lkoppel/robotics'
+          packages:
+            - *common_packages
+            - clang-4.0
+    - stage: test
+      env: WAVE_CXX=g++-7 WAVE_CC=gcc-7 \
+        ASAN_OPTIONS=detect_leaks=0:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1 \
+        WAVE_CXX_FLAGS="-fsanitize=address -fsanitize-address-use-after-scope -O1 -fno-omit-frame-pointer -ftrack-macro-expansion=0 -fuse-ld=gold"
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - sourceline: 'ppa:lkoppel/robotics'
+          packages:
+            - *common_packages
+            - g++-7
+            - binutils
+
 
 before_script:
-  - export CXX=g++-5 CC=gcc-5  # override travis defaults
+  - export CXX=$WAVE_CXX CC=$WAVE_CC  # override travis with what we set in matrix
 
 script:
   - bash scripts/ci/ci_check.bash

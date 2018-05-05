@@ -1,4 +1,4 @@
-IF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+IF(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   # Disable excessive warning from clang (see https://github.com/dealii/dealii/issues/3705)
   # from templated test fixtures
   ADD_COMPILE_OPTIONS(-Wno-undefined-var-template)

@@ -74,6 +74,7 @@ template <typename Matrix>
 bool checkApproxCoeffWise(const Matrix &expected, const Matrix &actual, double prec) {
     for (int i = 0; i < expected.rows(); ++i) {
         for (int j = 0; j < expected.cols(); ++j) {
+            using std::abs;
             const auto err = abs(expected(i, j) - actual(i, j));
             EXPECT_NEAR(expected(i, j), actual(i, j), prec) << " (" << i << ", " << j
                                                             << ")";

@@ -42,7 +42,7 @@ class TransformTest : public testing::Test {
     using LeafAC = Framed<Leaf, FrameA, FrameC>;
     using RelLeafAAB = Framed<RelLeaf, FrameA, FrameA, FrameB>;
 
-    const Scalar dummy_prec = Eigen::NumTraits<Scalar>::dummy_precision();
+    const Scalar dummy_prec = 10 * Eigen::NumTraits<Scalar>::dummy_precision();
 
     // Static traits checks
     TICK_TRAIT_CHECK(wave::internal::is_leaf_expression<LeafAB>);
@@ -130,7 +130,7 @@ TYPED_TEST(TransformTest, consistentExpLog) {
     // back, so the precision is a bit worse
     auto prec = this->dummy_prec;
     if (std::is_same<typename TestFixture::Leaf, typename TestFixture::RotationA>{}) {
-        prec = 10;
+        prec *= 10;
     }
 
     // Bloesch section D
