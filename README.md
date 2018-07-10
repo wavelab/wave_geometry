@@ -135,13 +135,42 @@ Quaternions use the conventions of `Eigen::Quaternion`: Hamilton product, storag
 
 ## How to install
 
-`wave_geometry` is a header-only library, meaning no compilation is required to use it in your project. Put the `include` directory into your compiler's search path, and write
+`wave_geometry` is a header-only library, meaning no compilation is required to use it in your project.
 
+`wave_geometry` can be installed with cmake.
+
+```bash
+mkdir build
+cd build
+cmake .. -DBUILD_TESTING=OFF
+sudo make install
 ```
+
+Setting the `BUILD_TESTING` option to `ON` (the default) will build unit tests,
+and `make test` will run them.
+
+As an alternative to `make install`, the CMake option `-DEXPORT_BUILD=ON` will
+make the build directory findable by other CMake projects without installation.
+
+## How to use in your CMake project
+
+Once libwave has been either installed or exported by CMake, it can be used in
+your project's `CMakeLists.txt` file as follows:
+
+```cmake
+cmake_minimum_required(VERSION 3.2)
+project(example)
+
+find_package(wave_geometry REQUIRED)
+
+add_executable(example example.cpp)
+target_link_libraries(example wave_geometry)
+```
+
+In your C++ file, write:
+```cpp
 #include <wave/geometry/geometry.hpp>
 ```
-
-CMake install and link commands will be added soon.
 
 ### Dependencies
 
