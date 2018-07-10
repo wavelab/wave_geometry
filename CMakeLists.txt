@@ -85,6 +85,11 @@ TARGET_INCLUDE_DIRECTORIES(wave_geometry INTERFACE
   $<INSTALL_INTERFACE:3rd-party/Tick>)
 INSTALL(DIRECTORY 3rd-party DESTINATION .)
 
+
+# This is where .cmake files will be installed (default: under share/)
+SET(INSTALL_CMAKE_DIR "${CMAKE_INSTALL_DATADIR}/wave_geometry/cmake" CACHE PATH
+  "Installation directory for CMake files")
+
 # Generate the Config file for the install tree
 SET(WAVE_GEOMETRY_EXTRA_CMAKE_DIR "cmake")
 CONFIGURE_PACKAGE_CONFIG_FILE(
@@ -96,10 +101,6 @@ CONFIGURE_PACKAGE_CONFIG_FILE(
 WRITE_BASIC_PACKAGE_VERSION_FILE(wave_geometryConfigVersion.cmake
   VERSION ${WAVE_GEOMETRY_PACKAGE_VERSION}
   COMPATIBILITY SameMajorVersion)
-
-# This is where .cmake files will be installed (default under share/)
-SET(INSTALL_CMAKE_DIR "${CMAKE_INSTALL_DATADIR}/wave_geometry/cmake" CACHE PATH
-  "Installation directory for CMake files")
 
 # Install the Config and ConfigVersion files
 INSTALL(FILES
