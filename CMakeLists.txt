@@ -75,7 +75,8 @@ TARGET_LINK_LIBRARIES(wave_geometry INTERFACE Eigen3::Eigen ${BOOST_LIBRARIES})
 TARGET_INCLUDE_DIRECTORIES(wave_geometry INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>)
-INSTALL(TARGETS wave_geometry EXPORT wave_geometryConfig)
+# Install to include path set by GNUInstallDirs
+INSTALL(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 # We ship the headers of Tick and always want to use this exact version
 # Add Tick header to the include path as well.
@@ -84,9 +85,12 @@ TARGET_INCLUDE_DIRECTORIES(wave_geometry INTERFACE
   $<INSTALL_INTERFACE:3rd-party/Tick>)
 INSTALL(DIRECTORY 3rd-party DESTINATION .)
 
-# Install to include path set by GNUInstallDirs
-INSTALL(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
+# Generate the Config file for the install tree
+SET(WAVE_GEOMETRY_EXTRA_CMAKE_DIR "cmake")
+CONFIGURE_PACKAGE_CONFIG_FILE(
+  "${CMAKE_CURRENT_SOURCE_DIR}/cmake/wave_geometryConfig.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/wave_geometryConfig.cmake"
+  INSTALL_DESTINATION "${INSTALL_CMAKE_DIR}")
 
 # Generate the Version file
 WRITE_BASIC_PACKAGE_VERSION_FILE(wave_geometryConfigVersion.cmake
@@ -98,10 +102,20 @@ SET(INSTALL_CMAKE_DIR "${CMAKE_INSTALL_DATADIR}/wave_geometry/cmake" CACHE PATH
   "Installation directory for CMake files")
 
 # Install the Config and ConfigVersion files
-INSTALL(EXPORT wave_geometryConfig DESTINATION "${INSTALL_CMAKE_DIR}")
 INSTALL(FILES
+  "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/wave_geometryConfig.cmake"
   "${PROJECT_BINARY_DIR}/wave_geometryConfigVersion.cmake"
   DESTINATION "${INSTALL_CMAKE_DIR}")
+# Install auto-generated targets file used by the Config file
+INSTALL(TARGETS wave_geometry EXPORT wave_geometryTargets)
+INSTALL(EXPORT wave_geometryTargets DESTINATION "${INSTALL_CMAKE_DIR}")
+
+# Install our import scripts so we can use them in the Config script. That way,
+# other projects using wave_geometry will get transient dependencies (such as
+# Eigen) automatically
+INSTALL(DIRECTORY "${WAVE_GEOMETRY_EXTRA_CMAKE_DIR}/"
+  DESTINATION "${INSTALL_CMAKE_DIR}/${WAVE_GEOMETRY_EXTRA_CMAKE_DIR}"
+  FILES_MATCHING PATTERN "Add*.cmake" PATTERN "Find*.cmake")
 
 IF(EXPORT_BUILD)
   # Export this build so the package can be found through CMake's registry
