@@ -161,6 +161,8 @@ your project's `CMakeLists.txt` file as follows:
 cmake_minimum_required(VERSION 3.2)
 project(example)
 
+set(CMAKE_CXX_STANDARD 11)
+
 find_package(wave_geometry REQUIRED)
 
 add_executable(example example.cpp)
