@@ -56,7 +56,7 @@ ELSE(TARGET wave)
 
     # This target is used to run benchmarks via "make benchmark".
     # Like "make test", it does not build anything. (@todo change?)
-    # It runs all tests labelled "benchmark" by WAVE_ADD_BENCHMARK helper.
+    # It runs all tests labelled "benchmark" by WAVE_GEOMETRY_ADD_BENCHMARK helper.
     ADD_CUSTOM_TARGET(benchmark
         COMMAND ${CMAKE_CTEST_COMMAND} -C benchmark -L benchmark)
     MESSAGE(STATUS "Building benchmarks")
