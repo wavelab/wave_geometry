@@ -13,4 +13,4 @@ else()
   return()
 endif()
 
-wave_add_benchmark(imu_preint imu_preint.cpp)
+wave_geometry_add_benchmark(imu_preint imu_preint.cpp)
