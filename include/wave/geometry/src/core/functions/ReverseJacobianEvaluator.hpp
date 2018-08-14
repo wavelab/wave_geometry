@@ -33,7 +33,7 @@ struct ReverseJacobianEvaluator<Derived, Adjoint, enable_if_leaf_t<Derived>> {
 
  private:
     const Evaluator<Derived> &evaluator;
-    const ref_sel_t<Adjoint> adjoint;
+    const jac_ref_sel_t<Adjoint> adjoint;
 };
 
 /** Specialization for unary expression, if types match */
@@ -52,9 +52,9 @@ struct ReverseJacobianEvaluator<Derived, Adjoint, enable_if_unary_t<Derived>> {
     const Evaluator<Derived> &evaluator;
 
     // Results cache
-    ref_sel_t<SelfJacobian> self_jac;
-    ref_sel_t<Adjoint> adjoint;
-    ref_sel_t<RhsAdjoint> rhs_adjoint;
+    jac_ref_sel_t<SelfJacobian> self_jac;
+    jac_ref_sel_t<Adjoint> adjoint;
+    jac_ref_sel_t<RhsAdjoint> rhs_adjoint;
 
     // Nested jacobian-evaluators
     const ReverseJacobianEvaluator<typename traits<Derived>::RhsDerived, RhsAdjoint>
@@ -102,11 +102,11 @@ struct ReverseJacobianEvaluator<Derived, Adjoint, enable_if_binary_t<Derived>> {
     const Evaluator<Derived> &evaluator;
 
     // Results cache
-    ref_sel_t<LhsSelfJacobian> lhs_jac;
-    ref_sel_t<RhsSelfJacobian> rhs_jac;
-    ref_sel_t<Adjoint> adjoint;
-    ref_sel_t<LhsAdjoint> lhs_adjoint;
-    ref_sel_t<RhsAdjoint> rhs_adjoint;
+    jac_ref_sel_t<LhsSelfJacobian> lhs_jac;
+    jac_ref_sel_t<RhsSelfJacobian> rhs_jac;
+    jac_ref_sel_t<Adjoint> adjoint;
+    jac_ref_sel_t<LhsAdjoint> lhs_adjoint;
+    jac_ref_sel_t<RhsAdjoint> rhs_adjoint;
 
     // Nested jacobian-evaluators
     const ReverseJacobianEvaluator<typename traits<Derived>::LhsDerived, LhsAdjoint>

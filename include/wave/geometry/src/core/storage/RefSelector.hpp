@@ -7,9 +7,10 @@
 
 namespace wave {
 namespace internal {
-/** Helper to choose cache storage type (reference or value)
+/** Helper to choose storage type (reference or value) for expressions.
  *
- * We pass the result of decltype() to this template. It should be an Eigen expression.
+ * We pass the result of decltype() to this template. T should be a wave_geometry
+ * expression.
  *
  * If the input T is an rvalue reference, we want to store it by value.
  *
@@ -25,9 +26,10 @@ using wave_ref_sel_t =
                                         const T &,
                                         tmp::remove_cr_t<T>>>;
 
-/** Helper to choose cache storage type (reference or value)
+/** Helper to choose cache storage type (reference or value) for Jacobian evaluators.
  *
- * We pass the result of decltype() to this template. It should be an Eigen expression.
+ * We pass the result of decltype() to this template. T should be an Eigen matrix
+ * expression.
  *
  * If the input T is an lvalue reference, we want to see whether it refers to a leaf or
  * to a lightweight expression, and store it by value if the latter (as in Eigen).
@@ -35,7 +37,7 @@ using wave_ref_sel_t =
  * Otherwise if the input T is an rvalue, we want to store it by value.
  **/
 template <typename T>
-using ref_sel_t =
+using jac_ref_sel_t =
   tmp::conditional_t<std::is_lvalue_reference<T>{},
                      typename Eigen::internal::ref_selector<tmp::remove_cr_t<T>>::type,
                      const tmp::remove_cr_t<T>>;

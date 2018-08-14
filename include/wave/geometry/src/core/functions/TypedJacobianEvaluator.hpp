@@ -59,8 +59,8 @@ struct TypedJacobianEvaluator<
     using Jacobian = decltype(std::declval<SelfJacobian>() * std::declval<RhsJacobian>());
 
     // Results cache
-    ref_sel_t<SelfJacobian> self_jac;
-    ref_sel_t<Jacobian> jac;
+    jac_ref_sel_t<SelfJacobian> self_jac;
+    jac_ref_sel_t<Jacobian> jac;
 
 
  public:
@@ -114,9 +114,9 @@ struct TypedJacobianEvaluator<
                std::declval<RhsSelfJacobian>() * std::declval<RhsJacobian>());
 
     // Results cache
-    ref_sel_t<LhsSelfJacobian> lhs_jac;
-    ref_sel_t<RhsSelfJacobian> rhs_jac;
-    ref_sel_t<Jacobian> jac;
+    jac_ref_sel_t<LhsSelfJacobian> lhs_jac;
+    jac_ref_sel_t<RhsSelfJacobian> rhs_jac;
+    jac_ref_sel_t<Jacobian> jac;
 
  public:
     WAVE_STRONG_INLINE TypedJacobianEvaluator(const Evaluator<Derived> &evaluator,
@@ -171,8 +171,8 @@ struct TypedJacobianEvaluator<
       decltype(std::declval<LhsSelfJacobian>() * std::declval<LhsJacobian>());
 
     // Results cache
-    ref_sel_t<LhsSelfJacobian> lhs_jac;
-    ref_sel_t<Jacobian> jac;
+    jac_ref_sel_t<LhsSelfJacobian> lhs_jac;
+    jac_ref_sel_t<Jacobian> jac;
 
  public:
     WAVE_STRONG_INLINE TypedJacobianEvaluator(const Evaluator<Derived> &evaluator,
@@ -220,8 +220,8 @@ struct TypedJacobianEvaluator<
       decltype(std::declval<RhsSelfJacobian>() * std::declval<RhsJacobian>());
 
     // Results cache
-    ref_sel_t<RhsSelfJacobian> rhs_jac;
-    ref_sel_t<Jacobian> jac;
+    jac_ref_sel_t<RhsSelfJacobian> rhs_jac;
+    jac_ref_sel_t<Jacobian> jac;
 
  public:
     WAVE_STRONG_INLINE TypedJacobianEvaluator(const Evaluator<Derived> &evaluator,
