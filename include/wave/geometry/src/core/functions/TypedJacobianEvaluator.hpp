@@ -255,15 +255,14 @@ template <typename Derived,
           typename TargetDerived,
           tmp::enable_if_t<contains_same_type<Derived, TargetDerived>::value, int> = 0>
 auto evaluateTypedJacobian(const ExpressionBase<Derived> &expr,
-                           const ExpressionBase<TargetDerived> &target)
+                           const TargetDerived &target)
   -> jacobian_t<Derived, TargetDerived> {
     assert(containsSame(expr, target));
 
     // Note since we don't return the value, we don't need the user-facing OutputType
     using OutType = eval_output_t<Derived>;
     const auto &v_eval = prepareEvaluatorTo<OutType>(expr.derived());
-    internal::TypedJacobianEvaluator<Derived, TargetDerived> j_eval{v_eval,
-                                                                    target.derived()};
+    internal::TypedJacobianEvaluator<Derived, TargetDerived> j_eval{v_eval, target};
     const auto &result = j_eval.jacobian();
     return result;
 }
@@ -271,8 +270,7 @@ auto evaluateTypedJacobian(const ExpressionBase<Derived> &expr,
 template <typename Derived,
           typename TargetDerived,
           tmp::enable_if_t<!contains_same_type<Derived, TargetDerived>::value, int> = 0>
-auto evaluateTypedJacobian(const ExpressionBase<Derived> & /*expr*/,
-                           const ExpressionBase<TargetDerived> &
+auto evaluateTypedJacobian(const ExpressionBase<Derived> & /*expr*/, const TargetDerived &
                            /*target*/) -> jacobian_t<Derived, TargetDerived> {
     return jacobian_t<Derived, TargetDerived>::Zero();
 }
@@ -283,8 +281,8 @@ auto evaluateTypedJacobian(const ExpressionBase<Derived> & /*expr*/,
  * @param targets N dependent leaf expressions
  */
 template <typename Derived, typename... Targets>
-WAVE_STRONG_INLINE auto evaluateWithTypedJacobians(
-  const ExpressionBase<Derived> &expr, const ExpressionBase<Targets> &... targets)
+WAVE_STRONG_INLINE auto evaluateWithTypedJacobians(const ExpressionBase<Derived> &expr,
+                                                   const Targets &... targets)
   -> std::tuple<plain_output_t<Derived>, jacobian_t<Derived, Targets>...> {
     // @todo better checks for validity of arguments
     // @todo debug-mode checks
@@ -297,8 +295,7 @@ WAVE_STRONG_INLINE auto evaluateWithTypedJacobians(
 
     return std::forward_as_tuple(
       prepareOutput(v_eval),
-      internal::TypedJacobianEvaluator<ExprType, Targets>{v_eval, targets.derived()}
-        .jacobian()...);
+      internal::TypedJacobianEvaluator<ExprType, Targets>{v_eval, targets}.jacobian()...);
 }
 
 /** Evaluate one Jacobian of an expression, using forward-mode AD.
@@ -312,18 +309,18 @@ template <typename Derived,
           typename TargetDerived,
           tmp::enable_if_t<unique_leaves_t<Derived>{}, int> = 0>
 auto evaluateJacobianAuto(const ExpressionBase<Derived> &expr,
-                          const ExpressionBase<TargetDerived> &target)
+                          const TargetDerived &target)
   -> jacobian_t<Derived, TargetDerived> {
-    return evaluateTypedJacobian(expr.derived(), target.derived());
+    return evaluateTypedJacobian(expr.derived(), target);
 }
 
 template <typename Derived,
           typename TargetDerived,
           tmp::enable_if_t<!unique_leaves_t<Derived>{}, int> = 0>
 auto evaluateJacobianAuto(const ExpressionBase<Derived> &expr,
-                          const ExpressionBase<TargetDerived> &target)
+                          const TargetDerived &target)
   -> jacobian_t<Derived, TargetDerived> {
-    return evaluateJacobian(expr.derived(), target.derived());
+    return evaluateJacobian(expr.derived(), target);
 }
 
 /** Evaluate the result of an expression tree and any number of jacobians
@@ -335,18 +332,18 @@ template <typename Derived,
           typename... Targets,
           tmp::enable_if_t<unique_leaves_t<Derived>{}, int> = 0>
 auto evaluateWithJacobiansAuto(const ExpressionBase<Derived> &expr,
-                               const ExpressionBase<Targets> &... targets)
+                               const Targets &... targets)
   -> std::tuple<plain_output_t<Derived>, jacobian_t<Derived, Targets>...> {
-    return evaluateWithTypedJacobians(expr.derived(), targets.derived()...);
+    return evaluateWithTypedJacobians(expr.derived(), targets...);
 }
 
 template <typename Derived,
           typename... Targets,
           tmp::enable_if_t<!unique_leaves_t<Derived>{}, int> = 0>
 auto evaluateWithJacobiansAuto(const ExpressionBase<Derived> &expr,
-                               const ExpressionBase<Targets> &... targets)
+                               const Targets &... targets)
   -> std::tuple<plain_output_t<Derived>, jacobian_t<Derived, Targets>...> {
-    return evaluateWithJacobians(expr.derived(), targets.derived()...);
+    return evaluateWithJacobians(expr.derived(), targets...);
 }
 
 

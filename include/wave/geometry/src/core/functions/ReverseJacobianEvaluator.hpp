@@ -21,8 +21,12 @@ using eigen_plain_t = typename tmp::remove_cr_t<T>::PlainObject;
 
 /** Specialization for leaf expression */
 template <typename Derived, typename Adjoint>
-struct ReverseJacobianEvaluator<Derived, Adjoint, enable_if_leaf_t<Derived>> {
-    WAVE_STRONG_INLINE ReverseJacobianEvaluator(const Evaluator<Derived> &evaluator,
+struct ReverseJacobianEvaluator<Derived,
+                                Adjoint,
+                                enable_if_leaf_nullary_or_scalar_t<Derived>> {
+    using CleanDerived = tmp::remove_cr_t<Derived>;
+
+    WAVE_STRONG_INLINE ReverseJacobianEvaluator(const Evaluator<CleanDerived> &evaluator,
                                                 const Adjoint &adjoint)
         : evaluator{evaluator}, adjoint{adjoint} {}
 
@@ -32,7 +36,7 @@ struct ReverseJacobianEvaluator<Derived, Adjoint, enable_if_leaf_t<Derived>> {
     }
 
  private:
-    const Evaluator<Derived> &evaluator;
+    const Evaluator<CleanDerived> &evaluator;
     const jac_ref_sel_t<Adjoint> adjoint;
 };
 

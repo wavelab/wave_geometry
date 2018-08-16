@@ -31,6 +31,14 @@ TEST(IsSame, trivialFalseTemporary) {
     EXPECT_FALSE(wave::isSame(wave::RotationQd{q1}, wave::RotationQd{q1}));
 }
 
+TEST(IsSame, falseTemporaryValue) {
+    // This test catches a problem with a possible implementation of isSame(): using the
+    // address of the leaf's `value()`. Here Zero.value() would return a temporary, and we
+    // can't take the address.
+    EXPECT_FALSE(
+      wave::isSame(wave::Zero<wave::Translationd>{}, wave::Zero<wave::Translationd>{}));
+}
+
 TEST(IsSame, trivialConstRef) {
     wave::RotationQd r1{};
     const auto &cr = r1;
@@ -50,7 +58,7 @@ TEST(IsSame, composition) {
     EXPECT_FALSE(wave::isSame(r1 * r2, r2 * r1));
 }
 
-TEST(IsSame, complex) {
+TEST(IsSame, complicatedExpression) {
     wave::RotationQd r1{};
     wave::RotationQd r2{};
     wave::RotationMd r3{};
@@ -81,4 +89,20 @@ TEST(IsSame, rvalueCopy) {
 
     // Note the stored leaves are equal, though separate copies.
     EXPECT_EQ(expr.rhs().value(), expr2.rhs().rhs().value());
+}
+
+TEST(IsSame, scalarRef) {
+    double a{};
+    wave::Scalar<double> s0{a};
+    wave::ScalarRef<double> s1{a};
+    wave::ScalarRef<double> s2{a};
+
+    EXPECT_TRUE(wave::isSame(s1, s2));
+    EXPECT_FALSE(wave::isSame(s0, s1));
+}
+
+TEST(IsSame, contains_same_type) {
+    using Sum = wave::Sum<wave::Scalar<double>, wave::ScalarRef<double>>;
+    static_assert(wave::internal::contains_same_type<Sum, wave::ScalarRef<double>>{}, "");
+    static_assert(wave::internal::contains_same_type<Sum, double>{}, "");
 }

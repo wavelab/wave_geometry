@@ -232,6 +232,17 @@ TYPED_TEST(VectorTest, norm) {
     CHECK_JACOBIANS(true, t1.norm(), t1);
 }
 
+TYPED_TEST(VectorTest, addNorms) {
+    const auto t1 = TestFixture::LeafAAB::Random();
+    const auto t2 = TestFixture::LeafABC::Random();
+
+    const double result = eval(t1.norm() + t2.norm());
+    const auto eigen_result = t1.value().norm() + t2.value().norm();
+
+    ASSERT_DOUBLE_EQ(eigen_result, result);
+    CHECK_JACOBIANS(TestFixture::IsFramed, t1.norm() + t2.norm(), t1, t2);
+}
+
 TYPED_TEST(VectorTest, addMultiple) {
     const auto t1 = TestFixture::LeafAAB::Random();
     const auto t2 = TestFixture::LeafABC::Random();

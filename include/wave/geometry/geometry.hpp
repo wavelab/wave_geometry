@@ -20,11 +20,13 @@
 #include "src/geometry/frames/Framed.hpp"
 
 // Geometric expressions
-#include "src/geometry/base/ScalarExpression.hpp"
+#include "src/geometry/base/ScalarBase.hpp"
 #include "src/geometry/op/CommonExpressions.hpp"
 #include "src/geometry/base/VectorBase.hpp"
 #include "src/geometry/base/TransformBase.hpp"
 #include "src/geometry/base/RotationBase.hpp"
+#include "src/geometry/leaf/Scalar.hpp"
+#include "src/geometry/leaf/ScalarRef.hpp"
 #include "src/geometry/leaf/MatrixRotation.hpp"
 #include "src/geometry/leaf/QuaternionRotation.hpp"
 #include "src/geometry/leaf/AngleAxisRotation.hpp"

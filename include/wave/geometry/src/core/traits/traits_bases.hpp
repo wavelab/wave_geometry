@@ -62,8 +62,8 @@ template <template <typename, typename> class Tmpl,
           typename LhsDerived_,
           typename RhsDerived_>
 struct binary_traits_base<Tmpl<LhsDerived_, RhsDerived_>> {
-    using LhsDerived = LhsDerived_;
-    using RhsDerived = RhsDerived_;
+    using LhsDerived = tmp::remove_cr_t<LhsDerived_>;
+    using RhsDerived = tmp::remove_cr_t<RhsDerived_>;
 
     /** The type of the derived template instantiated with a different parameter.
      *
@@ -117,7 +117,7 @@ struct binary_traits_base<Tmpl<LhsDerived_, RhsDerived_>> {
 // Inverse)
 template <template <typename> class Tmpl, typename RhsDerived_>
 struct unary_traits_base<Tmpl<RhsDerived_>> {
-    using RhsDerived = RhsDerived_;
+    using RhsDerived = tmp::remove_cr_t<RhsDerived_>;
 
     /** The type of the derived template instantiated with a different parameter.
      *
@@ -132,7 +132,7 @@ struct unary_traits_base<Tmpl<RhsDerived_>> {
 
  private:
     // Convenience aliases, not part of traits interface
-    using This = Tmpl<RhsDerived>;
+    using This = Tmpl<RhsDerived_>;
     using RhsEval = clean_eval_t<RhsDerived>;
     // Type of the Rhs after applying its PreparedType (before evaluation)
     using RhsPrepared = typename traits<RhsDerived>::PreparedType;
@@ -168,7 +168,7 @@ template <template <typename, typename> class Tmpl,
           typename RhsDerived_,
           typename Tag_>
 struct unary_traits_base_tag<Tmpl<Aux, RhsDerived_>, Tag_> {
-    using RhsDerived = RhsDerived_;
+    using RhsDerived = tmp::remove_cr_t<RhsDerived_>;
     using Tag = Tag_;
 
     template <typename NewRhs>
@@ -176,7 +176,7 @@ struct unary_traits_base_tag<Tmpl<Aux, RhsDerived_>, Tag_> {
 
  private:
     // Convenience aliases, not part of traits interface
-    using This = Tmpl<Aux, RhsDerived>;
+    using This = Tmpl<Aux, RhsDerived_>;
     using RhsEval = clean_eval_t<RhsDerived>;
     // Type of the Rhs after applying its PreparedType (before evaluation)
     using RhsPrepared = typename traits<RhsDerived>::PreparedType;
@@ -208,17 +208,6 @@ struct unary_traits_base_tag<Tmpl<Aux, RhsDerived_>, Tag_> {
 template <template <typename, typename> class Tmpl, typename Aux, typename RhsDerived_>
 struct unary_traits_base<Tmpl<Aux, RhsDerived_>>
   : unary_traits_base_tag<Tmpl<Aux, RhsDerived_>, expr<Tmpl, Aux>> {};
-
-template <typename T>
-struct scalar_traits_base : leaf_traits_base<T> {
-    using Scalar = T;
-    static constexpr int TangentSize = 1;
-    static constexpr int Size = 1;
-};
-
-/** Specialize traits for built-in scalar types. */
-template <typename T>
-struct traits<T, tmp::enable_if_t<std::is_arithmetic<T>{}>> : scalar_traits_base<T> {};
 
 // Used so we can instantiate traits of non-evaluable types
 template <>

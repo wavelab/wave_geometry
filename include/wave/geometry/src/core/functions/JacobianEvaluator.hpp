@@ -19,7 +19,7 @@ struct JacobianEvaluator;
 
 /** Specialization for leaf expression of same type */
 template <typename Derived>
-struct JacobianEvaluator<Derived, Derived, enable_if_leaf_t<Derived>> {
+struct JacobianEvaluator<Derived, Derived, enable_if_leaf_nullary_or_scalar_t<Derived>> {
     using Scalar = scalar_t<Derived>;
 
     WAVE_STRONG_INLINE JacobianEvaluator(const Evaluator<Derived> &evaluator,
@@ -51,7 +51,7 @@ struct JacobianEvaluator<Derived, Derived, enable_if_leaf_t<Derived>> {
 
 /** Specialization for leaf expression of different type */
 template <typename Derived, typename Target>
-struct JacobianEvaluator<Derived, Target, enable_if_leaf_t<Derived>> {
+struct JacobianEvaluator<Derived, Target, enable_if_leaf_nullary_or_scalar_t<Derived>> {
     WAVE_STRONG_INLINE JacobianEvaluator(const Evaluator<Derived> &, const Target &) {}
 
     /** Finds (trivial) jacobian of the leaf expression
@@ -226,10 +226,9 @@ struct JacobianEvaluator<
 /** Evaluate a jacobian using an existing Evaluator tree
  */
 template <typename Derived, typename Target>
-inline auto evaluateOneJacobian(const Evaluator<Derived> &v_eval,
-                                const ExpressionBase<Target> &target)
+inline auto evaluateOneJacobian(const Evaluator<Derived> &v_eval, const Target &target)
   -> jacobian_t<Derived, Target> {
-    internal::JacobianEvaluator<Derived, Target> j_eval{v_eval, target.derived()};
+    internal::JacobianEvaluator<Derived, Target> j_eval{v_eval, target};
     const auto &result = j_eval.jacobian();
     if (result) {
         return *result;
@@ -244,13 +243,12 @@ inline auto evaluateOneJacobian(const Evaluator<Derived> &v_eval,
  * @note this also calculates the value and discards it
  */
 template <typename Derived, typename Target>
-auto evaluateJacobian(const ExpressionBase<Derived> &expr,
-                      const ExpressionBase<Target> &target)
+auto evaluateJacobian(const ExpressionBase<Derived> &expr, const Target &target)
   -> jacobian_t<Derived, Target> {
     // Note since we don't return the value, we don't need the user-facing OutputType
     using OutType = eval_output_t<Derived>;
     const auto &v_eval = prepareEvaluatorTo<OutType>(expr.derived());
-    return evaluateOneJacobian(v_eval, target.derived());
+    return evaluateOneJacobian(v_eval, target);
 }
 
 /** Evaluate the result of an expression tree and any number of jacobians
@@ -261,13 +259,13 @@ auto evaluateJacobian(const ExpressionBase<Derived> &expr,
  */
 template <typename Derived, typename... Targets>
 auto evaluateWithJacobians(const ExpressionBase<Derived> &expr,
-                           const ExpressionBase<Targets> &... targets)
+                           const Targets &... targets)
   -> std::tuple<plain_output_t<Derived>, jacobian_t<Derived, Targets>...> {
     // Get the value once
     const auto &v_eval = prepareEvaluatorTo<plain_output_t<Derived>>(expr.derived());
 
     return std::make_tuple(prepareOutput(v_eval),
-                           evaluateOneJacobian(v_eval, targets.derived())...);
+                           evaluateOneJacobian(v_eval, targets)...);
 }
 
 }  // namespace internal

@@ -52,6 +52,19 @@ struct Evaluator<Derived, enable_if_nullary_t<Derived>> {
     const EvalType result;
 };
 
+/** Specialization for scalar type */
+template <typename Derived>
+struct Evaluator<Derived, tmp::enable_if_t<is_scalar<Derived>{}>> {
+    using EvalType = Derived;
+    WAVE_STRONG_INLINE explicit Evaluator(const Derived &scalar) : expr{scalar} {}
+    const EvalType &operator()() const {
+        return this->expr;
+    }
+
+ public:
+    const wave_ref_sel_t<Derived> expr;
+};
+
 /** Specialization for unary expression */
 template <typename Derived>
 struct Evaluator<Derived, enable_if_unary_t<Derived>> {

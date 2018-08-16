@@ -28,11 +28,6 @@ struct traits<Minus<Rhs>, tmp::enable_if_t<has_three_decorators<Rhs>{}>>
       WrapWithFrames<LeftFrameOf<Rhs>, RightFrameOf<Rhs>, MiddleFrameOf<Rhs>>;
 };
 
-// Traits for -(scalar)
-template <typename Rhs>
-struct traits<Minus<Rhs>, tmp::enable_if_t<std::is_arithmetic<eval_t<Rhs>>{}>>
-  : unary_traits_base<Minus<Rhs>> {};
-
 /** Jacobian implementation for all Minus */
 template <typename Res, typename Rhs>
 auto jacobianImpl(expr<Minus>, const Res &, const Rhs &) -> jacobian_t<Res, Rhs> {

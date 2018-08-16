@@ -99,9 +99,8 @@ auto evalImpl(expr<Convert, ToType>, const VectorBase<Rhs> &rhs) -> ToType {
  */
 template <typename Lhs, typename Rhs, TICK_REQUIRES(internal::same_base_tmpl<Lhs, Rhs>{})>
 auto evalImpl(expr<Sum>, const VectorBase<Lhs> &lhs, const VectorBase<Rhs> &rhs)
-  -> decltype(
-    makeVectorLike<Rhs>((lhs.derived().value() + rhs.derived().value()).eval())) {
-    return makeVectorLike<Rhs>((lhs.derived().value() + rhs.derived().value()).eval());
+  -> plain_output_t<Rhs> {
+    return plain_output_t<Rhs>{lhs.derived().value() + rhs.derived().value()};
 }
 
 /** Implementation of Minus for a vector leaf
@@ -125,8 +124,8 @@ auto evalImpl(expr<Random, Leaf>) -> Leaf {
  */
 template <typename Rhs>
 auto evalImpl(expr<SquaredNorm>, const VectorBase<Rhs> &rhs)
-  -> decltype(rhs.derived().value().squaredNorm()) {
-    return rhs.derived().value().squaredNorm();
+  -> decltype(makeScalarResult(rhs.derived().value().squaredNorm())) {
+    return makeScalarResult(rhs.derived().value().squaredNorm());
 }
 
 /** Gradient of squared L2 norm */
@@ -140,8 +139,8 @@ auto jacobianImpl(expr<SquaredNorm>, const Val &, const VectorBase<Rhs> &rhs)
  */
 template <typename Rhs>
 auto evalImpl(expr<Norm>, const VectorBase<Rhs> &rhs)
-  -> decltype(rhs.derived().value().norm()) {
-    return rhs.derived().value().norm();
+  -> decltype(makeScalarResult(rhs.derived().value().norm())) {
+    return makeScalarResult(rhs.derived().value().norm());
 }
 
 /** Gradient of L2 norm */

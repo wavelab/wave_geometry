@@ -9,7 +9,7 @@ namespace wave {
 namespace internal {
 /** Helper to choose storage type (reference or value) for expressions.
  *
- * T should be a wave_geometry expression type.
+ * T should be a wave_geometry expression or scalar type.
  *
  * If the input T is an rvalue reference, we want to store it by value. If T is an lvalue
  * reference, we store it by lvalue reference.  Otherwise, we want to see whether it
@@ -28,7 +28,8 @@ template <typename T>
 using wave_ref_sel_t =
   tmp::conditional_t<std::is_rvalue_reference<T>{},
                      tmp::remove_cr_t<T>,
-                     tmp::conditional_t<is_leaf_expression<tmp::remove_cr_t<T>>::value,
+                     tmp::conditional_t<is_leaf_expression<tmp::remove_cr_t<T>>::value ||
+                                          is_scalar<tmp::remove_cr_t<T>>::value,
                                         const T &,
                                         tmp::remove_cr_t<T>>>;
 

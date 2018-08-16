@@ -27,19 +27,35 @@ inline constexpr bool isSame(const ExpressionBase<A> &,
     return false;
 }
 
-template <typename Derived, internal::enable_if_leaf_t<Derived, int> = 0>
+// Version for scalar (matching types)
+template <typename A, internal::enable_if_scalar_t<A, int> = 0>
+inline constexpr bool isSame(const A &a, const A &b) noexcept {
+    return &a == &b;
+}
+// Version for scalar (mismatching types)
+template <typename A,
+          typename B,
+          tmp::enable_if_t<internal::is_scalar<A>{} || internal::is_scalar<B>{}, int> = 0>
+inline constexpr bool isSame(const A &, const B &) noexcept {
+    static_assert(!std::is_same<A, B>::value, "Should only be called when types differ");
+    return false;
+}
+
+// Version for leaf expression (matching types)
+template <typename Derived, internal::enable_if_leaf_or_nullary_t<Derived, int> = 0>
 inline constexpr bool isSame(const ExpressionBase<Derived> &a,
                              const ExpressionBase<Derived> &b) noexcept {
     return &a.derived() == &b.derived();
 }
 
-
+// Version for unary expression (matching types)
 template <typename Derived, internal::enable_if_unary_t<Derived, int> = 0>
 inline constexpr bool isSame(const ExpressionBase<Derived> &a,
                              const ExpressionBase<Derived> &b) noexcept {
     return isSame(a.derived().rhs(), b.derived().rhs());
 }
 
+// Version for binary expression (matching types)
 template <typename Derived, internal::enable_if_binary_t<Derived, int> = 0>
 inline constexpr bool isSame(const ExpressionBase<Derived> &a,
                              const ExpressionBase<Derived> &b) noexcept {

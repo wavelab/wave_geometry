@@ -16,7 +16,11 @@ struct traits;
 template <typename T>
 struct traits<const T> : traits<T> {};
 
-// There are no distinct traits of a && type
+// There are no distinct traits of a reference type
+template <typename T>
+struct traits<T &> : traits<T> {};
+
+// There are no distinct traits of a reference type
 template <typename T>
 struct traits<T &&> : traits<T> {};
 

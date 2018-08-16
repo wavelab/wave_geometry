@@ -135,7 +135,18 @@ TICK_TRAIT(is_nullary_expression, is_derived_expression<_>, has_valid_nullary_tr
               is_false<is_leaf_expression<T>>>;
 };
 
+/** True if type is a scalar (non-expression arithmetic type)
+ * Note a scalar is separate from a size-1 vector.
+ */
+TICK_TRAIT(is_scalar) {
+    template <class T>
+    auto require(T && x)
+      ->valid<is_true<std::is_same<tmp::remove_cr_t<T>, typename traits<T>::Scalar>>>;
+};
+
+//
 // Convenience enable_if aliases
+//
 
 template <typename Derived, typename T = void>
 using enable_if_leaf_t = typename std::enable_if<is_leaf_expression<Derived>{}, T>::type;
@@ -158,6 +169,14 @@ using enable_if_leaf_or_nullary_t =
                             is_nullary_expression<Derived>{},
                           T>::type;
 
+template <typename Derived, typename T = void>
+using enable_if_scalar_t = typename std::enable_if<is_scalar<Derived>{}, T>::type;
+
+template <typename Derived, typename T = void>
+using enable_if_leaf_nullary_or_scalar_t =
+  typename std::enable_if<is_leaf_expression<Derived>{} ||
+                            is_nullary_expression<Derived>{} || is_scalar<Derived>{},
+                          T>::type;
 
 /** Empty tag of an expression template for tag dispatching */
 template <template <typename...> class Tmpl, typename... Aux>

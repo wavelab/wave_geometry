@@ -57,13 +57,6 @@ struct traits<Sum<Lhs, Rhs>,
                                !std::is_same<RightFrameOf<Rhs>, MiddleFrameOf<Lhs>>{}>>
   : binary_traits_base<Sum<Lhs, Rhs>> {};
 
-// Traits for sum of (scalar) + (scalar)
-template <typename Lhs, typename Rhs>
-struct traits<Sum<Lhs, Rhs>,
-              tmp::enable_if_t<std::is_arithmetic<eval_t<Lhs>>{} &&
-                               std::is_arithmetic<eval_t<Rhs>>{}>>
-  : binary_traits_base<Sum<Lhs, Rhs>> {};
-
 /** Jacobian implementation for all sums */
 template <typename Res, typename Lhs, typename Rhs>
 auto leftJacobianImpl(expr<Sum>, const Res &, const Lhs &, const Rhs &)

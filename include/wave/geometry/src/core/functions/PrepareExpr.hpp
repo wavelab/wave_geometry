@@ -16,7 +16,8 @@ template <typename Derived, typename Enable = void>
 struct PrepareExpr;
 
 template <typename Derived>
-struct PrepareExpr<Derived, enable_if_leaf_or_nullary_t<tmp::remove_cr_t<Derived>>> {
+struct PrepareExpr<Derived,
+                   enable_if_leaf_nullary_or_scalar_t<tmp::remove_cr_t<Derived>>> {
     using Leaf = tmp::remove_cr_t<Derived>;
 
     static auto run(const Leaf &leaf) -> const Leaf & {

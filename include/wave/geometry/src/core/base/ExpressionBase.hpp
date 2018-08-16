@@ -46,9 +46,9 @@ class ExpressionBase {
     /** Evaluate the jacobian w.r.t. the target */
     template <typename TargetDerived,
               TICK_REQUIRES(internal::is_leaf_expression<TargetDerived>{})>
-    auto jacobian(const ExpressionBase<TargetDerived> &wrt) const
+    auto jacobian(const TargetDerived &wrt) const
       -> internal::jacobian_t<Derived, TargetDerived> {
-        return internal::evaluateJacobianAuto(this->derived(), wrt.derived());
+        return internal::evaluateJacobianAuto(this->derived(), wrt);
     }
 
     /** Evaluate the value and jacobians w.r.t. all leaves, in reverse mode.
@@ -64,9 +64,9 @@ class ExpressionBase {
 
     /** Evaluate the value and jacobians w.r.t. some targets */
     template <typename... Targets>
-    auto evalWithJacobians(const ExpressionBase<Targets> &... wrt) const
+    auto evalWithJacobians(const Targets &... wrt) const
       -> std::tuple<OutputType, internal::jacobian_t<Derived, Targets>...> {
-        return internal::evaluateWithJacobiansAuto(this->derived(), wrt.derived()...);
+        return internal::evaluateWithJacobiansAuto(this->derived(), wrt...);
     }
 };
 

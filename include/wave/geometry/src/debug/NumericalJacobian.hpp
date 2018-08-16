@@ -8,18 +8,10 @@
 namespace wave {
 namespace internal {
 
-/** Helper to get a vector from a vector expression *or* a scalar, both of which are
- * valid tangent types */
-template <typename T, TICK_REQUIRES(!is_derived_expression<T>{})>
-// Actually require a scalar
-auto tangentValueAsVector(const T &t) -> Eigen::Matrix<T, 1, 1> {
-    return Eigen::Matrix<T, 1, 1>{t};
-}
-
-template <typename T, TICK_REQUIRES(is_derived_expression<T>{})>
-// Actually require a vector leaf
-auto tangentValueAsVector(const ExpressionBase<T> &t) -> decltype(t.derived().value()) {
-    return t.derived().value();
+template <typename T>
+auto tangentValueAsVector(const ExpressionBase<T> &t)
+  -> Eigen::Matrix<scalar_t<T>, traits<T>::Size, 1> {
+    return Eigen::Matrix<scalar_t<T>, traits<T>::Size, 1>{t.derived().value()};
 }
 
 /** Helper to make a tangent type from a vector expression, if the tangent type might be a
@@ -91,6 +83,18 @@ struct EvaluatorWithDelta<Derived, TargetDerived, enable_if_leaf_t<Derived>> {
     };
 };
 
+/** Specialization for scalar type */
+template <typename Scalar, typename TargetDerived>
+struct EvaluatorWithDelta<Scalar, TargetDerived, enable_if_scalar_t<Scalar>> {
+    using PlainType = plain_eval_t<Scalar>;
+    PlainType operator()(const Scalar &value,
+                         const TargetDerived &target,
+                         int coeff,
+                         Scalar delta) const {
+        return evaluateWithDeltaImpl(value, target, PlainType{value}, coeff, delta);
+    };
+};
+
 /** Specialization for unary expression */
 template <typename Derived, typename TargetDerived>
 struct EvaluatorWithDelta<Derived, TargetDerived, enable_if_unary_t<Derived>> {
@@ -158,7 +162,7 @@ struct EvaluatorWithDelta<Derived, TargetDerived, enable_if_binary_t<Derived>> {
  */
 template <typename Derived, typename TargetDerived>
 auto evaluateNumericalJacobianImpl(const Evaluator<Derived> &evaluator,
-                                   const ExpressionBase<TargetDerived> &target)
+                                   const TargetDerived &target)
   -> internal::jacobian_t<Derived, TargetDerived> {
     using Scalar = scalar_t<Derived>;
     auto jacobian = internal::jacobian_t<Derived, TargetDerived>{};
@@ -172,8 +176,8 @@ auto evaluateNumericalJacobianImpl(const Evaluator<Derived> &evaluator,
     const Scalar delta = std::sqrt(Eigen::NumTraits<Scalar>::epsilon());
 
     for (int i = 0; i < jacobian.cols(); ++i) {
-        const auto forward_eval = internal::EvaluatorWithDelta<Derived, TargetDerived>{}(
-          expr, target.derived(), i, delta);
+        const auto forward_eval =
+          internal::EvaluatorWithDelta<Derived, TargetDerived>{}(expr, target, i, delta);
 
         // Apply output functor (e.g. wrap in Framed)
         const auto forward_value = internal::prepareLeafForOutput<Derived>(forward_eval);
@@ -195,12 +199,12 @@ auto evaluateNumericalJacobianImpl(const Evaluator<Derived> &evaluator,
  */
 template <typename Derived, typename TargetDerived>
 auto evaluateNumericalJacobian(const ExpressionBase<Derived> &expr,
-                               const ExpressionBase<TargetDerived> &target)
+                               const TargetDerived &target)
   -> internal::jacobian_t<Derived, TargetDerived> {
     using OutputType = internal::plain_output_t<Derived>;
     const auto &v_eval = internal::prepareEvaluatorTo<OutputType>(expr.derived());
 
-    return internal::evaluateNumericalJacobianImpl(v_eval, target.derived());
+    return internal::evaluateNumericalJacobianImpl(v_eval, target);
 }
 
 /** Numerically evaluate multiple Jacobians of am expression tree.
@@ -213,16 +217,14 @@ auto evaluateNumericalJacobian(const ExpressionBase<Derived> &expr,
  */
 template <typename Derived, typename... Targets>
 auto evaluateNumericalJacobians(const ExpressionBase<Derived> &expr,
-                                const ExpressionBase<Targets> &... targets)
+                                const Targets &... targets)
   -> std::tuple<internal::jacobian_t<Derived, Targets>...> {
     // Get the correct evaluator
     using OutputType = internal::plain_output_t<Derived>;
     const auto &v_eval = internal::prepareEvaluatorTo<OutputType>(expr.derived());
 
-    return std::make_tuple(
-      internal::evaluateNumericalJacobianImpl(v_eval, targets.derived())...);
+    return std::make_tuple(internal::evaluateNumericalJacobianImpl(v_eval, targets)...);
 }
-
 
 }  // namespace wave
 
