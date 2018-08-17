@@ -8,12 +8,18 @@
 
 #include <Eigen/Core>
 
+#ifdef NDEBUG
 #if EIGEN_COMP_CLANG
 // Based on experiments, always_inline makes clang-4.0 faster, but not GCC
 #define WAVE_STRONG_INLINE EIGEN_ALWAYS_INLINE
 #else
 #define WAVE_STRONG_INLINE EIGEN_STRONG_INLINE
 #endif
+#else
+// When debugging don't force inlining
+#define WAVE_STRONG_INLINE inline
+#endif
+
 
 // We sometimes need to explicitly declare special member functions (copy constructors and
 // operator=) even when they should already be defaulted, to avoid a GCC bug
