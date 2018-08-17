@@ -16,12 +16,9 @@ struct traits;
 template <typename T>
 struct traits<const T> : traits<T> {};
 
-// T&& in expression parameters means store-by-value.
-// These traits have special modifications
+// There are no distinct traits of a && type
 template <typename T>
-struct traits<T &&> : traits<T> {
-    using PreparedType = typename traits<T>::PreparedType &&;
-};
+struct traits<T &&> : traits<T> {};
 
 /** Marker of a missing expression implemenation */
 struct NotImplemented;

@@ -63,3 +63,22 @@ TEST(IsSame, complex) {
     auto expr_copy = expr;
     EXPECT_TRUE(wave::isSame(expr, expr_copy));
 }
+
+TEST(IsSame, rvalueCopy) {
+    const auto t1 = wave::Translationd::Random();
+
+    // expr is initialized with an rvalue leaf, thus it stores the leaf
+    // (expr is Minus<Translationd&&>)
+    const auto expr = -(wave::Translationd::Random());
+
+    // expr2 stores a *copy* of expr, including the leaf. Therefore isSame() here is
+    // false, and we can't differentiate expr2 wrt expr.rhs().
+    // @todo The decision about copying expressions with stored leaves may change.
+    const auto expr2 = t1 + expr;
+    EXPECT_TRUE(isSame(t1, expr2.lhs()));
+    EXPECT_FALSE(isSame(expr, expr2.rhs()));
+    EXPECT_FALSE(isSame(expr.rhs(), expr2.rhs().rhs()));
+
+    // Note the stored leaves are equal, though separate copies.
+    EXPECT_EQ(expr.rhs().value(), expr2.rhs().rhs().value());
+}
