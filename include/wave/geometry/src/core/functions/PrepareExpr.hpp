@@ -17,13 +17,10 @@ struct PrepareExpr;
 
 template <typename Derived>
 struct PrepareExpr<Derived, enable_if_leaf_or_nullary_t<tmp::remove_cr_t<Derived>>> {
-    // Note if we were to write run(Derived&& leaf), it would not be a forwarding
-    // reference (aka "universal reference"), so we introduce a new template parameter
-    // here. For the leaf case specifically we could figure out the type of the argument
-    // to run based on Derived, but we keep it consistent with the other cases.
-    template <typename T>
-    static auto run(T &&leaf) -> T {
-        return std::forward<T>(leaf);
+    using Leaf = tmp::remove_cr_t<Derived>;
+
+    static auto run(const Leaf &leaf) -> const Leaf & {
+        return leaf;
     }
 };
 
@@ -33,9 +30,8 @@ struct PrepareExpr<Derived, enable_if_unary_t<Derived>> {
     using Rhs = typename traits<Derived>::RhsDerived;
 
     template <typename T>
-    static auto run(T &&unary) -> PreparedType {
-        return PreparedType{
-          PrepareExpr<Rhs>::run(std::forward<T>(unary).derived().rhs())};
+    static auto run(const T &unary) -> PreparedType {
+        return PreparedType{PrepareExpr<Rhs>::run(unary.derived().rhs())};
     }
 };
 
@@ -46,10 +42,9 @@ struct PrepareExpr<Derived, enable_if_binary_t<Derived>> {
     using Rhs = typename traits<Derived>::RhsDerived;
 
     template <typename T>
-    static auto run(T &&binary) -> PreparedType {
-        return PreparedType{
-          PrepareExpr<Lhs>::run(std::forward<T>(binary).derived().lhs()),
-          PrepareExpr<Rhs>::run(std::forward<T>(binary).derived().rhs())};
+    static auto run(const T &binary) -> PreparedType {
+        return PreparedType{PrepareExpr<Lhs>::run(binary.derived().lhs()),
+                            PrepareExpr<Rhs>::run(binary.derived().rhs())};
     }
 };
 

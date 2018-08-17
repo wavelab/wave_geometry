@@ -9,15 +9,21 @@ namespace wave {
 namespace internal {
 /** Helper to choose storage type (reference or value) for expressions.
  *
- * We pass the result of decltype() to this template. T should be a wave_geometry
- * expression.
+ * T should be a wave_geometry expression type.
  *
- * If the input T is an rvalue reference, we want to store it by value.
+ * If the input T is an rvalue reference, we want to store it by value. If T is an lvalue
+ * reference, we store it by lvalue reference.  Otherwise, we want to see whether it
+ * refers to a leaf or to a lightweight expression, and store it by value if the latter
+ * (as in Eigen).
  *
- * Otherwise, we want to see whether it refers to a leaf or
- * to a lightweight expression, and store it by value if the latter (as in Eigen).
+ * | input  | output      |
+ * |--------|-------------|
+ * | Expr   | Expr        |
+ * | Expr&& | Expr        |
+ * | Leaf   | const Leaf& |
+ * | Leaf&& | Leaf        |
  *
- **/
+ */
 template <typename T>
 using wave_ref_sel_t =
   tmp::conditional_t<std::is_rvalue_reference<T>{},

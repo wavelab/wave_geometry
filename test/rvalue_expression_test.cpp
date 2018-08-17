@@ -27,6 +27,9 @@ class RvalueTest : public testing::Test {
 
     using ZeroLeafAAB = wave::Zero<LeafAAB>;
     using ZeroLeafABC = wave::Zero<LeafABC>;
+
+    // Used for CHECK_JACOBIANS macro
+    static constexpr bool IsFramed = Params::IsFramed;
 };
 TYPED_TEST_CASE(RvalueTest, LeafTypes);
 
@@ -54,13 +57,13 @@ TYPED_TEST(RvalueTest, addTemporaryExpr) {
     const auto v2 = typename TestFixture::Vector{TestFixture::Vector::Random()};
 
     // Sum with rvalue
-    const auto expr =
-      typename TestFixture::LeafAAC{t1 + typename TestFixture::LeafABC{v2}};
+    const auto expr = t1 + typename TestFixture::LeafABC{v2};
 
     const auto result = typename TestFixture::LeafAAC{expr};
 
     const auto eigen_result = typename TestFixture::Vector{t1.value() + v2};
     EXPECT_APPROX(eigen_result, result.value());
+    CHECK_JACOBIANS(TestFixture::IsFramed, expr, expr.lhs(), expr.rhs());
 }
 
 TYPED_TEST(RvalueTest, addTemporaryExpr2) {
