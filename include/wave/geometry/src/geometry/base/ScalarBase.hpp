@@ -161,6 +161,17 @@ auto operator-(ScalarBase<L> &&lhs, R &&rhs)
     return std::move(lhs).derived() - internal::wrapInputScalar(std::forward<R>(rhs));
 }
 
+/** Multiplication of two scalar expressions
+ *
+ * @f[ \mathbb{R}^n \times \mathbb{R} \to \mathbb{R}^n @f]
+ */
+template <typename L, typename R>
+auto operator*(const ScalarBase<L> &lhs, const ScalarBase<R> &rhs) -> Scale<L, R> {
+    return Scale<L, R>{lhs.derived(), rhs.derived()};
+}
+
+WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*, Scale, ScalarBase, ScalarBase)
+
 }  // namespace wave
 
 #endif  // WAVE_GEOMETRY_SCALARBASE_HPP

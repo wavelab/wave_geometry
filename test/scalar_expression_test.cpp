@@ -66,3 +66,4 @@ TYPED_TEST(ScalarTest, assignFromExpression) {
 
 GENERATE_OP_TEST(+, add)
 GENERATE_OP_TEST(-, subtract)
+GENERATE_OP_TEST(*, multiply)
