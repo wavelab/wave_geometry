@@ -199,6 +199,34 @@ auto rightJacobianImpl(expr<Scale>,
     return lhs.derived().value() * identity_t<Rhs>{};
 }
 
+/** Implementation of right scalar division
+ * Defer to the implementation type's arithmetic operations.
+ */
+template <typename Lhs, typename Rhs>
+auto evalImpl(expr<ScaleDiv>, const VectorBase<Lhs> &lhs, const ScalarBase<Rhs> &rhs)
+  -> decltype(makeVectorLike<Lhs>(lhs.derived().value() / rhs.derived().value())) {
+    return makeVectorLike<Lhs>(lhs.derived().value() / rhs.derived().value());
+}
+
+/** Left Jacobian implementation for right scalar division */
+template <typename Res, typename Lhs, typename Rhs>
+auto leftJacobianImpl(expr<ScaleDiv>,
+                      const Res &,
+                      const VectorBase<Lhs> &,
+                      const ScalarBase<Rhs> &rhs) -> jacobian_t<Res, Lhs> {
+    return identity_t<Res>{} / rhs.derived().value();
+}
+
+/** Right Jacobian implementation for right scalar division */
+template <typename Res, typename Lhs, typename Rhs>
+auto rightJacobianImpl(expr<ScaleDiv>,
+                       const Res &,
+                       const VectorBase<Lhs> &lhs,
+                       const ScalarBase<Rhs> &rhs) -> jacobian_t<Res, Rhs> {
+    const auto rhs_squared = rhs.derived().value() * rhs.derived().value();
+    return jacobian_t<Res, Rhs>{-lhs.derived().value() / rhs_squared};
+}
+
 }  // namespace internal
 
 /** Applies vector addition to two vector expressions (of the same space)
@@ -261,6 +289,7 @@ auto operator*(const ScalarBase<L> &lhs, const VectorBase<R> &rhs) -> Scale<L, R
 
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*, Scale, ScalarBase, VectorBase)
+WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_LEFT(*, VectorBase)
 
 /** Right scalar multiplication of a vector expression
  *
@@ -272,6 +301,19 @@ auto operator*(const VectorBase<L> &lhs, const ScalarBase<R> &rhs) -> ScaleR<L, 
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*, ScaleR, VectorBase, ScalarBase)
+WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_RIGHT(*, VectorBase)
+
+/** Right scalar division of a vector expression by a scalar expression
+ *
+ * @f[ \mathbb{R}^n \times \mathbb{R} \to \mathbb{R}^n @f]
+ */
+template <typename L, typename R>
+auto operator/(const VectorBase<L> &lhs, const ScalarBase<R> &rhs) -> ScaleDiv<L, R> {
+    return ScaleDiv<L, R>{lhs.derived(), rhs.derived()};
+}
+
+WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator/, ScaleDiv, VectorBase, ScalarBase)
+WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_RIGHT(/, VectorBase)
 
 }  // namespace wave
 

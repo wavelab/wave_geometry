@@ -33,6 +33,9 @@ template <typename Lhs, typename Rhs>
 struct ScaleR;
 
 template <typename Lhs, typename Rhs>
+struct ScaleDiv;
+
+template <typename Lhs, typename Rhs>
 struct Product;
 
 template <typename Lhs, typename Rhs>

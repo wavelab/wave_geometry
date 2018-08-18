@@ -26,6 +26,17 @@ struct ScaleR : internal::base_tmpl_t<Lhs, ScaleR<Lhs, Rhs>>,
     using BinaryExpression<ScaleR<Lhs, Rhs>>::BinaryExpression;
 };
 
+/** An expression representing the division of a vector (Lhs) by a scalar (Rhs).
+ * Equivalent to right scalar multiplication by the inverse of the scalar.
+ */
+template <typename Lhs, typename Rhs>
+struct ScaleDiv : internal::base_tmpl_t<Lhs, ScaleDiv<Lhs, Rhs>>,
+                  BinaryExpression<ScaleDiv<Lhs, Rhs>> {
+    // Inherit constructor from BinaryExpression
+    using BinaryExpression<ScaleDiv<Lhs, Rhs>>::BinaryExpression;
+};
+
+
 namespace internal {
 
 // Traits for left scalar multiplication
@@ -42,6 +53,15 @@ struct traits<Scale<Lhs, Rhs>> : binary_traits_base<Scale<Lhs, Rhs>> {
 // @todo add scalar mixing. Currently the type of Lhs is kept.
 template <typename Lhs, typename Rhs>
 struct traits<ScaleR<Lhs, Rhs>> : binary_traits_base<ScaleR<Lhs, Rhs>> {
+    using OutputFunctor =
+      WrapWithFrames<LeftFrameOf<Lhs>, MiddleFrameOf<Lhs>, RightFrameOf<Lhs>>;
+};
+
+// Traits for right scalar division
+// Keep the frames of the vector side.
+// @todo add scalar mixing. Currently the type of Lhs is kept.
+template <typename Lhs, typename Rhs>
+struct traits<ScaleDiv<Lhs, Rhs>> : binary_traits_base<ScaleDiv<Lhs, Rhs>> {
     using OutputFunctor =
       WrapWithFrames<LeftFrameOf<Lhs>, MiddleFrameOf<Lhs>, RightFrameOf<Lhs>>;
 };
