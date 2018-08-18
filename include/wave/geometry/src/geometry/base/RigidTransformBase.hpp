@@ -25,24 +25,11 @@ auto operator*(const RigidTransformBase<L> &lhs, const TranslationBase<R> &rhs)
   -> Transform<L, R> {
     return Transform<L, R>{lhs.derived(), rhs.derived()};
 }
-// Overloads for rvalues
-template <typename L, typename R>
-auto operator*(RigidTransformBase<L> &&lhs, const TranslationBase<R> &rhs)
-  -> Transform<internal::arg_t<L>, R> {
-    return Transform<internal::arg_t<L>, R>{std::move(lhs).derived(), rhs.derived()};
-}
-template <typename L, typename R>
-auto operator*(const RigidTransformBase<L> &lhs, TranslationBase<R> &&rhs)
-  -> Transform<L, internal::arg_t<R>> {
-    return Transform<L, internal::arg_t<R>>{lhs.derived(), std::move(rhs).derived()};
-}
-template <typename L, typename R>
-auto operator*(RigidTransformBase<L> &&lhs, TranslationBase<R> &&rhs)
-  -> Transform<internal::arg_t<L>, internal::arg_t<R>> {
-    return Transform<internal::arg_t<L>, internal::arg_t<R>>{std::move(lhs).derived(),
-                                                             std::move(rhs).derived()};
-}
 
+WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*,
+                                   Transform,
+                                   RigidTransformBase,
+                                   TranslationBase)
 
 namespace internal {
 

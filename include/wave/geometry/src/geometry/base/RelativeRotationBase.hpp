@@ -26,11 +26,7 @@ template <typename Rhs>
 auto exp(const RelativeRotationBase<Rhs> &rhs) -> ExpMap<Rhs> {
     return ExpMap<Rhs>{rhs.derived()};
 }
-// Overload for rvalue
-template <typename Rhs>
-auto inverse(RelativeRotationBase<Rhs> &&rhs) -> ExpMap<internal::arg_t<Rhs>> {
-    return ExpMap<internal::arg_t<Rhs>>{std::move(rhs).derived()};
-}
+WAVE_OVERLOAD_FUNCTION_FOR_RVALUE(exp, ExpMap, RelativeRotationBase)
 
 
 }  // namespace wave

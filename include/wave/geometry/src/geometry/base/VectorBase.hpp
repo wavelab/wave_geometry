@@ -161,23 +161,7 @@ auto operator+(const VectorBase<L> &lhs, const VectorBase<R> &rhs) -> Sum<L, R> 
     return Sum<L, R>{lhs.derived(), rhs.derived()};
 }
 
-// Overloads for rvalues
-template <typename L, typename R>
-auto operator+(VectorBase<L> &&lhs, const VectorBase<R> &rhs)
-  -> Sum<internal::arg_t<L>, R> {
-    return Sum<internal::arg_t<L>, R>{std::move(lhs).derived(), rhs.derived()};
-}
-template <typename L, typename R>
-auto operator+(const VectorBase<L> &lhs, VectorBase<R> &&rhs)
-  -> Sum<L, internal::arg_t<R>> {
-    return Sum<L, internal::arg_t<R>>{lhs.derived(), std::move(rhs).derived()};
-}
-template <typename L, typename R>
-auto operator+(VectorBase<L> &&lhs, VectorBase<R> &&rhs)
-  -> Sum<internal::arg_t<L>, internal::arg_t<R>> {
-    return Sum<internal::arg_t<L>, internal::arg_t<R>>{std::move(lhs).derived(),
-                                                       std::move(rhs).derived()};
-}
+WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator+, Sum, VectorBase, VectorBase)
 
 /** Applies vector addition to two vector expressions (of the same space)
  *
@@ -215,12 +199,7 @@ auto operator-(const VectorBase<R> &rhs) -> Minus<R> {
     return Minus<R>{rhs.derived()};
 }
 
-// Overload for rvalue
-template <typename R>
-auto operator-(VectorBase<R> &&rhs) -> Minus<internal::arg_t<R>> {
-    return Minus<internal::arg_t<R>>{std::move(rhs).derived()};
-}
-
+WAVE_OVERLOAD_FUNCTION_FOR_RVALUE(operator-, Minus, VectorBase)
 
 }  // namespace wave
 

@@ -52,23 +52,8 @@ auto operator*(const RotationBase<L> &lhs, const TranslationBase<R> &rhs)
   -> Rotate<L, R> {
     return Rotate<L, R>{lhs.derived(), rhs.derived()};
 }
-// Overloads for rvalues
-template <typename L, typename R>
-auto operator*(RotationBase<L> &&lhs, const TranslationBase<R> &rhs)
-  -> Rotate<internal::arg_t<L>, R> {
-    return Rotate<internal::arg_t<L>, R>{std::move(lhs).derived(), rhs.derived()};
-}
-template <typename L, typename R>
-auto operator*(const RotationBase<L> &lhs, TranslationBase<R> &&rhs)
-  -> Rotate<L, internal::arg_t<R>> {
-    return Rotate<L, internal::arg_t<R>>{lhs.derived(), std::move(rhs).derived()};
-}
-template <typename L, typename R>
-auto operator*(RotationBase<L> &&lhs, TranslationBase<R> &&rhs)
-  -> Rotate<internal::arg_t<L>, internal::arg_t<R>> {
-    return Rotate<internal::arg_t<L>, internal::arg_t<R>>{std::move(lhs).derived(),
-                                                          std::move(rhs).derived()};
-}
+
+WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*, Rotate, RotationBase, TranslationBase)
 
 namespace internal {
 
