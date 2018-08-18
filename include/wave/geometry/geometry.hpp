@@ -51,6 +51,7 @@
 #include "src/geometry/op/BoxMinus.hpp"
 #include "src/geometry/op/Minus.hpp"
 #include "src/geometry/op/Scale.hpp"
+#include "src/geometry/op/Product.hpp"
 #include "src/geometry/op/Inverse.hpp"
 
 #endif  // WAVE_GEOMETRY_GEOMETRY_HPP
