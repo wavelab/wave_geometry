@@ -24,6 +24,8 @@ The code is available under the [MIT License](LICENSE).
 | Sum | <img src="https://latex.codecogs.com/png.latex?\mathbf{v}&plus;\mathbf{v}" title="\mathbf{v}+\mathbf{v}" /> | `v + v` |
 | Difference | <img src="https://latex.codecogs.com/png.latex?\mathbf{v}-\mathbf{v}" title="\mathbf{v}-\mathbf{v}" /> | `v - v` |
 | Negative  | <img src="https://latex.codecogs.com/png.latex?-\mathbf&space;v" title="-\mathbf v" /> | `-v` |
+| Scalar multiplication   | <img src="https://latex.codecogs.com/png.latex?a\mathbf&space;v" title="a\mathbf v" /> | `a * v` |
+| Scalar division   | <img src="https://latex.codecogs.com/png.latex?\mathbf&space;v/a" title="\mathbf v/a" /> | `v / a` |
 | Composition | <img src="https://latex.codecogs.com/png.latex?\mathbf&space;\Phi&space;\circ&space;\mathbf&space;\Phi" title="\mathbf \Phi \circ \mathbf \Phi" /> | `R * R` |
 | Inverse | <img src="https://latex.codecogs.com/png.latex?\mathbf&space;\Phi^{-1}" title="\mathbf \Phi^{-1}" /> | `inverse(R)` |
 | Coordinate map | <img src="https://latex.codecogs.com/png.latex?\mathbf&space;\Phi&space;(\mathbf&space;p)" title="\mathbf \Phi (\mathbf p)" /> | `R * p` |
@@ -32,7 +34,10 @@ The code is available under the [MIT License](LICENSE).
 | Manifold plus | <img src="https://latex.codecogs.com/png.latex?\mathbf\Phi\boxplus\mathbf\varphi=\exp(\mathbf\varphi)\circ\mathbf\Phi" title="\mathbf\Phi \boxplus \mathbf\varphi = \exp(\mathbf\varphi) \circ \mathbf\Phi" /> | `R + w` |
 | Manifold minus | <img src="https://latex.codecogs.com/png.latex?\mathbf\Phi_1\boxminus\mathbf\Phi_2=\log(\mathbf\Phi_1\circ\mathbf\Phi_2^{-1})" title="\mathbf\Phi_1 \boxminus \mathbf\Phi_2 = \log(\mathbf\Phi_1 \circ \mathbf\Phi_2^{-1})" /> | `R - R` |
 
-Above, <img src="https://latex.codecogs.com/png.latex?\mathbf\Phi" alt="Phi" /> or `R` represents a Lie group element, <img src="https://latex.codecogs.com/png.latex?\mathbf\varphi" alt="small phi" />  or `w` represents a Lie algebra element, <img src="https://latex.codecogs.com/png.latex?\mathbf{p}" alt="p" /> or `p` represents a translation, and <img src="https://latex.codecogs.com/png.latex?\mathbf{v}" alt="v" /> or `v` represents any element of R^3, so(3) or se(3).
+Above, <img src="https://latex.codecogs.com/png.latex?\mathbf\Phi" alt="Phi" /> or `R` represents a Lie group element, <img src="https://latex.codecogs.com/png.latex?\mathbf\varphi" alt="small phi" />  or `w` represents a Lie algebra element,
+<img src="https://latex.codecogs.com/png.latex?\mathbf{p}" alt="p" /> or `p` represents a translation,
+<img src="https://latex.codecogs.com/png.latex?a" alt="a" /> or `a` represents a scalar,
+and <img src="https://latex.codecogs.com/png.latex?\mathbf{v}" alt="v" /> or `v` represents any element of R^n, so(3) or se(3).
 
 ### Automatic differentiation
 
