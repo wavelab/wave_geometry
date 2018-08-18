@@ -76,4 +76,45 @@
         return ExprName<internal::arg_t<R>>{std::move(rhs).derived()}; \
     }
 
+
+/** Generate overloaded binary functions where one side is a plain scalar to be wrapped */
+#define WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_LEFT(OpSymbol, RhsBase)                       \
+    template <typename L, typename R, TICK_REQUIRES(internal::is_scalar<L>{})>           \
+    auto operator OpSymbol(L &&lhs, const RhsBase<R> &rhs)                               \
+      ->decltype(internal::wrapInputScalar(std::forward<L>(lhs))                         \
+                   OpSymbol rhs.derived()) {                                             \
+        return internal::wrapInputScalar(std::forward<L>(lhs)) OpSymbol rhs.derived();   \
+    }                                                                                    \
+                                                                                         \
+    template <typename L, typename R, TICK_REQUIRES(internal::is_scalar<L>{})>           \
+    auto operator OpSymbol(L &&lhs, RhsBase<R> &&rhs)                                    \
+      ->decltype(internal::wrapInputScalar(std::forward<L>(lhs)) OpSymbol std::move(rhs) \
+                   .derived()) {                                                         \
+        return internal::wrapInputScalar(std::forward<L>(lhs)) OpSymbol std::move(rhs)   \
+          .derived();                                                                    \
+    }
+
+/** Generate overloaded binary functions where one side is a plain scalar to be wrapped */
+#define WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_RIGHT(OpSymbol, LhsBase)                    \
+    template <typename L, typename R, TICK_REQUIRES(internal::is_scalar<R>{})>         \
+    auto operator OpSymbol(const LhsBase<L> &lhs, R &&rhs)                             \
+      ->decltype(lhs.derived()                                                         \
+                   OpSymbol internal::wrapInputScalar(std::forward<R>(rhs))) {         \
+        return lhs.derived() OpSymbol internal::wrapInputScalar(std::forward<R>(rhs)); \
+    }                                                                                  \
+                                                                                       \
+    template <typename L, typename R, TICK_REQUIRES(internal::is_scalar<R>{})>         \
+    auto operator OpSymbol(LhsBase<L> &&lhs, R &&rhs)                                  \
+      ->decltype(std::move(lhs).derived()                                              \
+                   OpSymbol internal::wrapInputScalar(std::forward<R>(rhs))) {         \
+        return std::move(lhs).derived()                                                \
+          OpSymbol internal::wrapInputScalar(std::forward<R>(rhs));                    \
+    }
+
+/** Generate overloaded binary functions where one side is a plain scalar to be wrapped
+ * (for scalar on both left and right) */
+#define WAVE_OVERLOAD_OPERATORS_FOR_SCALAR(OpSymbol, LhsBase)  \
+    WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_LEFT(OpSymbol, LhsBase) \
+    WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_RIGHT(OpSymbol, LhsBase)
+
 #endif  // WAVE_GEOMETRY_MACROS_HPP

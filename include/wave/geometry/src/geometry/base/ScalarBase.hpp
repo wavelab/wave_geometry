@@ -97,69 +97,14 @@ auto wrapInputScalar(const T &&arg) -> Scalar<T> {
  *
  * @f[ \mathbb{R} \times \mathbb{R} \to \mathbb{R} @f]
  */
-template <typename L, typename R, TICK_REQUIRES(internal::is_scalar<L>{})>
-auto operator+(L &&lhs, const ScalarBase<R> &rhs)
-  -> decltype(internal::wrapInputScalar(std::forward<L>(lhs)) + rhs.derived()) {
-    return internal::wrapInputScalar(std::forward<L>(lhs)) + rhs.derived();
-}
-// Overload for rvalue
-template <typename L, typename R, TICK_REQUIRES(internal::is_scalar<L>{})>
-auto operator+(L &&lhs, ScalarBase<R> &&rhs)
-  -> decltype(internal::wrapInputScalar(std::forward<L>(lhs)) +
-              std::move(rhs).derived()) {
-    return internal::wrapInputScalar(std::forward<L>(lhs)) + std::move(rhs).derived();
-}
+WAVE_OVERLOAD_OPERATORS_FOR_SCALAR(+, ScalarBase)
 
-/** Adds a scalar expression and a plain scalar
- *
- * @f[ \mathbb{R} \times \mathbb{R} \to \mathbb{R} @f]
- */
-template <typename L, typename R, TICK_REQUIRES(internal::is_scalar<R>{})>
-auto operator+(const ScalarBase<L> &lhs, R &&rhs)
-  -> decltype(lhs.derived() + internal::wrapInputScalar(std::forward<R>(rhs))) {
-    return lhs.derived() + internal::wrapInputScalar(std::forward<R>(rhs));
-}
-// Overload for rvalue
-template <typename L, typename R, TICK_REQUIRES(internal::is_scalar<R>{})>
-auto operator+(ScalarBase<L> &&lhs, R &&rhs)
-  -> decltype(std::move(lhs).derived() +
-              internal::wrapInputScalar(std::forward<R>(rhs))) {
-    return std::move(lhs).derived() + internal::wrapInputScalar(std::forward<R>(rhs));
-}
 
 /** Subtracts a plain scalar and a scalar expression
  *
  * @f[ \mathbb{R} \times \mathbb{R} \to \mathbb{R} @f]
  */
-template <typename L, typename R, TICK_REQUIRES(internal::is_scalar<L>{})>
-auto operator-(L &&lhs, const ScalarBase<R> &rhs)
-  -> decltype(internal::wrapInputScalar(std::forward<L>(lhs)) - rhs.derived()) {
-    return internal::wrapInputScalar(std::forward<L>(lhs)) - rhs.derived();
-}
-// Overload for rvalue
-template <typename L, typename R, TICK_REQUIRES(internal::is_scalar<L>{})>
-auto operator-(L &&lhs, ScalarBase<R> &&rhs)
-  -> decltype(internal::wrapInputScalar(std::forward<L>(lhs)) -
-              std::move(rhs).derived()) {
-    return internal::wrapInputScalar(std::forward<L>(lhs)) - std::move(rhs).derived();
-}
-
-/** Subtracts a scalar expression and a plain scalar
- *
- * @f[ \mathbb{R} \times \mathbb{R} \to \mathbb{R} @f]
- */
-template <typename L, typename R, TICK_REQUIRES(internal::is_scalar<R>{})>
-auto operator-(const ScalarBase<L> &lhs, R &&rhs)
-  -> decltype(lhs.derived() - internal::wrapInputScalar(std::forward<R>(rhs))) {
-    return lhs.derived() - internal::wrapInputScalar(std::forward<R>(rhs));
-}
-// Overload for rvalue
-template <typename L, typename R, TICK_REQUIRES(internal::is_scalar<R>{})>
-auto operator-(ScalarBase<L> &&lhs, R &&rhs)
-  -> decltype(std::move(lhs).derived() -
-              internal::wrapInputScalar(std::forward<R>(rhs))) {
-    return std::move(lhs).derived() - internal::wrapInputScalar(std::forward<R>(rhs));
-}
+WAVE_OVERLOAD_OPERATORS_FOR_SCALAR(-, ScalarBase)
 
 /** Multiplication of two scalar expressions
  *
