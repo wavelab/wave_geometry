@@ -2,18 +2,18 @@
  * @file
  */
 
-#ifndef WAVE_GEOMETRY_PRODUCT_HPP
-#define WAVE_GEOMETRY_PRODUCT_HPP
+#ifndef WAVE_GEOMETRY_DIVIDE_HPP
+#define WAVE_GEOMETRY_DIVIDE_HPP
 
 namespace wave {
 
-/** An expression representing the product of two scalars.
+/** An expression representing scalar / scalar division
  */
 template <typename Lhs, typename Rhs>
-struct Product : internal::base_tmpl_t<Lhs, Rhs, Product<Lhs, Rhs>>,
-                 BinaryExpression<Product<Lhs, Rhs>> {
+struct Divide : internal::base_tmpl_t<Lhs, Rhs, Divide<Lhs, Rhs>>,
+                BinaryExpression<Divide<Lhs, Rhs>> {
     // Inherit constructor from BinaryExpression
-    using BinaryExpression<Product<Lhs, Rhs>>::BinaryExpression;
+    using BinaryExpression<Divide<Lhs, Rhs>>::BinaryExpression;
 };
 
 
@@ -23,7 +23,7 @@ namespace internal {
 // Keep the frames of the vector side.
 // @todo add scalar mixing. Currently the type of Lhs is kept.
 template <typename Lhs, typename Rhs>
-struct traits<Product<Lhs, Rhs>> : binary_traits_base<Product<Lhs, Rhs>> {
+struct traits<Divide<Lhs, Rhs>> : binary_traits_base<Divide<Lhs, Rhs>> {
     using OutputFunctor =
       WrapWithFrames<LeftFrameOf<Lhs>, MiddleFrameOf<Lhs>, RightFrameOf<Lhs>>;
 };
@@ -31,4 +31,4 @@ struct traits<Product<Lhs, Rhs>> : binary_traits_base<Product<Lhs, Rhs>> {
 }  // namespace internal
 }  // namespace wave
 
-#endif  // WAVE_GEOMETRY_PRODUCT_HPP
+#endif  // WAVE_GEOMETRY_DIVIDE_HPP

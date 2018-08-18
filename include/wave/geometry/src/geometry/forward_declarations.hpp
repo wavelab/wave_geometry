@@ -36,6 +36,9 @@ template <typename Lhs, typename Rhs>
 struct Product;
 
 template <typename Lhs, typename Rhs>
+struct Divide;
+
+template <typename Lhs, typename Rhs>
 struct Rotate;
 
 template <typename Lhs, typename Rhs>

@@ -145,9 +145,9 @@ auto evalImpl(expr<Norm>, const VectorBase<Rhs> &rhs)
 
 /** Gradient of L2 norm */
 template <typename Val, typename Rhs>
-auto jacobianImpl(expr<Norm>, const Val &norm, const VectorBase<Rhs> &rhs)
+auto jacobianImpl(expr<Norm>, const ScalarBase<Val> &norm, const VectorBase<Rhs> &rhs)
   -> jacobian_t<Val, Rhs> {
-    return rhs.derived().value() / norm;
+    return rhs.derived().value() / norm.derived().value();
 }
 
 /** Implementation of left scalar multiplication

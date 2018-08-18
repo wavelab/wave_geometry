@@ -39,6 +39,7 @@ TYPED_TEST_CASE(ScalarOpTest, ScalarTypes);
 GENERATE_OP_TESTS(+, add)
 GENERATE_OP_TESTS(-, subtract)
 GENERATE_OP_TESTS(*, multiply)
+GENERATE_OP_TESTS(/, divide)
 
 // These tests handle variations of rvalues in multi-level expressions, and check
 // Jacobians. For the other operators assume rvalues work for now. @todo generate these

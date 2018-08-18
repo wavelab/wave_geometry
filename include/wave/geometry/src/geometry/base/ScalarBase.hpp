@@ -119,6 +119,35 @@ auto rightJacobianImpl(expr<Product>,
     return jacobian_t<Res, Rhs>{lhs.derived().value()};
 }
 
+/** Trivial implementation of scalar / scalar division
+ * Defer to the implementation type's arithmetic operators.
+ */
+template <typename Lhs, typename Rhs>
+auto evalImpl(expr<Divide>, const ScalarBase<Lhs> &lhs, const ScalarBase<Rhs> &rhs)
+  -> decltype(makeScalarResult(lhs.derived().value() / rhs.derived().value())) {
+    return makeScalarResult(lhs.derived().value() / rhs.derived().value());
+}
+
+/** Left Jacobian implementation for scalar / scalar division
+ * (return 1x1 matrix) */
+template <typename Res, typename Lhs, typename Rhs>
+auto leftJacobianImpl(expr<Divide>,
+                      const Res &,
+                      const ScalarBase<Lhs> &,
+                      const ScalarBase<Rhs> &rhs) -> jacobian_t<Res, Lhs> {
+    return jacobian_t<Res, Lhs>{1 / rhs.derived().value()};
+}
+/** Right Jacobian implementation for scalar / scalar division
+ * (return 1x1 matrix) */
+template <typename Res, typename Lhs, typename Rhs>
+auto rightJacobianImpl(expr<Divide>,
+                       const Res &,
+                       const ScalarBase<Lhs> &lhs,
+                       const ScalarBase<Rhs> &rhs) -> jacobian_t<Res, Rhs> {
+    const auto rhs_squared = rhs.derived().value() * rhs.derived().value();
+    return jacobian_t<Res, Rhs>{-lhs.derived().value() / rhs_squared};
+}
+
 }  // namespace internal
 
 /** Adds a plain scalar and a scalar expression
@@ -136,7 +165,7 @@ WAVE_OVERLOAD_OPERATORS_FOR_SCALAR(-, ScalarBase)
 
 /** Multiplication of two scalar expressions
  *
- * @f[ \mathbb{R}^n \times \mathbb{R} \to \mathbb{R}^n @f]
+ * @f[ \mathbb{R} \times \mathbb{R} \to \mathbb{R} @f]
  */
 template <typename L, typename R>
 auto operator*(const ScalarBase<L> &lhs, const ScalarBase<R> &rhs) -> Product<L, R> {
@@ -144,8 +173,20 @@ auto operator*(const ScalarBase<L> &lhs, const ScalarBase<R> &rhs) -> Product<L,
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*, Product, ScalarBase, ScalarBase)
-
 WAVE_OVERLOAD_OPERATORS_FOR_SCALAR(*, ScalarBase)
+
+/** Division of two scalar expressions
+ *
+ * @f[ \mathbb{R} \times \mathbb{R} \to \mathbb{R} @f]
+ */
+template <typename L, typename R>
+auto operator/(const ScalarBase<L> &lhs, const ScalarBase<R> &rhs) -> Divide<L, R> {
+    return Divide<L, R>{lhs.derived(), rhs.derived()};
+}
+
+WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator/, Divide, ScalarBase, ScalarBase)
+WAVE_OVERLOAD_OPERATORS_FOR_SCALAR(/, ScalarBase)
+
 
 }  // namespace wave
 

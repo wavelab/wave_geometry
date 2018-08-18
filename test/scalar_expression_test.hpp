@@ -26,11 +26,13 @@ class ScalarTest : public testing::Test {
     TICK_TRAIT_CHECK(wave::internal::is_leaf_expression<Leaf>);
     TICK_TRAIT_CHECK(wave::internal::is_unary_expression<wave::ScalarRef<ScalarType>>);
 
-    // Make some random values, different for each test
+    // Make some semi-random values, different for each test
+    // (too big or small can ruin numerical diff accuracy for some functions, e.g. if
+    // dividing by near-zero)
     const ScalarType rand_a =
-      wave::uniformRandom<ScalarType>(ScalarType{-3.0}, ScalarType{3.0});
+      wave::uniformRandom<ScalarType>(ScalarType{0.5}, ScalarType{3.0});
     const ScalarType rand_b =
-      wave::uniformRandom<ScalarType>(ScalarType{-3.0}, ScalarType{3.0});
+      wave::uniformRandom<ScalarType>(ScalarType{0.5}, ScalarType{3.0});
 
     // Return them as rvalues
     ScalarType a() const {
