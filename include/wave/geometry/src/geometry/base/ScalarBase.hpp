@@ -91,6 +91,25 @@ auto wrapInputScalar(const T &&arg) -> Scalar<T> {
     return Scalar<T>{std::move(arg)};
 }
 
+/** Left Jacobian implementation for scalar * scalar product
+ * (return 1x1 matrix) */
+template <typename Res, typename Lhs, typename Rhs>
+auto leftJacobianImpl(expr<Scale>,
+                      const Res &,
+                      const ScalarBase<Lhs> &,
+                      const ScalarBase<Rhs> &rhs) -> jacobian_t<Res, Lhs> {
+    return jacobian_t<Res, Lhs>{rhs.derived().value()};
+}
+/** Right Jacobian implementation for scalar * scalar product
+ * (return 1x1 matrix) */
+template <typename Res, typename Lhs, typename Rhs>
+auto rightJacobianImpl(expr<Scale>,
+                       const Res &,
+                       const ScalarBase<Lhs> &lhs,
+                       const ScalarBase<Rhs> &) -> jacobian_t<Res, Rhs> {
+    return jacobian_t<Res, Rhs>{lhs.derived().value()};
+}
+
 }  // namespace internal
 
 /** Adds a plain scalar and a scalar expression
@@ -114,6 +133,8 @@ template <typename L, typename R>
 auto operator*(const ScalarBase<L> &lhs, const ScalarBase<R> &rhs) -> Scale<L, R> {
     return Scale<L, R>{lhs.derived(), rhs.derived()};
 }
+
+WAVE_OVERLOAD_OPERATORS_FOR_SCALAR(*, ScalarBase)
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*, Scale, ScalarBase, ScalarBase)
 
