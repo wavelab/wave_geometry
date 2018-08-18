@@ -187,7 +187,6 @@ auto operator/(const ScalarBase<L> &lhs, const ScalarBase<R> &rhs) -> Divide<L, 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator/, Divide, ScalarBase, ScalarBase)
 WAVE_OVERLOAD_OPERATORS_FOR_SCALAR(/, ScalarBase)
 
-
 }  // namespace wave
 
 #endif  // WAVE_GEOMETRY_SCALARBASE_HPP

@@ -287,7 +287,6 @@ auto operator*(const ScalarBase<L> &lhs, const VectorBase<R> &rhs) -> Scale<L, R
     return Scale<L, R>{lhs.derived(), rhs.derived()};
 }
 
-
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*, Scale, ScalarBase, VectorBase)
 WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_LEFT(*, VectorBase)
 

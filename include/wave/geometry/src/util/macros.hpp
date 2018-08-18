@@ -113,8 +113,8 @@
 
 /** Generate overloaded binary functions where one side is a plain scalar to be wrapped
  * (for scalar on both left and right) */
-#define WAVE_OVERLOAD_OPERATORS_FOR_SCALAR(OpSymbol, LhsBase)  \
-    WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_LEFT(OpSymbol, LhsBase) \
-    WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_RIGHT(OpSymbol, LhsBase)
+#define WAVE_OVERLOAD_OPERATORS_FOR_SCALAR(OpSymbol, OtherBase)  \
+    WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_LEFT(OpSymbol, OtherBase) \
+    WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_RIGHT(OpSymbol, OtherBase)
 
 #endif  // WAVE_GEOMETRY_MACROS_HPP
