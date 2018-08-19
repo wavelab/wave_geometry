@@ -8,7 +8,7 @@ compile_libwave() {
     cd build
     cmake .. -DCMAKE_MODULE_PATH=$DIR/$CMAKE_CONFIG_DIR \
         -DCMAKE_CXX_FLAGS="-Werror $WAVE_CXX_FLAGS"     \
-        -DCMAKE_BUILD_TYPE=Release                      \
+        -DCMAKE_BUILD_TYPE=${WAVE_BUILD_TYPE:=Release}  \
         -DCMAKE_VERBOSE_MAKEFILE=ON
     make -j${WAVE_JOBS:=2}  # Travis gives two cores (can override with $WAVE_JOBS)
 

@@ -45,7 +45,8 @@ jobs:
     - stage: test
       env: WAVE_CXX=g++-7 WAVE_CC=gcc-7 \
         ASAN_OPTIONS=detect_leaks=0:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1 \
-        WAVE_CXX_FLAGS="-fsanitize=address -fsanitize-address-use-after-scope -O1 -fno-omit-frame-pointer -ftrack-macro-expansion=0 -fuse-ld=gold"
+        WAVE_CXX_FLAGS="-fsanitize=address -fsanitize-address-use-after-scope -O1 -DNDEBUG -fno-omit-frame-pointer -ftrack-macro-expansion=0 -fuse-ld=gold" \
+        WAVE_BUILD_TYPE=None
       addons:
         apt:
           sources:
