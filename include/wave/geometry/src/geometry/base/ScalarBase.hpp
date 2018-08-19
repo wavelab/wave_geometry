@@ -91,75 +91,101 @@ auto wrapInputScalar(const T &&arg) -> Scalar<T> {
     return Scalar<T>{std::move(arg)};
 }
 
+/** Trivial implementation of scalar * scalar product
+ * Defer to the implementation type's arithmetic operators.
+ */
+template <typename Lhs, typename Rhs>
+auto evalImpl(expr<Product>, const ScalarBase<Lhs> &lhs, const ScalarBase<Rhs> &rhs)
+  -> decltype(makeScalarResult(lhs.derived().value() * rhs.derived().value())) {
+    return makeScalarResult(lhs.derived().value() * rhs.derived().value());
+}
+
+/** Left Jacobian implementation for scalar * scalar product
+ * (return 1x1 matrix) */
+template <typename Res, typename Lhs, typename Rhs>
+auto leftJacobianImpl(expr<Product>,
+                      const Res &,
+                      const ScalarBase<Lhs> &,
+                      const ScalarBase<Rhs> &rhs) -> jacobian_t<Res, Lhs> {
+    return jacobian_t<Res, Lhs>{rhs.derived().value()};
+}
+/** Right Jacobian implementation for scalar * scalar product
+ * (return 1x1 matrix) */
+template <typename Res, typename Lhs, typename Rhs>
+auto rightJacobianImpl(expr<Product>,
+                       const Res &,
+                       const ScalarBase<Lhs> &lhs,
+                       const ScalarBase<Rhs> &) -> jacobian_t<Res, Rhs> {
+    return jacobian_t<Res, Rhs>{lhs.derived().value()};
+}
+
+/** Trivial implementation of scalar / scalar division
+ * Defer to the implementation type's arithmetic operators.
+ */
+template <typename Lhs, typename Rhs>
+auto evalImpl(expr<Divide>, const ScalarBase<Lhs> &lhs, const ScalarBase<Rhs> &rhs)
+  -> decltype(makeScalarResult(lhs.derived().value() / rhs.derived().value())) {
+    return makeScalarResult(lhs.derived().value() / rhs.derived().value());
+}
+
+/** Left Jacobian implementation for scalar / scalar division
+ * (return 1x1 matrix) */
+template <typename Res, typename Lhs, typename Rhs>
+auto leftJacobianImpl(expr<Divide>,
+                      const Res &,
+                      const ScalarBase<Lhs> &,
+                      const ScalarBase<Rhs> &rhs) -> jacobian_t<Res, Lhs> {
+    return jacobian_t<Res, Lhs>{1 / rhs.derived().value()};
+}
+/** Right Jacobian implementation for scalar / scalar division
+ * (return 1x1 matrix) */
+template <typename Res, typename Lhs, typename Rhs>
+auto rightJacobianImpl(expr<Divide>,
+                       const Res &,
+                       const ScalarBase<Lhs> &lhs,
+                       const ScalarBase<Rhs> &rhs) -> jacobian_t<Res, Rhs> {
+    const auto rhs_squared = rhs.derived().value() * rhs.derived().value();
+    return jacobian_t<Res, Rhs>{-lhs.derived().value() / rhs_squared};
+}
+
 }  // namespace internal
 
 /** Adds a plain scalar and a scalar expression
  *
  * @f[ \mathbb{R} \times \mathbb{R} \to \mathbb{R} @f]
  */
-template <typename L, typename R, TICK_REQUIRES(internal::is_scalar<L>{})>
-auto operator+(L &&lhs, const ScalarBase<R> &rhs)
-  -> decltype(internal::wrapInputScalar(std::forward<L>(lhs)) + rhs.derived()) {
-    return internal::wrapInputScalar(std::forward<L>(lhs)) + rhs.derived();
-}
-// Overload for rvalue
-template <typename L, typename R, TICK_REQUIRES(internal::is_scalar<L>{})>
-auto operator+(L &&lhs, ScalarBase<R> &&rhs)
-  -> decltype(internal::wrapInputScalar(std::forward<L>(lhs)) +
-              std::move(rhs).derived()) {
-    return internal::wrapInputScalar(std::forward<L>(lhs)) + std::move(rhs).derived();
-}
+WAVE_OVERLOAD_OPERATORS_FOR_SCALAR(+, ScalarBase)
 
-/** Adds a scalar expression and a plain scalar
- *
- * @f[ \mathbb{R} \times \mathbb{R} \to \mathbb{R} @f]
- */
-template <typename L, typename R, TICK_REQUIRES(internal::is_scalar<R>{})>
-auto operator+(const ScalarBase<L> &lhs, R &&rhs)
-  -> decltype(lhs.derived() + internal::wrapInputScalar(std::forward<R>(rhs))) {
-    return lhs.derived() + internal::wrapInputScalar(std::forward<R>(rhs));
-}
-// Overload for rvalue
-template <typename L, typename R, TICK_REQUIRES(internal::is_scalar<R>{})>
-auto operator+(ScalarBase<L> &&lhs, R &&rhs)
-  -> decltype(std::move(lhs).derived() +
-              internal::wrapInputScalar(std::forward<R>(rhs))) {
-    return std::move(lhs).derived() + internal::wrapInputScalar(std::forward<R>(rhs));
-}
 
 /** Subtracts a plain scalar and a scalar expression
  *
  * @f[ \mathbb{R} \times \mathbb{R} \to \mathbb{R} @f]
  */
-template <typename L, typename R, TICK_REQUIRES(internal::is_scalar<L>{})>
-auto operator-(L &&lhs, const ScalarBase<R> &rhs)
-  -> decltype(internal::wrapInputScalar(std::forward<L>(lhs)) - rhs.derived()) {
-    return internal::wrapInputScalar(std::forward<L>(lhs)) - rhs.derived();
-}
-// Overload for rvalue
-template <typename L, typename R, TICK_REQUIRES(internal::is_scalar<L>{})>
-auto operator-(L &&lhs, ScalarBase<R> &&rhs)
-  -> decltype(internal::wrapInputScalar(std::forward<L>(lhs)) -
-              std::move(rhs).derived()) {
-    return internal::wrapInputScalar(std::forward<L>(lhs)) - std::move(rhs).derived();
-}
+WAVE_OVERLOAD_OPERATORS_FOR_SCALAR(-, ScalarBase)
 
-/** Subtracts a scalar expression and a plain scalar
+/** Multiplication of two scalar expressions
  *
  * @f[ \mathbb{R} \times \mathbb{R} \to \mathbb{R} @f]
  */
-template <typename L, typename R, TICK_REQUIRES(internal::is_scalar<R>{})>
-auto operator-(const ScalarBase<L> &lhs, R &&rhs)
-  -> decltype(lhs.derived() - internal::wrapInputScalar(std::forward<R>(rhs))) {
-    return lhs.derived() - internal::wrapInputScalar(std::forward<R>(rhs));
+template <typename L, typename R>
+auto operator*(const ScalarBase<L> &lhs, const ScalarBase<R> &rhs) -> Product<L, R> {
+    return Product<L, R>{lhs.derived(), rhs.derived()};
 }
-// Overload for rvalue
-template <typename L, typename R, TICK_REQUIRES(internal::is_scalar<R>{})>
-auto operator-(ScalarBase<L> &&lhs, R &&rhs)
-  -> decltype(std::move(lhs).derived() -
-              internal::wrapInputScalar(std::forward<R>(rhs))) {
-    return std::move(lhs).derived() - internal::wrapInputScalar(std::forward<R>(rhs));
+
+WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*, Product, ScalarBase, ScalarBase)
+WAVE_OVERLOAD_OPERATORS_FOR_SCALAR(*, ScalarBase)
+
+/** Division of two scalar expressions
+ *
+ * @f[ \mathbb{R} \times \mathbb{R} \to \mathbb{R} @f]
+ */
+template <typename L, typename R>
+auto operator/(const ScalarBase<L> &lhs, const ScalarBase<R> &rhs) -> Divide<L, R> {
+    return Divide<L, R>{lhs.derived(), rhs.derived()};
 }
+
+WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator/, Divide, ScalarBase, ScalarBase)
+WAVE_OVERLOAD_OPERATORS_FOR_SCALAR(/, ScalarBase)
 
 }  // namespace wave
 

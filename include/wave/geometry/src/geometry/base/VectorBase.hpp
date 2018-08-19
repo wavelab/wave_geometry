@@ -145,9 +145,86 @@ auto evalImpl(expr<Norm>, const VectorBase<Rhs> &rhs)
 
 /** Gradient of L2 norm */
 template <typename Val, typename Rhs>
-auto jacobianImpl(expr<Norm>, const Val &norm, const VectorBase<Rhs> &rhs)
+auto jacobianImpl(expr<Norm>, const ScalarBase<Val> &norm, const VectorBase<Rhs> &rhs)
   -> jacobian_t<Val, Rhs> {
-    return rhs.derived().value() / norm;
+    return rhs.derived().value() / norm.derived().value();
+}
+
+/** Implementation of left scalar multiplication
+ * Defer to the implementation type's arithmetic operators.
+ */
+template <typename Lhs, typename Rhs>
+auto evalImpl(expr<Scale>, const ScalarBase<Lhs> &lhs, const VectorBase<Rhs> &rhs)
+  -> decltype(makeVectorLike<Rhs>(lhs.derived().value() * rhs.derived().value())) {
+    return makeVectorLike<Rhs>(lhs.derived().value() * rhs.derived().value());
+}
+/** Implementation of right scalar multiplication
+* Defer to the implementation type's arithmetic operators.
+*/
+template <typename Lhs, typename Rhs>
+auto evalImpl(expr<ScaleR>, const VectorBase<Lhs> &lhs, const ScalarBase<Rhs> &rhs)
+  -> decltype(makeVectorLike<Lhs>(lhs.derived().value() * rhs.derived().value())) {
+    return makeVectorLike<Lhs>(lhs.derived().value() * rhs.derived().value());
+}
+/** Left Jacobian implementation for left scalar multiplication */
+template <typename Res, typename Lhs, typename Rhs>
+auto leftJacobianImpl(expr<Scale>,
+                      const Res &,
+                      const ScalarBase<Lhs> &,
+                      const VectorBase<Rhs> &rhs) -> decltype(rhs.derived().value()) {
+    return rhs.derived().value();
+}
+/** Right Jacobian implementation for right scalar multiplication */
+template <typename Res, typename Lhs, typename Rhs>
+auto rightJacobianImpl(expr<ScaleR>,
+                       const Res &,
+                       const VectorBase<Lhs> &lhs,
+                       const ScalarBase<Rhs> &) -> decltype(lhs.derived().value()) {
+    return lhs.derived().value();
+}
+/** Left Jacobian implementation for right scalar multiplication */
+template <typename Res, typename Lhs, typename Rhs>
+auto leftJacobianImpl(expr<ScaleR>,
+                      const Res &,
+                      const VectorBase<Lhs> &,
+                      const ScalarBase<Rhs> &rhs) -> jacobian_t<Res, Lhs> {
+    return rhs.derived().value() * identity_t<Lhs>{};
+}
+/** Right Jacobian implementation for left scalar multiplication */
+template <typename Res, typename Lhs, typename Rhs>
+auto rightJacobianImpl(expr<Scale>,
+                       const Res &,
+                       const ScalarBase<Lhs> &lhs,
+                       const VectorBase<Rhs> &) -> jacobian_t<Res, Rhs> {
+    return lhs.derived().value() * identity_t<Rhs>{};
+}
+
+/** Implementation of right scalar division
+ * Defer to the implementation type's arithmetic operations.
+ */
+template <typename Lhs, typename Rhs>
+auto evalImpl(expr<ScaleDiv>, const VectorBase<Lhs> &lhs, const ScalarBase<Rhs> &rhs)
+  -> decltype(makeVectorLike<Lhs>(lhs.derived().value() / rhs.derived().value())) {
+    return makeVectorLike<Lhs>(lhs.derived().value() / rhs.derived().value());
+}
+
+/** Left Jacobian implementation for right scalar division */
+template <typename Res, typename Lhs, typename Rhs>
+auto leftJacobianImpl(expr<ScaleDiv>,
+                      const Res &,
+                      const VectorBase<Lhs> &,
+                      const ScalarBase<Rhs> &rhs) -> jacobian_t<Res, Lhs> {
+    return identity_t<Res>{} / rhs.derived().value();
+}
+
+/** Right Jacobian implementation for right scalar division */
+template <typename Res, typename Lhs, typename Rhs>
+auto rightJacobianImpl(expr<ScaleDiv>,
+                       const Res &,
+                       const VectorBase<Lhs> &lhs,
+                       const ScalarBase<Rhs> &rhs) -> jacobian_t<Res, Rhs> {
+    const auto rhs_squared = rhs.derived().value() * rhs.derived().value();
+    return jacobian_t<Res, Rhs>{-lhs.derived().value() / rhs_squared};
 }
 
 }  // namespace internal
@@ -200,6 +277,42 @@ auto operator-(const VectorBase<R> &rhs) -> Minus<R> {
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUE(operator-, Minus, VectorBase)
+
+/** Left scalar multiplication of a vector expression
+ *
+ * @f[ \mathbb{R} \times \mathbb{R}^n \to \mathbb{R}^n @f]
+ */
+template <typename L, typename R>
+auto operator*(const ScalarBase<L> &lhs, const VectorBase<R> &rhs) -> Scale<L, R> {
+    return Scale<L, R>{lhs.derived(), rhs.derived()};
+}
+
+WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*, Scale, ScalarBase, VectorBase)
+WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_LEFT(*, VectorBase)
+
+/** Right scalar multiplication of a vector expression
+ *
+ * @f[ \mathbb{R}^n \times \mathbb{R} \to \mathbb{R}^n @f]
+ */
+template <typename L, typename R>
+auto operator*(const VectorBase<L> &lhs, const ScalarBase<R> &rhs) -> ScaleR<L, R> {
+    return ScaleR<L, R>{lhs.derived(), rhs.derived()};
+}
+
+WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*, ScaleR, VectorBase, ScalarBase)
+WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_RIGHT(*, VectorBase)
+
+/** Right scalar division of a vector expression by a scalar expression
+ *
+ * @f[ \mathbb{R}^n \times \mathbb{R} \to \mathbb{R}^n @f]
+ */
+template <typename L, typename R>
+auto operator/(const VectorBase<L> &lhs, const ScalarBase<R> &rhs) -> ScaleDiv<L, R> {
+    return ScaleDiv<L, R>{lhs.derived(), rhs.derived()};
+}
+
+WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator/, ScaleDiv, VectorBase, ScalarBase)
+WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_RIGHT(/, VectorBase)
 
 }  // namespace wave
 

@@ -4,6 +4,7 @@
 template <typename Params>
 class VectorTest : public testing::Test {
  protected:
+    using Scalar = typename Params::Scalar;
     using Leaf = typename Params::Leaf;
     using Vector = typename wave::internal::traits<Leaf>::ImplType;
 
@@ -236,7 +237,7 @@ TYPED_TEST(VectorTest, addNorms) {
     const auto t1 = TestFixture::LeafAAB::Random();
     const auto t2 = TestFixture::LeafABC::Random();
 
-    const double result = eval(t1.norm() + t2.norm());
+    const auto result = eval(t1.norm() + t2.norm());
     const auto eigen_result = t1.value().norm() + t2.value().norm();
 
     ASSERT_DOUBLE_EQ(eigen_result, result);
@@ -297,4 +298,66 @@ TYPED_TEST(VectorTest, addTwoZeroLeafs) {
     const auto expected = typename TestFixture::LeafAAC{TestFixture::Vector::Zero()};
     EXPECT_APPROX(expected, result);
     CHECK_JACOBIANS(TestFixture::IsFramed, t1 + t2, t1, t2);
+}
+
+TYPED_TEST(VectorTest, scaleLeft) {
+    const auto t1 = TestFixture::LeafAAB::Random();
+    const auto a = wave::uniformRandom<typename TestFixture::Scalar>(-3.0, 3.0);
+    const auto result = typename TestFixture::LeafAAB{a * t1};
+    const auto eigen_result = typename TestFixture::Vector{a * t1.value()};
+    EXPECT_APPROX(eigen_result, result.value());
+    CHECK_JACOBIANS(true, a * t1, a, t1);
+}
+
+TYPED_TEST(VectorTest, scaleRight) {
+    const auto t1 = TestFixture::LeafAAB::Random();
+    const auto a = wave::uniformRandom<typename TestFixture::Scalar>(-3.0, 3.0);
+    const auto result = typename TestFixture::LeafAAB{t1 * a};
+    const auto eigen_result = typename TestFixture::Vector{t1.value() * a};
+
+    EXPECT_APPROX(eigen_result, result.value());
+    CHECK_JACOBIANS(true, t1 * a, t1, a);
+}
+
+TYPED_TEST(VectorTest, scaleDivideRight) {
+    const auto t1 = TestFixture::LeafAAB::Random();
+    const auto a = wave::uniformRandom<typename TestFixture::Scalar>(-3.0, 3.0);
+    const auto result = typename TestFixture::LeafAAB{t1 / a};
+    const auto eigen_result = typename TestFixture::Vector{t1.value() / a};
+
+    EXPECT_APPROX(eigen_result, result.value());
+    CHECK_JACOBIANS(true, t1 * a, t1, a);
+}
+
+TYPED_TEST(VectorTest, scaleByExpressionLeft) {
+    const auto t1 = TestFixture::LeafAAB::Random();
+    const auto t2 = TestFixture::LeafABC::Random();
+    const auto result = typename TestFixture::LeafAAB{t2.norm() * t1};
+    const auto eigen_result =
+      typename TestFixture::Vector{t2.value().norm() * t1.value()};
+
+    EXPECT_APPROX(eigen_result, result.value());
+    CHECK_JACOBIANS(TestFixture::IsFramed, t2.norm() * t1, t2, t1);
+}
+
+TYPED_TEST(VectorTest, scaleByExpressionRight) {
+    const auto t1 = TestFixture::LeafAAB::Random();
+    const auto t2 = TestFixture::LeafABC::Random();
+    const auto result = typename TestFixture::LeafAAB{t1 * t2.norm()};
+    const auto eigen_result =
+      typename TestFixture::Vector{t1.value() * t2.value().norm()};
+
+    EXPECT_APPROX(eigen_result, result.value());
+    CHECK_JACOBIANS(TestFixture::IsFramed, t1 * t2.norm(), t1, t2);
+}
+
+TYPED_TEST(VectorTest, scaleDivideByExpressionRight) {
+    const auto t1 = TestFixture::LeafAAB::Random();
+    const auto t2 = TestFixture::LeafABC::Random();
+    const auto result = typename TestFixture::LeafAAB{t1 / t2.norm()};
+    const auto eigen_result =
+      typename TestFixture::Vector{t1.value() / t2.value().norm()};
+
+    EXPECT_APPROX(eigen_result, result.value());
+    CHECK_JACOBIANS(TestFixture::IsFramed, t1 / t2.norm(), t1, t2);
 }

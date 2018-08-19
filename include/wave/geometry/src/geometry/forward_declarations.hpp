@@ -27,6 +27,21 @@ template <typename Rhs>
 struct Minus;
 
 template <typename Lhs, typename Rhs>
+struct Scale;
+
+template <typename Lhs, typename Rhs>
+struct ScaleR;
+
+template <typename Lhs, typename Rhs>
+struct ScaleDiv;
+
+template <typename Lhs, typename Rhs>
+struct Product;
+
+template <typename Lhs, typename Rhs>
+struct Divide;
+
+template <typename Lhs, typename Rhs>
 struct Rotate;
 
 template <typename Lhs, typename Rhs>

@@ -52,17 +52,3 @@ TYPED_TEST(ScalarTest, assignFromExpression) {
     s = t.norm();
     EXPECT_EQ(t.value().norm(), s);
 }
-
-#define GENERATE_OP_TEST(OP, NAME)                          \
-    TYPED_TEST(ScalarTest, NAME) {                          \
-        const auto s1 = wave::Scalar<TypeParam>{this->a()}; \
-        const auto s2 = wave::Scalar<TypeParam>{this->b()}; \
-                                                            \
-        const auto expr = s1 OP s2;                         \
-                                                            \
-        EXPECT_EQ(this->a() OP this->b(), eval(expr));      \
-        CHECK_JACOBIANS(false, s1 OP s2, s1, s2);           \
-    }
-
-GENERATE_OP_TEST(+, add)
-GENERATE_OP_TEST(-, subtract)
