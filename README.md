@@ -3,7 +3,7 @@
 
 [![Build Status](https://travis-ci.com/wavelab/wave_geometry.svg?branch=master)](https://travis-ci.com/wavelab/wave_geometry)
 
-**wave_geometry** is a header-only C++ library for working with rotations and transformations in robotics and computer vision applications. It differs from similar libraries by offering:
+**wave_geometry** is a header-only C++14 library for working with rotations and transformations in robotics and computer vision applications. It differs from similar libraries by offering:
 
 * Fast operations using expression templates
 * Fast on-manifold automatic differentiation
@@ -58,7 +58,7 @@ It is possible (and more efficient) to combine evaluation and multiple Jacobian 
 // Using C++17
 auto [p2, J_p2_wrt_R, J_p2_wrt_p1] = (R * p1).evalWithJacobians(R, p1);
 
-// Or, using C++11
+// Or, using C++14
 wave::Translationd p2;
 Eigen::Matrix3d J_p2_wrt_R, J_p2_wrt_p1;
 std::tie(p2, J_p2_wrt_R, J_p2_wrt_p1) = (R * p1).evalWithJacobians(R, p1);
@@ -184,7 +184,7 @@ In your C++ file, write:
 `wave_geometry` requires:
   * an existing installation of [Eigen](http://eigen.tuxfamily.org) 3.3.2 or above
   * an existing installation of Boost (only the header-only Optional library is used)
-  * a modern C++11 compiler (tested on GCC 5.4, clang 4.0)
+  * a modern C++14 compiler (tested on GCC 5.4, clang 4.0)
 
 ### Development status
 
