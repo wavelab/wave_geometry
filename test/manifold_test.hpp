@@ -1,15 +1,27 @@
-#include "wave/geometry/geometry.hpp"
-#include "test.hpp"
-
-/** Test correctness and consistency of manifold operations, both with and without frames.
+/**
+ * @file
+ * @author lkoppel
+ * Fixture and tests of manifold expressions
+ *
+ * Tests correctness and consistency of manifold operations, both with and without frames.
  *
  * This test covers operations common to both SO(3) and SE(3), such as logmap and expmap.
  *
  * Some tests in this fixture refer to equations in Bloesch, Michael, et al.
  * "A Primer on the Differential Calculus of 3D Orientations." arXiv:1606.05285 (2016).
+ *
+ * The tests are included in this header file so that instantiations for different types
+ * (e.g. RotationMd and RigidTransformMd) can be split into different translation units.
  */
+
+#ifndef WAVE_GEOMETRY_MANIFOLD_TEST_HPP
+#define WAVE_GEOMETRY_MANIFOLD_TEST_HPP
+
+#include "wave/geometry/geometry.hpp"
+#include "test.hpp"
+
 template <typename Params>
-class TransformTest : public testing::Test {
+class ManifoldTest : public testing::Test {
  protected:
     using Scalar = typename Params::Scalar;
     using Leaf = typename Params::Leaf;
@@ -53,24 +65,22 @@ class TransformTest : public testing::Test {
     TICK_TRAIT_CHECK(wave::internal::is_unary_expression<wave::BoxMinus<LeafAB, LeafAB>>);
 };
 
-// The list of implementation types to run each test case on
-using LeafTypes = test_types_list<wave::RotationMd,
-                                  wave::RotationQd,
-                                  wave::RotationAd,
-                                  wave::RigidTransformMd,
-                                  wave::RigidTransformQd>;
+// Use a type-parametrized test case, meaning we can instantiate it with types later
+// without knowing the types in advance.
+// See https://github.com/google/googletest/blob/master/googletest/docs/advanced.md
+TYPED_TEST_CASE_P(ManifoldTest);
 
-// The following tests will be built for each type in LeafTypes
-TYPED_TEST_CASE(TransformTest, LeafTypes);
+// When adding a test it must also be added to the REGISTER_TYPED_TEST_CASE_P call below.
+// Yes, it's redundant; apparently the drawback of using type-parameterized tests.
 
 // Check that the result of Random() is the same type
-TYPED_TEST(TransformTest, constructRandom) {
+TYPED_TEST_P(ManifoldTest, constructRandom) {
     auto r = TestFixture::LeafAB::Random();
     static_assert(std::is_same<typename TestFixture::LeafAB, decltype(r)>{},
                   "Random() returns non-plain type");
 }
 
-TYPED_TEST(TransformTest, isApproxTrivial) {
+TYPED_TEST_P(ManifoldTest, isApproxTrivial) {
     const auto r1 = TestFixture::LeafAB::Random();
     const auto r2 = typename TestFixture::LeafBA{r1.value()};
 
@@ -78,7 +88,7 @@ TYPED_TEST(TransformTest, isApproxTrivial) {
     EXPECT_TRUE(r1.isApprox(r2));
 }
 
-TYPED_TEST(TransformTest, isApprox) {
+TYPED_TEST_P(ManifoldTest, isApprox) {
     const auto r1 = TestFixture::LeafAB::Random();
     auto rel = TestFixture::RelLeafAAB::Random();
     rel.value() *= 0.01;  // @todo scaling expression
@@ -88,7 +98,7 @@ TYPED_TEST(TransformTest, isApprox) {
     EXPECT_TRUE(r1.isApprox(r2, 0.01));
 }
 
-TYPED_TEST(TransformTest, inverseIdentity) {
+TYPED_TEST_P(ManifoldTest, inverseIdentity) {
     const auto r1 = TestFixture::LeafAB::Random();
     const auto r2 = typename TestFixture::LeafBA{inverse(r1)};
 
@@ -97,7 +107,7 @@ TYPED_TEST(TransformTest, inverseIdentity) {
     EXPECT_APPROX(TestFixture::LeafAA::Identity(), res);
 }
 
-TYPED_TEST(TransformTest, boxPlusZero) {
+TYPED_TEST_P(ManifoldTest, boxPlusZero) {
     // Bloesch Equation 16
     const auto r1 = TestFixture::LeafAB::Random();
     const auto rel = wave::Zero<typename TestFixture::RelLeafAAB>{};
@@ -107,7 +117,7 @@ TYPED_TEST(TransformTest, boxPlusZero) {
     CHECK_JACOBIANS(true, r1 + rel, r1, rel);
 }
 
-TYPED_TEST(TransformTest, boxPlusMinus) {
+TYPED_TEST_P(ManifoldTest, boxPlusMinus) {
     // Bloesch Equation 17
     const auto r1 = TestFixture::LeafAB::Random();
     auto rel = TestFixture::RelLeafAAB::Random();
@@ -116,7 +126,7 @@ TYPED_TEST(TransformTest, boxPlusMinus) {
     EXPECT_APPROX_PREC(rel, result, this->dummy_prec * 10);
 }
 
-TYPED_TEST(TransformTest, boxMinusPlus) {
+TYPED_TEST_P(ManifoldTest, boxMinusPlus) {
     // Bloesch Equation 18
     const auto r1 = TestFixture::LeafAB::Random();
     const auto r2 = TestFixture::LeafAB::Random();
@@ -125,7 +135,7 @@ TYPED_TEST(TransformTest, boxMinusPlus) {
     EXPECT_APPROX_PREC(r2, result, this->dummy_prec * 10);
 }
 
-TYPED_TEST(TransformTest, consistentExpLog) {
+TYPED_TEST_P(ManifoldTest, consistentExpLog) {
     // Special case: for AngleAxis this operation requires converting from angle-axis and
     // back, so the precision is a bit worse
     auto prec = this->dummy_prec;
@@ -140,7 +150,7 @@ TYPED_TEST(TransformTest, consistentExpLog) {
     EXPECT_APPROX_PREC(r1, result, prec);
 }
 
-TYPED_TEST(TransformTest, logMapJacobian) {
+TYPED_TEST_P(ManifoldTest, logMapJacobian) {
     // Use a small rotation for more accurate numerical jacobians
     auto rel = TestFixture::RelLeafAAB::Random();
     rel.value() *= 0.02;
@@ -155,31 +165,49 @@ TYPED_TEST(TransformTest, logMapJacobian) {
 }
 
 
-TYPED_TEST(TransformTest, expMapJacobian) {
+TYPED_TEST_P(ManifoldTest, expMapJacobian) {
     auto rel = TestFixture::RelLeafAAB::Random();
     rel.value() *= 0.02;
     CHECK_JACOBIANS(true, exp(rel), rel);
 }
 
 
-TYPED_TEST(TransformTest, expMapJacobianNearZero) {
+TYPED_TEST_P(ManifoldTest, expMapJacobianNearZero) {
     using S = typename TestFixture::Scalar;
     auto rel = TestFixture::RelLeafAAB::Zero().eval();
     rel.value()[2] = S{1e-14};
     CHECK_JACOBIANS(true, exp(rel), rel);
 }
 
-TYPED_TEST(TransformTest, boxPlusJacobian) {
+TYPED_TEST_P(ManifoldTest, boxPlusJacobian) {
     const auto r1 = TestFixture::LeafAB::Random();
     auto rel = TestFixture::RelLeafAAB::Random();
     rel.value() *= 0.02;
     CHECK_JACOBIANS(true, r1 + rel, r1, rel);
 }
 
-TYPED_TEST(TransformTest, boxMinusJacobian) {
+TYPED_TEST_P(ManifoldTest, boxMinusJacobian) {
     const auto r1 = TestFixture::LeafAB::Random();
     auto rel = TestFixture::RelLeafAAB::Random();
     rel.value() *= 0.02;
     const auto r2 = typename TestFixture::LeafAB{r1 + rel};
     CHECK_JACOBIANS(false, r1 - r2, r1, r2);
 }
+
+// Register the test case (having to list all the tests again)
+REGISTER_TYPED_TEST_CASE_P(ManifoldTest,
+                           constructRandom,
+                           isApproxTrivial,
+                           isApprox,
+                           inverseIdentity,
+                           boxPlusZero,
+                           boxPlusMinus,
+                           boxMinusPlus,
+                           consistentExpLog,
+                           logMapJacobian,
+                           expMapJacobian,
+                           expMapJacobianNearZero,
+                           boxPlusJacobian,
+                           boxMinusJacobian);
+
+#endif  // WAVE_GEOMETRY_MANIFOLD_TEST_HPP
