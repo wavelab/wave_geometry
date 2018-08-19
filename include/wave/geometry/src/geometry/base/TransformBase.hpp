@@ -121,6 +121,68 @@ WAVE_OVERLOAD_FUNCTION_FOR_RVALUES_REQ(operator+,
                                        TICK_REQUIRES(
                                          internal::rhs_is_tangent_of_lhs<L, R>{}))
 
+namespace internal {
+
+/** Jacobian of Compose wrt any transform rhs
+ */
+template <typename Val, typename Lhs, typename Rhs>
+auto rightJacobianImpl(expr<Compose>,
+                       const TransformBase<Val> &,
+                       const TransformBase<Lhs> &lhs,
+                       const TransformBase<Rhs> &) -> jacobian_t<Val, Lhs> {
+    using Scalar = scalar_t<Val>;
+    using Mat3 = Eigen::Matrix<Scalar, 3, 3>;
+
+    // From http://ethaneade.com/lie.pdf - note we swap order of rotation and translation
+    // Actually the adjoint of SE(3)
+    // @todo factor out adjoint
+    const auto &R = Mat3{lhs.derived().rotation().value()};
+    const auto &t = lhs.derived().translation().value();
+    jacobian_t<Val, Lhs> out{};
+
+    out.template topLeftCorner<3, 3>() = R;
+    out.template bottomLeftCorner<3, 3>() = crossMatrix(t) * R;
+    out.template topRightCorner<3, 3>().setZero();
+    out.template bottomRightCorner<3, 3>() = R;
+
+    return out;
+}
+
+/** Implements Transform for any transform
+ *
+ * More efficient implementations may be available for specific types (e.g. 4x4 matrix)
+ */
+template <typename Lhs, typename Rhs>
+auto evalImpl(expr<Transform>,
+              const TransformBase<Lhs> &lhs,
+              const TranslationBase<Rhs> &rhs) -> plain_eval_t<Rhs> {
+    return eval(lhs.derived().rotation() * rhs.derived() + lhs.derived().translation());
+}
+
+/** Jacobian of any Transform wrt to the lhs */
+template <typename Val, typename Lhs, typename Rhs>
+auto leftJacobianImpl(expr<Transform>,
+                      const TranslationBase<Val> &val,
+                      const TransformBase<Lhs> &,
+                      const TranslationBase<Rhs> &) -> jacobian_t<Val, Lhs> {
+    using Scalar = scalar_t<Val>;
+
+    // From http://ethaneade.com/lie.pdf - note we swap order of rotation and translation
+    jacobian_t<Val, Lhs> out{};
+    out << crossMatrix(-val.derived().value()), IdentityMatrix<Scalar, 3>{};
+    return out;
+}
+
+/** Jacobian of any Transform wrt to the rhs is the rotation part */
+template <typename Val, typename Lhs, typename Rhs>
+auto rightJacobianImpl(expr<Transform>,
+                       const TranslationBase<Val> &,
+                       const TransformBase<Lhs> &lhs,
+                       const TranslationBase<Rhs> &) -> jacobian_t<Val, Rhs> {
+    return jacobian_t<Val, Rhs>{lhs.derived().rotation().value()};
+}
+
+}  // namespace internal
 }  // namespace wave
 
 #endif  // WAVE_GEOMETRY_TRANSFORMBASE_HPP
