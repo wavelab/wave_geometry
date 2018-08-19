@@ -60,8 +60,6 @@ ELSE(TARGET wave)
     ADD_CUSTOM_TARGET(benchmark
         COMMAND ${CMAKE_CTEST_COMMAND} -C benchmark -L benchmark)
     MESSAGE(STATUS "Building benchmarks")
-
-    ADD_SUBDIRECTORY(benchmarks)
   ENDIF(BUILD_BENCHMARKS)
 
   # We use header-only parts of boost: boost::optional
