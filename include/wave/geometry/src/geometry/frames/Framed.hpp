@@ -74,7 +74,7 @@ class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Fra
     // Disable if copy ctor would apply - https://stackoverflow.com/a/39646176
 
     template <class Arg,
-              tmp::enable_if_t<!std::is_same<tmp::decay_t<Arg>, Framed>{} &&
+              std::enable_if_t<!std::is_same<std::decay_t<Arg>, Framed>{} &&
                                  std::is_constructible<WrappedLeaf, Arg>{} &&
                                  (!internal::is_expression<tmp::remove_cr_t<Arg>>{}),
                                int> = 0>
@@ -82,7 +82,7 @@ class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Fra
 
     // Forward args to rhs (version more than 1 argument)
     template <class... Args,
-              tmp::enable_if_t<(sizeof...(Args) > 1) &&
+              std::enable_if_t<(sizeof...(Args) > 1) &&
                                  std::is_constructible<WrappedLeaf, Args...>::value &&
                                  !special_constructor_applies<Args...>{},
                                int> = 0>
@@ -136,7 +136,7 @@ class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Fra
     /** Construct from a leaf rvalue - only allowed for our friend functor which is used
      * internally by evaluateTo() itself */
     template <typename OtherDerived,
-              tmp::enable_if_t<internal::is_leaf_expression<OtherDerived>{} &&
+              std::enable_if_t<internal::is_leaf_expression<OtherDerived>{} &&
                                  internal::is_unframed<OtherDerived>{},
                                int> = 0>
     explicit Framed(ExpressionBase<OtherDerived> &&other)
@@ -145,7 +145,7 @@ class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Fra
     /** Construct from an unframed leaf - only allowed for our friend functor which is
      * used internally by evaluateTo() itself */
     template <typename OtherDerived,
-              tmp::enable_if_t<internal::is_leaf_expression<OtherDerived>{} &&
+              std::enable_if_t<internal::is_leaf_expression<OtherDerived>{} &&
                                  WeHaveFrames && internal::is_unframed<OtherDerived>{},
                                int> = 0>
     explicit Framed(const ExpressionBase<OtherDerived> &other)

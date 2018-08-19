@@ -35,7 +35,7 @@ inline constexpr bool isSame(const A &a, const A &b) noexcept {
 // Version for scalar (mismatching types)
 template <typename A,
           typename B,
-          tmp::enable_if_t<internal::is_scalar<A>{} || internal::is_scalar<B>{}, int> = 0>
+          std::enable_if_t<internal::is_scalar<A>{} || internal::is_scalar<B>{}, int> = 0>
 inline constexpr bool isSame(const A &, const B &) noexcept {
     static_assert(!std::is_same<A, B>::value, "Should only be called when types differ");
     return false;

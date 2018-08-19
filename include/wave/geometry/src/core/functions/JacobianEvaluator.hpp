@@ -99,7 +99,7 @@ template <typename Derived, typename Target>
 struct JacobianEvaluator<
   Derived,
   Target,
-  tmp::enable_if_t<is_binary_expression<Derived>{} &&
+  std::enable_if_t<is_binary_expression<Derived>{} &&
                    contains_same_type<typename Derived::LhsDerived, Target>::value &&
                    contains_same_type<typename Derived::RhsDerived, Target>::value>> {
     using Jacobian = jacobian_t<Derived, Target>;
@@ -156,7 +156,7 @@ template <typename Derived, typename Target>
 struct JacobianEvaluator<
   Derived,
   Target,
-  tmp::enable_if_t<is_binary_expression<Derived>::value &&
+  std::enable_if_t<is_binary_expression<Derived>::value &&
                    contains_same_type<typename Derived::LhsDerived, Target>::value &&
                    !contains_same_type<typename Derived::RhsDerived, Target>::value>> {
     using Jacobian = jacobian_t<Derived, Target>;
@@ -192,7 +192,7 @@ template <typename Derived, typename Target>
 struct JacobianEvaluator<
   Derived,
   Target,
-  tmp::enable_if_t<is_binary_expression<Derived>{} &&
+  std::enable_if_t<is_binary_expression<Derived>{} &&
                    !contains_same_type<typename Derived::LhsDerived, Target>::value &&
                    contains_same_type<typename Derived::RhsDerived, Target>::value>> {
     using Jacobian = jacobian_t<Derived, Target>;

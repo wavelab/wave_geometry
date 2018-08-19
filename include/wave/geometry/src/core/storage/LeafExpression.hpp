@@ -14,11 +14,11 @@ struct LeafExpression {
     struct init_storage {};
 
 
-    using ValueType = tmp::decay_t<StorageType>;
+    using ValueType = std::decay_t<StorageType>;
     using RefType =
-      tmp::conditional_t<std::is_array<StorageType>{}, ValueType, ValueType &>;
-    using ConstRefType = const tmp::conditional_t<std::is_array<StorageType>{},
-                                                  tmp::decay_t<const StorageType>,
+      std::conditional_t<std::is_array<StorageType>{}, ValueType, ValueType &>;
+    using ConstRefType = const std::conditional_t<std::is_array<StorageType>{},
+                                                  std::decay_t<const StorageType>,
                                                   const ValueType &>;
 
  public:

@@ -21,7 +21,7 @@ namespace internal {
 template <
   typename Destination,
   typename Derived,
-  tmp::enable_if_t<std::is_same<Destination, eval_output_t<arg_t<Derived>>>{}, int> = 0>
+  std::enable_if_t<std::is_same<Destination, eval_output_t<arg_t<Derived>>>{}, int> = 0>
 WAVE_STRONG_INLINE auto prepareEvaluatorTo(Derived &&expr)
   -> Evaluator<typename traits<arg_t<Derived>>::PreparedType> {
     // First, transform the expression
@@ -48,7 +48,7 @@ WAVE_STRONG_INLINE auto prepareEvaluatorTo(Derived &&expr)
 template <
   typename Destination,
   typename Derived,
-  tmp::enable_if_t<!std::is_same<Destination, eval_output_t<arg_t<Derived>>>{}, int> = 0>
+  std::enable_if_t<!std::is_same<Destination, eval_output_t<arg_t<Derived>>>{}, int> = 0>
 WAVE_STRONG_INLINE auto prepareEvaluatorTo(Derived &&expr) -> Evaluator<
   typename traits<Convert<eval_t<Destination>, arg_t<Derived>>>::PreparedType> {
     // Add the needed conversion

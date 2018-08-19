@@ -8,7 +8,6 @@
 #define WAVE_GEOMETRY_CROSSMATRIX_HPP
 
 #include <Eigen/Geometry>
-#include "wave/geometry/src/util/meta/template_helpers.hpp"
 
 namespace wave {
 
@@ -86,11 +85,11 @@ namespace Eigen {
  *
  * Performs a cross product
  */
-template <typename VecType,
-          typename OtherType,
-          wave::tmp::enable_if_t<OtherType::RowsAtCompileTime == 3 &&
-                                   OtherType::ColsAtCompileTime == 1,
-                                 int> = 0>
+template <
+  typename VecType,
+  typename OtherType,
+  std::enable_if_t<OtherType::RowsAtCompileTime == 3 && OtherType::ColsAtCompileTime == 1,
+                   int> = 0>
 EIGEN_DEVICE_FUNC inline auto operator*(const wave::CrossMatrix<VecType> &crossMat,
                                         const Eigen::MatrixBase<OtherType> &rhs) {
     return crossMat.vec.cross(rhs);
@@ -100,11 +99,11 @@ EIGEN_DEVICE_FUNC inline auto operator*(const wave::CrossMatrix<VecType> &crossM
  *
  * Performs a cross product
  */
-template <typename VecType,
-          typename OtherType,
-          wave::tmp::enable_if_t<OtherType::ColsAtCompileTime == 3 &&
-                                   OtherType::RowsAtCompileTime == 1,
-                                 int> = 0>
+template <
+  typename VecType,
+  typename OtherType,
+  std::enable_if_t<OtherType::ColsAtCompileTime == 3 && OtherType::RowsAtCompileTime == 1,
+                   int> = 0>
 EIGEN_DEVICE_FUNC inline auto operator*(const Eigen::MatrixBase<OtherType> &lhs,
                                         const wave::CrossMatrix<VecType> &crossMat) {
     return lhs.cross(crossMat.vec);
@@ -118,11 +117,11 @@ EIGEN_DEVICE_FUNC inline auto operator*(const Eigen::MatrixBase<OtherType> &lhs,
  *
  * Only enabled for static matrices
  */
-template <typename VecType,
-          typename OtherType,
-          wave::tmp::enable_if_t<OtherType::RowsAtCompileTime == 3 &&
-                                   OtherType::ColsAtCompileTime != 1,
-                                 int> = 0>
+template <
+  typename VecType,
+  typename OtherType,
+  std::enable_if_t<OtherType::RowsAtCompileTime == 3 && OtherType::ColsAtCompileTime != 1,
+                   int> = 0>
 EIGEN_DEVICE_FUNC inline auto operator*(const wave::CrossMatrix<VecType> &crossMat,
                                         const Eigen::MatrixBase<OtherType> &rhs) {
     return rhs.colwise().cross(-crossMat.vec);
@@ -137,11 +136,11 @@ EIGEN_DEVICE_FUNC inline auto operator*(const wave::CrossMatrix<VecType> &crossM
  * This special case cuts down one instruction(?), but more importantly simplifies the
  * expression graph output.
  */
-template <typename VecType,
-          typename OtherType,
-          wave::tmp::enable_if_t<OtherType::RowsAtCompileTime == 3 &&
-                                   OtherType::ColsAtCompileTime != 1,
-                                 int> = 0>
+template <
+  typename VecType,
+  typename OtherType,
+  std::enable_if_t<OtherType::RowsAtCompileTime == 3 && OtherType::ColsAtCompileTime != 1,
+                   int> = 0>
 EIGEN_DEVICE_FUNC inline auto operator*(
   const wave::CrossMatrix<Eigen::CwiseUnaryOp<
     Eigen::internal::scalar_opposite_op<typename internal::traits<VecType>::Scalar>,
@@ -161,7 +160,7 @@ EIGEN_DEVICE_FUNC inline auto operator*(
  */
 template <typename OtherType,
           typename VecType,
-          wave::tmp::enable_if_t<OtherType::ColsAtCompileTime == 3, int> = 0>
+          std::enable_if_t<OtherType::ColsAtCompileTime == 3, int> = 0>
 EIGEN_DEVICE_FUNC inline auto operator*(const Eigen::MatrixBase<OtherType> &lhs,
                                         const wave::CrossMatrix<VecType> &crossMat) {
     return lhs.rowwise().cross(crossMat.vec);

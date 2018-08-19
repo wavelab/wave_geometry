@@ -64,7 +64,7 @@ struct scalar_traits_base : leaf_traits_base<T>, frameable_vector_traits {
  */
 template <typename T>
 struct traits<T,
-              tmp::enable_if_t<std::is_arithmetic<T>::value && !std::is_const<T>::value>>
+              std::enable_if_t<std::is_arithmetic<T>::value && !std::is_const<T>::value>>
   : scalar_traits_base<T> {};
 
 /** Helper to produce a scalar wrapping the input type */

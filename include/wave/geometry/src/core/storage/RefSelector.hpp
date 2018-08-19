@@ -26,9 +26,9 @@ namespace internal {
  */
 template <typename T>
 using wave_ref_sel_t =
-  tmp::conditional_t<std::is_rvalue_reference<T>{},
+  std::conditional_t<std::is_rvalue_reference<T>{},
                      tmp::remove_cr_t<T>,
-                     tmp::conditional_t<is_leaf_expression<tmp::remove_cr_t<T>>::value ||
+                     std::conditional_t<is_leaf_expression<tmp::remove_cr_t<T>>::value ||
                                           is_scalar<tmp::remove_cr_t<T>>::value,
                                         const T &,
                                         tmp::remove_cr_t<T>>>;
@@ -45,7 +45,7 @@ using wave_ref_sel_t =
  **/
 template <typename T>
 using jac_ref_sel_t =
-  tmp::conditional_t<std::is_lvalue_reference<T>{},
+  std::conditional_t<std::is_lvalue_reference<T>{},
                      typename Eigen::internal::ref_selector<tmp::remove_cr_t<T>>::type,
                      const tmp::remove_cr_t<T>>;
 
@@ -63,9 +63,9 @@ using jac_ref_sel_t =
  * an rvalue reference, to be used later by wave_ref_sel_t.
  */
 template <typename T>
-using arg_t = tmp::conditional_t<
+using arg_t = std::conditional_t<
   is_leaf_expression<tmp::remove_cr_t<T>>{},
-  tmp::conditional_t<std::is_reference<T>{}, tmp::remove_cr_t<T>, T &&>,
+  std::conditional_t<std::is_reference<T>{}, tmp::remove_cr_t<T>, T &&>,
   tmp::remove_cr_t<T>>;
 
 }  // namespace internal

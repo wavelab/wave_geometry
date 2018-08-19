@@ -54,7 +54,7 @@ struct Evaluator<Derived, enable_if_nullary_t<Derived>> {
 
 /** Specialization for scalar type */
 template <typename Derived>
-struct Evaluator<Derived, tmp::enable_if_t<is_scalar<Derived>{}>> {
+struct Evaluator<Derived, std::enable_if_t<is_scalar<Derived>{}>> {
     using EvalType = Derived;
     WAVE_STRONG_INLINE explicit Evaluator(const Derived &scalar) : expr{scalar} {}
     const EvalType &operator()() const {

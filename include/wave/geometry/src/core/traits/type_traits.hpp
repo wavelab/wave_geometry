@@ -187,11 +187,11 @@ struct leaf {};
 
 /** Get a tag type given an instance of a class template */
 template <typename T>
-using get_expr_tag_t = typename traits<tmp::decay_t<T>>::Tag;
+using get_expr_tag_t = typename traits<std::decay_t<T>>::Tag;
 
 /** Helper for template rebind */
 template <typename T, typename... Us>
-using rebind_t = typename traits<tmp::decay_t<T>>::template rebind<Us...>;
+using rebind_t = typename traits<std::decay_t<T>>::template rebind<Us...>;
 
 //
 // Convenience trait getters
@@ -389,7 +389,7 @@ struct has_unique_leaves_unary : unique_leaves_t<RhsDerived> {};
  */
 template <typename LhsDerived, typename RhsDerived>
 struct has_unique_leaves_binary
-  : tmp::conditional_t<unique_leaves_t<LhsDerived>::value &&
+  : std::conditional_t<unique_leaves_t<LhsDerived>::value &&
                          unique_leaves_t<RhsDerived>::value,
                        tmp::concat_if_unique<typename unique_leaves_t<LhsDerived>::type,
                                              typename unique_leaves_t<RhsDerived>::type>,

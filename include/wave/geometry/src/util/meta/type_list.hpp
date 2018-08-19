@@ -28,7 +28,7 @@ template <class B1>
 struct expanding_disjunction<B1> : B1 {};
 template <class B1, class... Bn>
 struct expanding_disjunction<B1, Bn...>
-  : conditional_t<bool(B1::value), B1, expanding_disjunction<Bn...>> {};
+  : std::conditional_t<bool(B1::value), B1, expanding_disjunction<Bn...>> {};
 
 
 /** Concatenate variadic type lists (of the same kind)
@@ -194,7 +194,7 @@ struct concat_if_unique;
 
 template <template <typename...> class List, typename... As, typename B0, typename... Bs>
 struct concat_if_unique<List<As...>, List<B0, Bs...>>
-  : tmp::conditional_t<find<List<As...>, B0>::value >= 0,
+  : std::conditional_t<find<List<As...>, B0>::value >= 0,
                        std::false_type,
                        concat_if_unique<List<As..., B0>, List<Bs...>>> {};
 

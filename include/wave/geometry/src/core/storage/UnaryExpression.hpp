@@ -20,14 +20,14 @@ struct UnaryExpressionBase {
     // Forward args to rhs (version for one argument)
     // Disable if copy ctor would apply - https://stackoverflow.com/a/39646176
     template <class Arg,
-              tmp::enable_if_t<!std::is_same<tmp::decay_t<Arg>, Derived>{} &&
+              std::enable_if_t<!std::is_same<std::decay_t<Arg>, Derived>{} &&
                                  std::is_constructible<RhsDerived, Arg &&>{},
                                int> = 0>
     explicit UnaryExpressionBase(Arg &&arg) : rhs_{std::forward<Arg>(arg)} {}
 
     // Forward args to rhs (version for 0 or more than 1 argument)
     template <class... Args,
-              tmp::enable_if_t<(sizeof...(Args) != 1) &&
+              std::enable_if_t<(sizeof...(Args) != 1) &&
                                  std::is_constructible<RhsStore, Args...>::value,
                                int> = 0>
     explicit UnaryExpressionBase(Args &&... args) : rhs_{std::forward<Args>(args)...} {}

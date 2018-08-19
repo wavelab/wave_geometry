@@ -11,40 +11,12 @@
 namespace wave {
 namespace tmp {
 
-// Convenience aliases standard in C++14 or 17
-template <bool B, class T, class F>
-using conditional_t = typename std::conditional<B, T, F>::type;
-
-template <class T>
-using result_of_t = typename std::result_of<T>::type;
-
-template <bool B, class T = void>
-using enable_if_t = typename std::enable_if<B, T>::type;
-
-template <class T>
-using remove_reference_t = typename std::remove_reference<T>::type;
-
-template <class T>
-using remove_const_t = typename std::remove_const<T>::type;
-
-template <class T>
-using decay_t = typename std::decay<T>::type;
-
+// Convenience aliases standard in C++17
 template <bool B>
 using bool_constant = std::integral_constant<bool, B>;
 
-
 template <typename...>
 using void_t = void;
-
-// Custom convenience templates
-/** Clean a type of const and reference qualifiers, if any */
-template <class T>
-using remove_cr_t = remove_const_t<remove_reference_t<T>>;
-
-/** Check if T and U are the same type ignoring const and reference */
-template <class T, class U>
-using is_same_cr = std::is_same<remove_cr_t<T>, remove_cr_t<U>>;
 
 /** Negate true_type or false_type */
 template <class B>
@@ -58,7 +30,8 @@ struct conjunction : std::true_type {};
 template <class B1>
 struct conjunction<B1> : B1 {};
 template <class B1, class... Bn>
-struct conjunction<B1, Bn...> : conditional_t<bool(B1::value), conjunction<Bn...>, B1> {};
+struct conjunction<B1, Bn...>
+  : std::conditional_t<bool(B1::value), conjunction<Bn...>, B1> {};
 
 /** Logical OR with short-circutiting, from C++17
  * (see http://en.cppreference.com/w/cpp/types/disjunction)
@@ -68,9 +41,19 @@ struct disjunction : std::false_type {};
 template <class B1>
 struct disjunction<B1> : B1 {};
 template <class B1, class... Bn>
-struct disjunction<B1, Bn...> : conditional_t<bool(B1::value), B1, disjunction<Bn...>> {};
+struct disjunction<B1, Bn...>
+  : std::conditional_t<bool(B1::value), B1, disjunction<Bn...>> {};
 
 // End of std:: backports. Custom metaprogramming helpers follow.
+
+/** Clean a type of const and reference qualifiers, if any */
+template <class T>
+using remove_cr_t = std::remove_const_t<std::remove_reference_t<T>>;
+
+/** Check if T and U are the same type ignoring const and reference */
+template <class T, class U>
+using is_same_cr = std::is_same<remove_cr_t<T>, remove_cr_t<U>>;
+
 
 /** Helper for is_base_of with CRTP-style inheritance */
 template <template <typename...> class Tmpl, typename Derived>
@@ -103,7 +86,7 @@ template <typename T, class Enable = void>
 struct is_complete : std::false_type {};
 
 template <typename T>
-struct is_complete<T, enable_if_t<(sizeof(T) > 0)>> : std::true_type {};
+struct is_complete<T, std::enable_if_t<(sizeof(T) > 0)>> : std::true_type {};
 
 /** Helps trigger static_assert if a template is instantiated.
  * See https://stackoverflow.com/q/14637356
@@ -149,7 +132,7 @@ template <typename Derived,
           template <typename> class Head,
           template <typename> class... Tail>
 struct matching_base_impl<Tmpl<Derived>, Head, Tail...> {
-    using type = conditional_t<
+    using type = std::conditional_t<
       std::is_base_of<Head<Derived>, Derived>::value,
       Head<Tmpl<Derived>>,                                       // if match, use this
       typename matching_base_impl<Tmpl<Derived>, Tail...>::type  // else, recurse
@@ -163,7 +146,7 @@ template <typename Lhs,
           template <typename> class Head,
           template <typename> class... Tail>
 struct matching_base_impl<Tmpl<Lhs, Rhs>, Head, Tail...> {
-    using type = conditional_t<
+    using type = std::conditional_t<
       std::is_base_of<Head<Lhs>, Lhs>::value && std::is_base_of<Head<Rhs>, Rhs>::value,
       Head<Tmpl<Lhs, Rhs>>,                                       // if match, use this
       typename matching_base_impl<Tmpl<Lhs, Rhs>, Tail...>::type  // else, recurse
