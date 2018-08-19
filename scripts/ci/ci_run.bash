@@ -10,7 +10,7 @@ compile_libwave() {
         -DCMAKE_CXX_FLAGS="-Werror $WAVE_CXX_FLAGS"     \
         -DCMAKE_BUILD_TYPE=Release                      \
         -DCMAKE_VERBOSE_MAKEFILE=ON
-    make -j2  # Travis gives two cores
+    make -j${WAVE_JOBS:=2}  # Travis gives two cores (can override with $WAVE_JOBS)
 
     # (don't rely on nproc: https://github.com/travis-ci/travis-ci/issues/6859)
 }

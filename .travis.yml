@@ -1,5 +1,7 @@
 dist: trusty
-sudo: false
+# Use sudo environment just because it currently has more memory, and there is less chance
+# of the expensive AddressSanitizer build running out.
+sudo: required
 
 language: cpp
 
@@ -9,7 +11,8 @@ branches:
   - develop
 
 cache:
-  ccache: true
+  # There is little benefit from ccache for testing a header-only library
+  ccache: false
 
 _common_packages: &common_packages
   - libboost1.54-dev
