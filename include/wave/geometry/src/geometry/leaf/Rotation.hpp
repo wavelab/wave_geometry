@@ -78,13 +78,6 @@ class MatrixRotation
         }
     }
 
-    /** Invert the given matrix expression during evaluation */
-    template <typename EvalDerived>
-    static auto evalInverse(const Eigen::MatrixBase<EvalDerived> &m)
-      -> decltype(m.transpose()) {
-        return m.transpose();
-    }
-
     /* Set from the exponential map of the given so(3) relative rotation */
     template <typename TangentDerived>
     MatrixRotation &setFromExpMap(const RelativeRotationBase<TangentDerived> &rel) {
@@ -140,13 +133,6 @@ class QuaternionRotation
         if (std::abs(q.squaredNorm() - 1) > tolerance) {
             throw InvalidValueError{"Quaternion is not normalized"};
         };
-    }
-
-    /** Invert the given matrix expression during evaluation */
-    template <typename EvalDerived>
-    static auto evalInverse(const Eigen::QuaternionBase<EvalDerived> &q)
-      -> decltype(q.conjugate()) {
-        return q.conjugate();
     }
 
     /* Set from the exponential map of the given so(3) relative rotation */
@@ -206,13 +192,6 @@ class AngleAxisRotation
         if (!std::isfinite(a.angle())) {
             throw InvalidValueError{"Angle is NaN or infinity"};
         }
-    }
-
-    /** Invert the given AngleAxis expression during evaluation */
-    template <typename EvalDerived>
-    static auto evalInverse(const Eigen::RotationBase<EvalDerived, 3> &a)
-      -> decltype(a.inverse()) {
-        return a.inverse();
     }
 
     /* Set from the exponential map of the given so(3) relative rotation */
