@@ -92,8 +92,7 @@ template <typename VecType,
                                    OtherType::ColsAtCompileTime == 1,
                                  int> = 0>
 EIGEN_DEVICE_FUNC inline auto operator*(const wave::CrossMatrix<VecType> &crossMat,
-                                        const Eigen::MatrixBase<OtherType> &rhs)
-  -> decltype(crossMat.vec.cross(rhs)) {
+                                        const Eigen::MatrixBase<OtherType> &rhs) {
     return crossMat.vec.cross(rhs);
 }
 
@@ -107,8 +106,7 @@ template <typename VecType,
                                    OtherType::RowsAtCompileTime == 1,
                                  int> = 0>
 EIGEN_DEVICE_FUNC inline auto operator*(const Eigen::MatrixBase<OtherType> &lhs,
-                                        const wave::CrossMatrix<VecType> &crossMat)
-  -> decltype(lhs.cross(crossMat.vec)) {
+                                        const wave::CrossMatrix<VecType> &crossMat) {
     return lhs.cross(crossMat.vec);
 }
 
@@ -126,8 +124,7 @@ template <typename VecType,
                                    OtherType::ColsAtCompileTime != 1,
                                  int> = 0>
 EIGEN_DEVICE_FUNC inline auto operator*(const wave::CrossMatrix<VecType> &crossMat,
-                                        const Eigen::MatrixBase<OtherType> &rhs)
-  -> decltype(rhs.colwise().cross(-crossMat.vec)) {
+                                        const Eigen::MatrixBase<OtherType> &rhs) {
     return rhs.colwise().cross(-crossMat.vec);
 }
 
@@ -149,8 +146,7 @@ EIGEN_DEVICE_FUNC inline auto operator*(
   const wave::CrossMatrix<Eigen::CwiseUnaryOp<
     Eigen::internal::scalar_opposite_op<typename internal::traits<VecType>::Scalar>,
     VecType>> &crossMat,
-  const Eigen::MatrixBase<OtherType> &rhs)
-  -> decltype(rhs.derived().colwise().cross(crossMat.vec.nestedExpression())) {
+  const Eigen::MatrixBase<OtherType> &rhs) {
     return rhs.derived().colwise().cross(crossMat.vec.nestedExpression());
 }
 
@@ -167,8 +163,7 @@ template <typename OtherType,
           typename VecType,
           wave::tmp::enable_if_t<OtherType::ColsAtCompileTime == 3, int> = 0>
 EIGEN_DEVICE_FUNC inline auto operator*(const Eigen::MatrixBase<OtherType> &lhs,
-                                        const wave::CrossMatrix<VecType> &crossMat)
-  -> decltype(lhs.rowwise().cross(crossMat.vec)) {
+                                        const wave::CrossMatrix<VecType> &crossMat) {
     return lhs.rowwise().cross(crossMat.vec);
 }
 
@@ -178,8 +173,7 @@ EIGEN_DEVICE_FUNC inline auto operator*(const Eigen::MatrixBase<OtherType> &lhs,
  */
 template <typename Lhs, typename Rhs>
 EIGEN_DEVICE_FUNC inline auto operator*(const wave::CrossMatrix<Lhs> &lhs,
-                                        const wave::CrossMatrix<Rhs> &rhs)
-  -> decltype(lhs.rowwise().cross(rhs.vec)) {
+                                        const wave::CrossMatrix<Rhs> &rhs) {
     return lhs.rowwise().cross(rhs.vec);
 }
 

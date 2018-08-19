@@ -76,8 +76,7 @@ auto prepareLeafForOutput(EvalLeaf &&leaf) -> output_t<Derived, EvalLeaf> {
  * (e.g. wraps in Framed<...>)
  */
 template <typename Derived>
-auto prepareOutput(const Evaluator<Derived> &evaluator)
-  -> decltype(prepareLeafForOutput<Derived>(evaluator())) {
+decltype(auto) prepareOutput(const Evaluator<Derived> &evaluator) {
     return prepareLeafForOutput<Derived>(evaluator());
 };
 

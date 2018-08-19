@@ -215,8 +215,7 @@ struct traits<Framed<WrappedLeaf, LeftFrame_, MiddleFrame_, RightFrame_>>
 
 // If someone asks to convert to Framed<Leaf, ...>, evaluate Convert<Leaf, Rhs> instead
 template <typename Leaf, typename... Frames, typename Rhs>
-auto evalImpl(expr<Convert, Framed<Leaf, Frames...>>, const Rhs &rhs)
-  -> decltype(evalImpl(expr<Convert, Leaf>{}, rhs)) {
+decltype(auto) evalImpl(expr<Convert, Framed<Leaf, Frames...>>, const Rhs &rhs) {
     return evalImpl(expr<Convert, Leaf>{}, rhs);
 };
 

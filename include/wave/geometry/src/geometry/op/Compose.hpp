@@ -58,7 +58,7 @@ template <typename Val, typename Lhs, typename Rhs>
 auto leftJacobianImpl(expr<Compose>,
                       const Val &,
                       const TransformBase<Lhs> &,
-                      const TransformBase<Rhs> &) -> identity_t<Val> {
+                      const TransformBase<Rhs> &) {
     return identity_t<Val>{};
 }
 
@@ -73,23 +73,19 @@ auto evalImpl(expr<ComposeFlipped>,
 
 /** Evaluates Jacobian of ComposeFlipped in terms of Compose */
 template <typename Val, typename Lhs, typename Rhs>
-auto rightJacobianImpl(expr<ComposeFlipped>,
-                       const Val &val,
-                       const TransformBase<Lhs> &lhs,
-                       const TransformBase<Rhs> &rhs)
-  -> decltype(
-    leftJacobianImpl(expr<Compose>{}, val.derived(), rhs.derived(), lhs.derived())) {
+decltype(auto) rightJacobianImpl(expr<ComposeFlipped>,
+                                 const Val &val,
+                                 const TransformBase<Lhs> &lhs,
+                                 const TransformBase<Rhs> &rhs) {
     return leftJacobianImpl(expr<Compose>{}, val.derived(), rhs.derived(), lhs.derived());
 }
 
 /** Evaluates Jacobian of ComposeFlipped in terms of Compose */
 template <typename Val, typename Lhs, typename Rhs>
-auto leftJacobianImpl(expr<ComposeFlipped>,
-                      const Val &val,
-                      const TransformBase<Lhs> &lhs,
-                      const TransformBase<Rhs> &rhs)
-  -> decltype(
-    rightJacobianImpl(expr<Compose>{}, val.derived(), rhs.derived(), lhs.derived())) {
+decltype(auto) leftJacobianImpl(expr<ComposeFlipped>,
+                                const Val &val,
+                                const TransformBase<Lhs> &lhs,
+                                const TransformBase<Rhs> &rhs) {
     return rightJacobianImpl(
       expr<Compose>{}, val.derived(), rhs.derived(), lhs.derived());
 }

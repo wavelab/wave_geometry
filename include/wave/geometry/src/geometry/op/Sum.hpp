@@ -59,15 +59,13 @@ struct traits<Sum<Lhs, Rhs>,
 
 /** Jacobian implementation for all sums */
 template <typename Res, typename Lhs, typename Rhs>
-auto leftJacobianImpl(expr<Sum>, const Res &, const Lhs &, const Rhs &)
-  -> identity_t<Res> {
+auto leftJacobianImpl(expr<Sum>, const Res &, const Lhs &, const Rhs &) {
     return identity_t<Res>{};
 };
 
 /** Jacobian implementation for all sums */
 template <typename Res, typename Lhs, typename Rhs>
-auto rightJacobianImpl(expr<Sum>, const Res &, const Lhs &, const Rhs &)
-  -> identity_t<Res> {
+auto rightJacobianImpl(expr<Sum>, const Res &, const Lhs &, const Rhs &) {
     return identity_t<Res>{};
 };
 

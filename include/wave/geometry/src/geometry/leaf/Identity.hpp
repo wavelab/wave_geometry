@@ -17,7 +17,7 @@ class Identity : public internal::base_tmpl_t<Leaf, Identity<Leaf>> {
 
  public:
     /** Returns an identity translation expression */
-    auto translation() const -> Zero<Translation<Eigen::Matrix<Scalar, 3, 1>>> {
+    auto translation() const {
         return Zero<Translation<Eigen::Matrix<Scalar, 3, 1>>>{};
     }
 
@@ -26,12 +26,12 @@ class Identity : public internal::base_tmpl_t<Leaf, Identity<Leaf>> {
      * @returns an identity quaternion expression arbitrarily. @todo could return another
      * type based on our Leaf, but Identity<Quaternion> is easily converted to others.
      */
-    auto rotation() const -> Identity<QuaternionRotation<Eigen::Quaternion<Scalar>>> {
+    auto rotation() const {
         return Identity<QuaternionRotation<Eigen::Quaternion<Scalar>>>{};
     }
 
     // Satisfy the Leaf Expression concept
-    auto value() const -> typename internal::eval_traits<Leaf>::ImplType {
+    auto value() const {
         return eval(this->derived()).value();
     }
 };
@@ -65,43 +65,45 @@ auto evalImpl(expr<Identity>, const Identity<Leaf> &) -> Identity<eval_t<Leaf>> 
 }
 
 template <typename Rhs>
-auto evalImpl(expr<Inverse>, const Identity<Rhs> &rhs) -> const Identity<Rhs> & {
+decltype(auto) evalImpl(expr<Inverse>, const Identity<Rhs> &rhs) {
     return rhs;
 };
 
 template <typename Lhs, typename Rhs>
-auto evalImpl(expr<Compose>, const TransformBase<Lhs> &lhs, const Identity<Rhs> &)
-  -> const Lhs & {
+decltype(auto) evalImpl(expr<Compose>,
+                        const TransformBase<Lhs> &lhs,
+                        const Identity<Rhs> &) {
     return lhs.derived();
 };
 
 template <typename Lhs, typename Rhs>
-auto evalImpl(expr<Compose>, const Identity<Lhs> &, const TransformBase<Rhs> &rhs)
-  -> const Rhs & {
+decltype(auto) evalImpl(expr<Compose>,
+                        const Identity<Lhs> &,
+                        const TransformBase<Rhs> &rhs) {
     return rhs.derived();
 };
 
 template <typename Lhs, typename Rhs>
-auto evalImpl(expr<Compose>, const Identity<Lhs> &lhs, const Identity<Rhs> &)
-  -> const Identity<Lhs> & {
+decltype(auto) evalImpl(expr<Compose>, const Identity<Lhs> &lhs, const Identity<Rhs> &) {
     return lhs;
 };
 
 template <typename Lhs, typename Rhs>
-auto evalImpl(expr<Rotate>, const Identity<Lhs> &, const TranslationBase<Rhs> &rhs)
-  -> const Rhs & {
+decltype(auto) evalImpl(expr<Rotate>,
+                        const Identity<Lhs> &,
+                        const TranslationBase<Rhs> &rhs) {
     return rhs.derived();
 };
 
 template <typename Lhs, typename Rhs>
-auto evalImpl(expr<Transform>, const Identity<Lhs> &, const TranslationBase<Rhs> &rhs)
-  -> const Rhs & {
+decltype(auto) evalImpl(expr<Transform>,
+                        const Identity<Lhs> &,
+                        const TranslationBase<Rhs> &rhs) {
     return rhs.derived();
 };
 
 template <typename Rhs>
-auto evalImpl(expr<LogMap>, const Identity<Rhs> &)
-  -> Zero<typename traits<Rhs>::TangentType> {
+auto evalImpl(expr<LogMap>, const Identity<Rhs> &) {
     return Zero<typename traits<Rhs>::TangentType>{};
 };
 

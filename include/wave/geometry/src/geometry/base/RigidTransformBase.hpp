@@ -59,7 +59,7 @@ struct rt_leaf_traits_base<Tmpl<ImplType_>> : leaf_traits_base<Tmpl<ImplType_>>,
  * random coefficients from -1 to 1
  */
 template <typename Leaf, TICK_REQUIRES(internal::is_rt_leaf<Leaf>{})>
-auto evalImpl(expr<Random, Leaf>) -> Leaf {
+auto evalImpl(expr<Random, Leaf>) {
     using Scalar = internal::scalar_t<Leaf>;
     return Leaf{randomQuaternion<Scalar>(), Eigen::Matrix<Scalar, 3, 1>::Random()};
 }
@@ -67,7 +67,7 @@ auto evalImpl(expr<Random, Leaf>) -> Leaf {
 /** Implementation of Inverse for any rigid transform
  */
 template <typename Rhs>
-auto evalImpl(expr<Inverse>, const RigidTransformBase<Rhs> &rhs) -> plain_eval_t<Rhs> {
+auto evalImpl(expr<Inverse>, const RigidTransformBase<Rhs> &rhs) {
     return plain_eval_t<Rhs>{
       inverse(rhs.derived().rotation()),
       -(inverse(rhs.derived().rotation()) * rhs.derived().translation())};
@@ -206,41 +206,30 @@ struct FramedLeafAccess<Framed<Leaf, LeftFrame, RightFrame>,
  public:
     /** Returns a mutable expression referring to the translation portion of this
     * transform */
-    auto rotation() &
-      noexcept ->
-      typename internal::add_frames<LeftFrame, RightFrame>::template to<RotationType> {
+    decltype(auto) rotation() & {
         return internal::WrapWithFrames<LeftFrame, RightFrame>{}(this->leaf().rotation());
     }
 
     /** Returns a mutable expression referring to the translation portion of this
     * transform */
-    auto rotation() &&
-      noexcept ->
-      typename internal::add_frames<LeftFrame, RightFrame>::template to<RotationType> {
+    decltype(auto) rotation() && noexcept {
         return internal::WrapWithFrames<LeftFrame, RightFrame>{}(this->leaf().rotation());
     }
 
     /** Returns an expression referring to the rotation portion of this transform */
-    auto rotation() const &
-      noexcept ->
-      typename internal::add_frames<LeftFrame,
-                                    RightFrame>::template to<ConstRotationType> {
+    decltype(auto) rotation() const &noexcept {
         return internal::WrapWithFrames<LeftFrame, RightFrame>{}(this->leaf().rotation());
     }
 
     /** Returns a mutable expression referring to the translation portion of this
      * transform */
-    auto translation() noexcept ->
-      typename internal::add_frames<LeftFrame, LeftFrame, RightFrame>::template to<
-        TranslationType> {
+    decltype(auto) translation() noexcept {
         return internal::WrapWithFrames<LeftFrame, LeftFrame, RightFrame>{}(
           this->leaf().translation());
     }
 
     /** Returns an expression referring to the translation portion of this transform */
-    auto translation() const noexcept ->
-      typename internal::add_frames<LeftFrame, LeftFrame, RightFrame>::template to<
-        ConstTranslationType> {
+    decltype(auto) translation() const noexcept {
         return internal::WrapWithFrames<LeftFrame, LeftFrame, RightFrame>{}(
           this->leaf().translation());
     }

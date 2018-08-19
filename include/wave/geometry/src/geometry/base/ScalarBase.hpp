@@ -95,8 +95,7 @@ auto wrapInputScalar(const T &&arg) -> Scalar<T> {
  * Defer to the implementation type's arithmetic operators.
  */
 template <typename Lhs, typename Rhs>
-auto evalImpl(expr<Product>, const ScalarBase<Lhs> &lhs, const ScalarBase<Rhs> &rhs)
-  -> decltype(makeScalarResult(lhs.derived().value() * rhs.derived().value())) {
+auto evalImpl(expr<Product>, const ScalarBase<Lhs> &lhs, const ScalarBase<Rhs> &rhs) {
     return makeScalarResult(lhs.derived().value() * rhs.derived().value());
 }
 
@@ -123,8 +122,7 @@ auto rightJacobianImpl(expr<Product>,
  * Defer to the implementation type's arithmetic operators.
  */
 template <typename Lhs, typename Rhs>
-auto evalImpl(expr<Divide>, const ScalarBase<Lhs> &lhs, const ScalarBase<Rhs> &rhs)
-  -> decltype(makeScalarResult(lhs.derived().value() / rhs.derived().value())) {
+auto evalImpl(expr<Divide>, const ScalarBase<Lhs> &lhs, const ScalarBase<Rhs> &rhs) {
     return makeScalarResult(lhs.derived().value() / rhs.derived().value());
 }
 

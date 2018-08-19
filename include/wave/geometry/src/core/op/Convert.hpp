@@ -28,7 +28,7 @@ struct traits<Convert<ToDerived, FromDerived>>
 
 /** Jacobian implementation for all Convert */
 template <typename To, typename Res, typename From>
-auto jacobianImpl(expr<Convert, To>, const Res &, const From &) -> identity_t<Res> {
+auto jacobianImpl(expr<Convert, To>, const Res &, const From &) {
     return identity_t<Res>{};
 };
 

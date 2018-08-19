@@ -60,8 +60,7 @@ struct traits<AngleAxisRotation<ImplType>>
 
 /** Implements inverse of an angle-axis rotation */
 template <typename Rhs>
-auto evalImpl(expr<Inverse>, const AngleAxisRotation<Rhs> &a)
-  -> decltype(makeLeaf<AngleAxisRotation>(a.value().inverse())) {
+auto evalImpl(expr<Inverse>, const AngleAxisRotation<Rhs> &a) {
     // Use Eigen's implementation
     return makeLeaf<AngleAxisRotation>(a.value().inverse());
 }
@@ -88,7 +87,7 @@ auto jacobianImpl(expr<Inverse>,
  */
 template <typename ToImpl, typename FromImpl>
 auto evalImpl(expr<Convert, AngleAxisRotation<ToImpl>>,
-              const AngleAxisRotation<FromImpl> &rhs) -> AngleAxisRotation<ToImpl> {
+              const AngleAxisRotation<FromImpl> &rhs) {
     return AngleAxisRotation<ToImpl>{rhs.value()};
 }
 
@@ -96,7 +95,7 @@ auto evalImpl(expr<Convert, AngleAxisRotation<ToImpl>>,
  */
 template <typename ToImpl, typename FromImpl>
 auto evalImpl(expr<Convert, MatrixRotation<ToImpl>>,
-              const AngleAxisRotation<FromImpl> &rhs) -> MatrixRotation<ToImpl> {
+              const AngleAxisRotation<FromImpl> &rhs) {
     // Use Eigen's implementation
     return MatrixRotation<ToImpl>{rhs.value().toRotationMatrix()};
 }
@@ -105,7 +104,7 @@ auto evalImpl(expr<Convert, MatrixRotation<ToImpl>>,
  */
 template <typename ToImpl, typename FromImpl>
 auto evalImpl(expr<Convert, AngleAxisRotation<ToImpl>>,
-              const MatrixRotation<FromImpl> &rhs) -> AngleAxisRotation<ToImpl> {
+              const MatrixRotation<FromImpl> &rhs) {
     // Use Eigen's implementation
     return AngleAxisRotation<ToImpl>{rhs.value()};
 }
@@ -114,7 +113,7 @@ auto evalImpl(expr<Convert, AngleAxisRotation<ToImpl>>,
  */
 template <typename ToImpl, typename FromImpl>
 auto evalImpl(expr<Convert, QuaternionRotation<ToImpl>>,
-              const AngleAxisRotation<FromImpl> &rhs) -> QuaternionRotation<ToImpl> {
+              const AngleAxisRotation<FromImpl> &rhs) {
     // Use Eigen's implementation
     return QuaternionRotation<ToImpl>{rhs.value().toRotationMatrix()};
 }
@@ -123,7 +122,7 @@ auto evalImpl(expr<Convert, QuaternionRotation<ToImpl>>,
  */
 template <typename ToImpl, typename FromImpl>
 auto evalImpl(expr<Convert, AngleAxisRotation<ToImpl>>,
-              const QuaternionRotation<FromImpl> &rhs) -> AngleAxisRotation<ToImpl> {
+              const QuaternionRotation<FromImpl> &rhs) {
     // Use Eigen's implementation
     return AngleAxisRotation<ToImpl>{rhs.value()};
 }

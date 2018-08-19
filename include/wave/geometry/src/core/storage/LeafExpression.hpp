@@ -78,7 +78,7 @@ struct LeafExpression {
 namespace internal {
 /** Helper to construct a templated leaf expression given the same template */
 template <template <typename> class LeafTmpl, typename ImplType>
-auto makeLeaf(ImplType &&arg) -> LeafTmpl<tmp::remove_cr_t<ImplType>> {
+auto makeLeaf(ImplType &&arg) {
     return LeafTmpl<tmp::remove_cr_t<ImplType>>{std::forward<ImplType>(arg)};
 }
 }  // namespace internal

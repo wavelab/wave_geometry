@@ -92,8 +92,7 @@ struct traits<RelativeRotation<ImplType>>
 
 /** Implements exp map of a relative rotation into a rotation matrix */
 template <typename ImplType>
-auto evalImpl(expr<ExpMap>, const RelativeRotation<ImplType> &rhs) ->
-  typename traits<RelativeRotation<ImplType>>::ExpType {
+auto evalImpl(expr<ExpMap>, const RelativeRotation<ImplType> &rhs) {
     using ExpType = typename traits<RelativeRotation<ImplType>>::ExpType;
     using Scalar = typename ImplType::Scalar;
     using Mat3 = Eigen::Matrix<Scalar, 3, 3>;
