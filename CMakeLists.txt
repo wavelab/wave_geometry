@@ -5,7 +5,7 @@ PROJECT(wave_geometry)
 SET(CMAKE_CXX_STANDARD 11)
 
 # Package version, used when other projects FIND_PACKAGE(wave <version>)
-SET(WAVE_GEOMETRY_PACKAGE_VERSION 0.2.0)
+SET(WAVE_GEOMETRY_PACKAGE_VERSION 0.3.0)
 
 INCLUDE(cmake/WaveGeometryHelpers.cmake)
 

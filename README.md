@@ -189,7 +189,7 @@ In your C++ file, write:
 ### Development status
 
 `wave_geometry` is in the initial development stage and the API may change at any time.
-
+See [CHANGELOG.md](CHANGELOG.md) for recent changes.
 
 ## More information
 The library is described in a conference paper:
