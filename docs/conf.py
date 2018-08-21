@@ -114,6 +114,12 @@ html_context = {
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'wave_geometrydoc'
 
+# Don't include links to sources
+html_show_sourcelink = False
+
+# Hide Sphinx and theme links in footer
+html_show_sphinx = False
+
 # -- Options for LaTeX output ------------------------------------------------
 
 latex_elements = {
