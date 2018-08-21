@@ -159,7 +159,7 @@ make the build directory findable by other CMake projects without installation.
 
 ## How to use in your CMake project
 
-Once libwave has been either installed or exported by CMake, it can be used in
+Once wave_geometry has been either installed or exported by CMake, it can be used in
 your project's `CMakeLists.txt` file as follows:
 
 ```cmake

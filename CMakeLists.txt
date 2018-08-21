@@ -29,6 +29,7 @@ ELSE(TARGET wave)
   OPTION(BUILD_BENCHMARKS
       "Build benchmarks for some components. Requires google benchmark package."
       OFF)
+  OPTION(BUILD_DOCS "Build Doxygen documentation" OFF)
 
   # Optionally build tests. `gtest` is included with this project
   IF(BUILD_TESTING)
@@ -73,6 +74,11 @@ ENDIF(BUILD_TESTING)
 IF(BUILD_BENCHMARKS)
   ADD_SUBDIRECTORY(benchmarks)
 ENDIF(BUILD_BENCHMARKS)
+
+IF(BUILD_DOCS)
+  FIND_PACKAGE(Sphinx REQUIRED)
+  ADD_SUBDIRECTORY(docs)
+ENDIF(BUILD_DOCS)
 
 IF(TARGET wave)
   WAVE_ADD_MODULE(wave_geometry DEPENDS Eigen3::Eigen Boost::boost)
