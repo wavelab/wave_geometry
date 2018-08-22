@@ -56,12 +56,13 @@ jobs:
             - *common_packages
             - g++-7
             - binutils
-    - name: "Docs"
+    - stage: deploy
+      name: "Docs"
       language: python
       python: "3.6"
       env: DOCS_BUILD_DIR=build_docs
       install:
-      - pip install sphinx sphinx_rtd_theme recommonmark sphinx-markdown-tables git+git://github.com/leokoppel/sphinxcontrib-versioning
+        - pip install sphinx sphinx_rtd_theme recommonmark sphinx-markdown-tables git+git://github.com/leokoppel/sphinxcontrib-versioning
       script:
         - ./scripts/ci/ci_make_docs.bash
       deploy:
@@ -70,7 +71,7 @@ jobs:
         github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
         local-dir: $DOCS_BUILD_DIR
         on:
-          branch: develop
+          branch: master
 
 before_script:
   - export CXX=$WAVE_CXX CC=$WAVE_CC  # override travis with what we set in matrix
