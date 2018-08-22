@@ -1,8 +1,5 @@
 dist: trusty
-# Use sudo environment just because it currently has more memory, and there is less chance
-# of the expensive AddressSanitizer build running out.
-sudo: required
-
+sudo: false
 language: cpp
 
 branches:
@@ -22,7 +19,7 @@ _common_packages: &common_packages
 
 jobs:
   include:
-    - stage: test
+    - name: "GCC 5"
       env: WAVE_CXX=g++-5 WAVE_CC=gcc-5
       addons:
         apt:
@@ -32,7 +29,7 @@ jobs:
           packages:
             - *common_packages
             - g++-5
-    - stage: test
+    - name: "Clang 4"
       env: WAVE_CXX=clang++-4.0 WAVE_CC=clang-4.0
       addons:
         apt:
@@ -42,7 +39,10 @@ jobs:
           packages:
             - *common_packages
             - clang-4.0
-    - stage: test
+    - name: "GCC 7 AddressSanitizer"
+      # Use sudo environment just because it has more memory, and there is less
+      # chance of the expensive AddressSanitizer build running out.
+      sudo: required
       env: WAVE_CXX=g++-7 WAVE_CC=gcc-7 \
         ASAN_OPTIONS=detect_leaks=0:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1 \
         WAVE_CXX_FLAGS="-fsanitize=address -fsanitize-address-use-after-scope -O1 -DNDEBUG -fno-omit-frame-pointer -ftrack-macro-expansion=0 -fuse-ld=gold -Wno-misleading-indentation" \
@@ -56,14 +56,28 @@ jobs:
             - *common_packages
             - g++-7
             - binutils
-
+    - name: "Docs"
+      language: python
+      python: "3.6"
+      env: DOCS_BUILD_DIR=build_docs
+      install:
+      - pip install sphinx sphinx_rtd_theme recommonmark sphinx-markdown-tables git+git://github.com/leokoppel/sphinxcontrib-versioning
+      script:
+        - ./scripts/ci/ci_make_docs.bash
+      deploy:
+        provider: pages
+        skip-cleanup: true
+        github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
+        local-dir: $DOCS_BUILD_DIR
+        on:
+          branch: develop
 
 before_script:
   - export CXX=$WAVE_CXX CC=$WAVE_CC  # override travis with what we set in matrix
 
 script:
-  - bash scripts/ci/ci_check.bash
-  - bash scripts/ci/ci_run.bash
+- ./scripts/ci/ci_check.bash
+- ./scripts/ci/ci_run.bash
 
 notifications:
   email: false
