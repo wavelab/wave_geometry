@@ -1,7 +1,7 @@
 # Build docs with Sphinx
 
 # Sphinx cache with pickled ReST documents
-set(SPHINX_CACHE_DIR "${CMAKE_CURRENT_BINARY_DIR}/_doctrees")
+SET(SPHINX_CACHE_DIR "${CMAKE_CURRENT_BINARY_DIR}/_doctrees")
 
 # HTML output directory
 SET(SPHINX_HTML_DIR "${CMAKE_CURRENT_BINARY_DIR}/html")

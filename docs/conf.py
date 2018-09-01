@@ -26,10 +26,10 @@ project = 'wave_geometry'
 copyright = '2018, Leonid Koppel (Waterloo Autonomous Vehicles Laboratory)'
 author = 'Leo Koppel'
 
-# The short X.Y version
-version = '0.3.0'
+# The short X.Y version (displayed in sidebar)
+version = '0.4.0'
 # The full version, including alpha/beta/rc tags
-release = '0.3.0'
+release = '0.4.0-dev'
 
 
 # -- General configuration ---------------------------------------------------
