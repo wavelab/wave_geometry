@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+### New features
+- New documentation built with Sphinx
+
+### Backward-incompatible API changes
+- C++14 is now required
+
 ## [0.3.0](https://github.com/wavelab/wave_geometry/compare/0.2.0...0.3.0) (2018-08-19)
 ### New features
 - Scalar multiplication (scalar\*vector, vector\*scalar, and vector\/scalar)
