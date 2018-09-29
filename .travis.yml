@@ -1,5 +1,7 @@
 dist: trusty
-sudo: false
+# Use sudo environment just because it currently has more memory, and there is less chance
+# of the expensive AddressSanitizer build running out.
+sudo: required
 language: cpp
 
 branches:
@@ -34,15 +36,14 @@ jobs:
       addons:
         apt:
           sources:
+            - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-4.0
             - sourceline: 'ppa:lkoppel/robotics'
           packages:
             - *common_packages
+            - g++-5
             - clang-4.0
     - name: "GCC 7 AddressSanitizer"
-      # Use sudo environment just because it has more memory, and there is less
-      # chance of the expensive AddressSanitizer build running out.
-      sudo: required
       env: WAVE_CXX=g++-7 WAVE_CC=gcc-7 \
         ASAN_OPTIONS=detect_leaks=0:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1 \
         WAVE_CXX_FLAGS="-fsanitize=address -fsanitize-address-use-after-scope -O1 -DNDEBUG -fno-omit-frame-pointer -ftrack-macro-expansion=0 -fuse-ld=gold -Wno-misleading-indentation" \
