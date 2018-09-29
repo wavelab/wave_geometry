@@ -9,8 +9,7 @@ namespace wave {
 namespace internal {
 
 template <typename T>
-auto tangentValueAsVector(const ExpressionBase<T> &t)
-  -> Eigen::Matrix<scalar_t<T>, traits<T>::Size, 1> {
+auto tangentValueAsVector(const ExpressionBase<T> &t) {
     return Eigen::Matrix<scalar_t<T>, traits<T>::Size, 1>{t.derived().value()};
 }
 
@@ -19,7 +18,7 @@ auto tangentValueAsVector(const ExpressionBase<T> &t)
 template <typename TangentType,
           typename Vector,
           TICK_REQUIRES(wave::internal::traits<TangentType>::Size != 1)>
-auto makeTangent(const Vector &v) -> TangentType {
+auto makeTangent(const Vector &v) {
     return TangentType{v};
 }
 
@@ -28,7 +27,7 @@ auto makeTangent(const Vector &v) -> TangentType {
 template <typename TangentType,
           typename Vector,
           TICK_REQUIRES(wave::internal::traits<TangentType>::Size == 1)>
-auto makeTangent(const Vector &v) -> TangentType {
+auto makeTangent(const Vector &v) {
     return TangentType{v[0]};
 }
 

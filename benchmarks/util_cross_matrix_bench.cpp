@@ -21,16 +21,14 @@ Eigen::Matrix<typename Derived::Scalar, 3, 3> manualCrossMatrix(
 // Functors which call both functions under test, for use with templated benchmarks
 struct ManualCross {
     template <typename Derived>
-    static auto call(const Eigen::MatrixBase<Derived> &v)
-      -> decltype(manualCrossMatrix(v)) {
+    static auto call(const Eigen::MatrixBase<Derived> &v) {
         return manualCrossMatrix(v);
     }
 };
 
 struct WaveCross {
     template <typename Derived>
-    static auto call(const Eigen::MatrixBase<Derived> &v)
-      -> decltype(wave::crossMatrix(v)) {
+    static auto call(const Eigen::MatrixBase<Derived> &v) {
         return wave::crossMatrix(v);
     }
 };

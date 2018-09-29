@@ -66,35 +66,33 @@ auto evalImpl(expr<Convert, Leaf>, const Zero<Leaf> &) -> Leaf {
 }
 
 template <typename Lhs, typename Rhs>
-auto evalImpl(expr<Sum>, const VectorBase<Lhs> &lhs, const Zero<Rhs> &) -> const Lhs & {
+decltype(auto) evalImpl(expr<Sum>, const VectorBase<Lhs> &lhs, const Zero<Rhs> &) {
     return lhs.derived();
 }
 
 template <typename Lhs, typename Rhs>
-auto evalImpl(expr<Sum>, const Zero<Lhs> &, const VectorBase<Rhs> &rhs) -> const Rhs & {
+decltype(auto) evalImpl(expr<Sum>, const Zero<Lhs> &, const VectorBase<Rhs> &rhs) {
     return rhs.derived();
 }
 
 template <typename Lhs, typename Rhs>
-auto evalImpl(expr<Sum>, const Zero<Lhs> &lhs, const Zero<Rhs> &) -> const Zero<Lhs> & {
+decltype(auto) evalImpl(expr<Sum>, const Zero<Lhs> &lhs, const Zero<Rhs> &) {
     return lhs;
 }
 
 template <typename Rhs>
-auto evalImpl(expr<Minus>, const Zero<Rhs> &rhs) -> const Zero<Rhs> & {
+decltype(auto) evalImpl(expr<Minus>, const Zero<Rhs> &rhs) {
     return rhs;
 }
 
 template <typename Rhs>
-auto evalImpl(expr<ExpMap>, const Zero<Rhs> &)
-  -> Identity<typename traits<Rhs>::ExpType> {
+auto evalImpl(expr<ExpMap>, const Zero<Rhs> &) {
     return Identity<typename traits<Rhs>::ExpType>{};
 }
 
 /** Jacobian of exp map of a zero element */
 template <typename Val, typename Rhs>
-auto jacobianImpl(expr<ExpMap>, const TransformBase<Val> &, const Zero<Rhs> &)
-  -> identity_t<Rhs> {
+auto jacobianImpl(expr<ExpMap>, const TransformBase<Val> &, const Zero<Rhs> &) {
     return identity_t<Rhs>{};
 }
 

@@ -117,7 +117,7 @@ struct traits<MatrixRigidTransform<ImplType>>
  *
  * @todo split up to matrix and compact RT */
 template <typename Leaf, TICK_REQUIRES(tmp::is_crtp_base_of<RigidTransformBase, Leaf>{})>
-auto evalImpl(expr<Convert, Leaf>, const Identity<Leaf> &) -> Leaf {
+auto evalImpl(expr<Convert, Leaf>, const Identity<Leaf> &) {
     using Scalar = internal::scalar_t<Leaf>;
     return Leaf{Eigen::Quaternion<Scalar>::Identity(),
                 Eigen::Matrix<Scalar, 3, 1>::Zero()};
@@ -130,7 +130,7 @@ auto evalImpl(expr<Convert, Leaf>, const Identity<Leaf> &) -> Leaf {
  */
 template <typename ToImpl, typename FromImpl>
 auto evalImpl(expr<Convert, MatrixRigidTransform<ToImpl>>,
-              const MatrixRigidTransform<FromImpl> &rhs) -> MatrixRigidTransform<ToImpl> {
+              const MatrixRigidTransform<FromImpl> &rhs) {
     return MatrixRigidTransform<ToImpl>{rhs.value()};
 }
 

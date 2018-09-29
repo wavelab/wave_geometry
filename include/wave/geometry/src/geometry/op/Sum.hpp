@@ -33,7 +33,7 @@ namespace internal {
 // Traits for sum of the form AB + BC
 template <typename Lhs, typename Rhs>
 struct traits<Sum<Lhs, Rhs>,
-              tmp::enable_if_t<std::is_same<RightFrameOf<Lhs>, MiddleFrameOf<Rhs>>{}>>
+              std::enable_if_t<std::is_same<RightFrameOf<Lhs>, MiddleFrameOf<Rhs>>{}>>
   : binary_traits_base<Sum<Lhs, Rhs>> {
     using OutputFunctor =
       WrapWithFrames<LeftFrameOf<Lhs>, MiddleFrameOf<Lhs>, RightFrameOf<Rhs>>;
@@ -42,7 +42,7 @@ struct traits<Sum<Lhs, Rhs>,
 // Traits for sum with reversed operands BC + AB
 template <typename Lhs, typename Rhs>
 struct traits<Sum<Lhs, Rhs>,
-              tmp::enable_if_t<!std::is_same<RightFrameOf<Lhs>, MiddleFrameOf<Rhs>>{} &&
+              std::enable_if_t<!std::is_same<RightFrameOf<Lhs>, MiddleFrameOf<Rhs>>{} &&
                                std::is_same<RightFrameOf<Rhs>, MiddleFrameOf<Lhs>>{}>>
   : binary_traits_base<Sum<Lhs, Rhs>> {
     using OutputFunctor =
@@ -53,21 +53,19 @@ struct traits<Sum<Lhs, Rhs>,
 // We need this defined so we can at least instantiate the class and fail a static_assert
 template <typename Lhs, typename Rhs>
 struct traits<Sum<Lhs, Rhs>,
-              tmp::enable_if_t<!std::is_same<RightFrameOf<Lhs>, MiddleFrameOf<Rhs>>{} &&
+              std::enable_if_t<!std::is_same<RightFrameOf<Lhs>, MiddleFrameOf<Rhs>>{} &&
                                !std::is_same<RightFrameOf<Rhs>, MiddleFrameOf<Lhs>>{}>>
   : binary_traits_base<Sum<Lhs, Rhs>> {};
 
 /** Jacobian implementation for all sums */
 template <typename Res, typename Lhs, typename Rhs>
-auto leftJacobianImpl(expr<Sum>, const Res &, const Lhs &, const Rhs &)
-  -> identity_t<Res> {
+auto leftJacobianImpl(expr<Sum>, const Res &, const Lhs &, const Rhs &) {
     return identity_t<Res>{};
 };
 
 /** Jacobian implementation for all sums */
 template <typename Res, typename Lhs, typename Rhs>
-auto rightJacobianImpl(expr<Sum>, const Res &, const Lhs &, const Rhs &)
-  -> identity_t<Res> {
+auto rightJacobianImpl(expr<Sum>, const Res &, const Lhs &, const Rhs &) {
     return identity_t<Res>{};
 };
 

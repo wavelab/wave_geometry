@@ -35,8 +35,7 @@ template <typename Val, typename Lhs, typename Rhs>
 auto leftJacobianImpl(expr<Rotate>,
                       const Translation<Val> &val,
                       const RotationBase<Lhs> &,
-                      const TranslationBase<Rhs> &)
-  -> decltype(crossMatrix(-val.value())) {
+                      const TranslationBase<Rhs> &) {
     // Bloesch equation 68
     return crossMatrix(-val.value());
 }

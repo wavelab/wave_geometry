@@ -69,7 +69,7 @@ TYPED_TEST(VectorTest, constructFromEigenExpression) {
 
 // Helper so we can try T{1.0, 0, 0} for 3-vectors but not 6-vectors
 template <typename T,
-          wave::tmp::enable_if_t<wave::internal::eval_traits<T>::Size == 3, int> = 0>
+          std::enable_if_t<wave::internal::eval_traits<T>::Size == 3, int> = 0>
 void testConstructFromScalars() {
     using S = typename wave::internal::eval_traits<T>::Scalar;
     using Vector = typename wave::internal::eval_traits<T>::ImplType;
@@ -80,7 +80,7 @@ void testConstructFromScalars() {
 }
 
 template <typename T,
-          wave::tmp::enable_if_t<wave::internal::eval_traits<T>::Size != 3, int> = 0>
+          std::enable_if_t<wave::internal::eval_traits<T>::Size != 3, int> = 0>
 void testConstructFromScalars() {}
 
 // Direct construct from three scalars (only for 3-vector case)

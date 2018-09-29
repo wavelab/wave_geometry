@@ -12,7 +12,7 @@ WAVE_GEOMETRY_ADD_TEST(scalar_expression_test scalar_expression_test.cpp
 WAVE_GEOMETRY_ADD_TEST(vector_expression_test vector_expression_test.cpp)
 WAVE_GEOMETRY_ADD_TEST(rvalue_expression_test rvalue_expression_test.cpp)
 WAVE_GEOMETRY_ADD_TEST(rigid_transform_test rigid_transform_test.cpp)
-WAVE_GEOMETRY_ADD_TEST(manifold_test manifold_test.cpp)
+WAVE_GEOMETRY_ADD_TEST(manifold_test manifold_test_so3.cpp manifold_test_se3.cpp)
 
 # benchmarks
 WAVE_GEOMETRY_ADD_TEST(imu_preint_test imu_preint_test.cpp)

@@ -108,8 +108,7 @@ struct traits<CompactRigidTransform<ImplType>>
  */
 template <typename ToImpl, typename FromImpl>
 auto evalImpl(expr<Convert, MatrixRigidTransform<ToImpl>>,
-              const CompactRigidTransform<FromImpl> &rhs)
-  -> MatrixRigidTransform<ToImpl> {
+              const CompactRigidTransform<FromImpl> &rhs) {
     return MatrixRigidTransform<ToImpl>{rhs.rotation(), rhs.translation()};
 }
 
@@ -117,8 +116,7 @@ auto evalImpl(expr<Convert, MatrixRigidTransform<ToImpl>>,
  */
 template <typename ToImpl, typename FromImpl>
 auto evalImpl(expr<Convert, CompactRigidTransform<ToImpl>>,
-              const MatrixRigidTransform<FromImpl> &rhs)
-  -> CompactRigidTransform<ToImpl> {
+              const MatrixRigidTransform<FromImpl> &rhs) {
     return CompactRigidTransform<ToImpl>{rhs.rotation(), rhs.translation()};
 }
 
@@ -129,8 +127,7 @@ auto evalImpl(expr<Convert, CompactRigidTransform<ToImpl>>,
  */
 template <typename ToImpl, typename FromImpl>
 auto evalImpl(expr<Convert, CompactRigidTransform<ToImpl>>,
-              const CompactRigidTransform<FromImpl> &rhs)
-  -> CompactRigidTransform<ToImpl> {
+              const CompactRigidTransform<FromImpl> &rhs) {
     return CompactRigidTransform<ToImpl>{rhs.value()};
 }
 

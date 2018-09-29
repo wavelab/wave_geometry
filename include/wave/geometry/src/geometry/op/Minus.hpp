@@ -22,7 +22,7 @@ namespace internal {
 
 // Traits for -(framed vector)
 template <typename Rhs>
-struct traits<Minus<Rhs>, tmp::enable_if_t<has_three_decorators<Rhs>{}>>
+struct traits<Minus<Rhs>, std::enable_if_t<has_three_decorators<Rhs>{}>>
   : unary_traits_base<Minus<Rhs>> {
     using OutputFunctor =
       WrapWithFrames<LeftFrameOf<Rhs>, RightFrameOf<Rhs>, MiddleFrameOf<Rhs>>;

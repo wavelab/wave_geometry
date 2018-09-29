@@ -62,8 +62,7 @@ struct traits<QuaternionRotation<ImplType>>
 
 /** Implements inverse of a quaternion */
 template <typename Rhs>
-auto evalImpl(expr<Inverse>, const QuaternionRotation<Rhs> &m)
-  -> decltype(makeLeaf<QuaternionRotation>(m.derived().value().conjugate())) {
+auto evalImpl(expr<Inverse>, const QuaternionRotation<Rhs> &m) {
     // Use Eigen's implementation, assuming valid rotation quaternion
     return makeLeaf<QuaternionRotation>(m.derived().value().conjugate());
 }
@@ -84,8 +83,7 @@ auto jacobianImpl(expr<Inverse>,
 template <typename Lhs, typename Rhs>
 auto evalImpl(expr<Compose>,
               const QuaternionRotation<Lhs> &lhs,
-              const QuaternionRotation<Rhs> &rhs)
-  -> plain_eval_t<QuaternionRotation<Lhs>> {
+              const QuaternionRotation<Rhs> &rhs) {
     // Use Eigen's implementation
     return plain_eval_t<QuaternionRotation<Lhs>>{lhs.value() * rhs.value()};
 }
@@ -103,7 +101,7 @@ auto rightJacobianImpl(expr<Compose>,
 template <typename Lhs, typename Rhs>
 auto evalImpl(expr<Rotate>,
               const QuaternionRotation<Lhs> &lhs,
-              const Translation<Rhs> &rhs) -> plain_eval_t<Translation<Rhs>> {
+              const Translation<Rhs> &rhs) {
     // Use Eigen's implementation
     return plain_eval_t<Translation<Rhs>>{lhs.value() * rhs.value()};
 }
@@ -126,7 +124,7 @@ auto rightJacobianImpl(expr<Rotate>,
  */
 template <typename ToImpl, typename FromImpl>
 auto evalImpl(expr<Convert, QuaternionRotation<ToImpl>>,
-              const QuaternionRotation<FromImpl> &rhs) -> QuaternionRotation<ToImpl> {
+              const QuaternionRotation<FromImpl> &rhs) {
     return QuaternionRotation<ToImpl>{rhs.derived().value()};
 }
 
@@ -134,7 +132,7 @@ auto evalImpl(expr<Convert, QuaternionRotation<ToImpl>>,
  */
 template <typename ToImpl, typename FromImpl>
 auto evalImpl(expr<Convert, MatrixRotation<ToImpl>>,
-              const QuaternionRotation<FromImpl> &rhs) -> MatrixRotation<ToImpl> {
+              const QuaternionRotation<FromImpl> &rhs) {
     // Use Eigen's implementation
     return MatrixRotation<ToImpl>{rhs.value().toRotationMatrix()};
 }
@@ -143,7 +141,7 @@ auto evalImpl(expr<Convert, MatrixRotation<ToImpl>>,
  */
 template <typename ToImpl, typename FromImpl>
 auto evalImpl(expr<Convert, QuaternionRotation<ToImpl>>,
-              const MatrixRotation<FromImpl> &rhs) -> QuaternionRotation<ToImpl> {
+              const MatrixRotation<FromImpl> &rhs) {
     // Use Eigen's implementation
     return QuaternionRotation<ToImpl>{rhs.value()};
 }

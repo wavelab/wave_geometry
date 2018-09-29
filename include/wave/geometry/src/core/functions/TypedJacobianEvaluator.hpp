@@ -87,7 +87,7 @@ template <typename Derived, typename Target>
 struct TypedJacobianEvaluator<
   Derived,
   Target,
-  tmp::enable_if_t<is_binary_expression<Derived>::value &&
+  std::enable_if_t<is_binary_expression<Derived>::value &&
                    !std::is_same<Derived, Target>{} &&
                    contains_same_type<typename Derived::LhsDerived, Target>::value &&
                    contains_same_type<typename Derived::RhsDerived, Target>::value>> {
@@ -152,7 +152,7 @@ template <typename Derived, typename Target>
 struct TypedJacobianEvaluator<
   Derived,
   Target,
-  tmp::enable_if_t<is_binary_expression<Derived>::value &&
+  std::enable_if_t<is_binary_expression<Derived>::value &&
                    !std::is_same<Derived, Target>{} &&
                    contains_same_type<typename Derived::LhsDerived, Target>::value &&
                    !contains_same_type<typename Derived::RhsDerived, Target>::value>> {
@@ -201,7 +201,7 @@ template <typename Derived, typename Target>
 struct TypedJacobianEvaluator<
   Derived,
   Target,
-  tmp::enable_if_t<is_binary_expression<Derived>::value &&
+  std::enable_if_t<is_binary_expression<Derived>::value &&
                    !std::is_same<Derived, Target>{} &&
                    !contains_same_type<typename Derived::LhsDerived, Target>::value &&
                    contains_same_type<typename Derived::RhsDerived, Target>::value>> {
@@ -253,7 +253,7 @@ struct TypedJacobianEvaluator<
  */
 template <typename Derived,
           typename TargetDerived,
-          tmp::enable_if_t<contains_same_type<Derived, TargetDerived>::value, int> = 0>
+          std::enable_if_t<contains_same_type<Derived, TargetDerived>::value, int> = 0>
 auto evaluateTypedJacobian(const ExpressionBase<Derived> &expr,
                            const TargetDerived &target)
   -> jacobian_t<Derived, TargetDerived> {
@@ -269,7 +269,7 @@ auto evaluateTypedJacobian(const ExpressionBase<Derived> &expr,
 
 template <typename Derived,
           typename TargetDerived,
-          tmp::enable_if_t<!contains_same_type<Derived, TargetDerived>::value, int> = 0>
+          std::enable_if_t<!contains_same_type<Derived, TargetDerived>::value, int> = 0>
 auto evaluateTypedJacobian(const ExpressionBase<Derived> & /*expr*/, const TargetDerived &
                            /*target*/) -> jacobian_t<Derived, TargetDerived> {
     return jacobian_t<Derived, TargetDerived>::Zero();
@@ -307,7 +307,7 @@ WAVE_STRONG_INLINE auto evaluateWithTypedJacobians(const ExpressionBase<Derived>
  */
 template <typename Derived,
           typename TargetDerived,
-          tmp::enable_if_t<unique_leaves_t<Derived>{}, int> = 0>
+          std::enable_if_t<unique_leaves_t<Derived>{}, int> = 0>
 auto evaluateJacobianAuto(const ExpressionBase<Derived> &expr,
                           const TargetDerived &target)
   -> jacobian_t<Derived, TargetDerived> {
@@ -316,7 +316,7 @@ auto evaluateJacobianAuto(const ExpressionBase<Derived> &expr,
 
 template <typename Derived,
           typename TargetDerived,
-          tmp::enable_if_t<!unique_leaves_t<Derived>{}, int> = 0>
+          std::enable_if_t<!unique_leaves_t<Derived>{}, int> = 0>
 auto evaluateJacobianAuto(const ExpressionBase<Derived> &expr,
                           const TargetDerived &target)
   -> jacobian_t<Derived, TargetDerived> {
@@ -330,7 +330,7 @@ auto evaluateJacobianAuto(const ExpressionBase<Derived> &expr,
  */
 template <typename Derived,
           typename... Targets,
-          tmp::enable_if_t<unique_leaves_t<Derived>{}, int> = 0>
+          std::enable_if_t<unique_leaves_t<Derived>{}, int> = 0>
 auto evaluateWithJacobiansAuto(const ExpressionBase<Derived> &expr,
                                const Targets &... targets)
   -> std::tuple<plain_output_t<Derived>, jacobian_t<Derived, Targets>...> {
@@ -339,7 +339,7 @@ auto evaluateWithJacobiansAuto(const ExpressionBase<Derived> &expr,
 
 template <typename Derived,
           typename... Targets,
-          tmp::enable_if_t<!unique_leaves_t<Derived>{}, int> = 0>
+          std::enable_if_t<!unique_leaves_t<Derived>{}, int> = 0>
 auto evaluateWithJacobiansAuto(const ExpressionBase<Derived> &expr,
                                const Targets &... targets)
   -> std::tuple<plain_output_t<Derived>, jacobian_t<Derived, Targets>...> {

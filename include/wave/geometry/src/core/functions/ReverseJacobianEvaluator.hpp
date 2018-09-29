@@ -175,7 +175,7 @@ struct eval_with_reverse_jacobians_impl {
 
 template <typename Derived>
 struct eval_with_reverse_jacobians_impl<Derived,
-                                        tmp::enable_if_t<unique_leaves_t<Derived>{}>> {
+                                        std::enable_if_t<unique_leaves_t<Derived>{}>> {
     using type = tmp::apply_t<
       std::tuple,
       plain_output_t<Derived>,

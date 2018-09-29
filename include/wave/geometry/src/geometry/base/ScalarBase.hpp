@@ -64,7 +64,7 @@ struct scalar_traits_base : leaf_traits_base<T>, frameable_vector_traits {
  */
 template <typename T>
 struct traits<T,
-              tmp::enable_if_t<std::is_arithmetic<T>::value && !std::is_const<T>::value>>
+              std::enable_if_t<std::is_arithmetic<T>::value && !std::is_const<T>::value>>
   : scalar_traits_base<T> {};
 
 /** Helper to produce a scalar wrapping the input type */
@@ -95,8 +95,7 @@ auto wrapInputScalar(const T &&arg) -> Scalar<T> {
  * Defer to the implementation type's arithmetic operators.
  */
 template <typename Lhs, typename Rhs>
-auto evalImpl(expr<Product>, const ScalarBase<Lhs> &lhs, const ScalarBase<Rhs> &rhs)
-  -> decltype(makeScalarResult(lhs.derived().value() * rhs.derived().value())) {
+auto evalImpl(expr<Product>, const ScalarBase<Lhs> &lhs, const ScalarBase<Rhs> &rhs) {
     return makeScalarResult(lhs.derived().value() * rhs.derived().value());
 }
 
@@ -123,8 +122,7 @@ auto rightJacobianImpl(expr<Product>,
  * Defer to the implementation type's arithmetic operators.
  */
 template <typename Lhs, typename Rhs>
-auto evalImpl(expr<Divide>, const ScalarBase<Lhs> &lhs, const ScalarBase<Rhs> &rhs)
-  -> decltype(makeScalarResult(lhs.derived().value() / rhs.derived().value())) {
+auto evalImpl(expr<Divide>, const ScalarBase<Lhs> &lhs, const ScalarBase<Rhs> &rhs) {
     return makeScalarResult(lhs.derived().value() / rhs.derived().value());
 }
 

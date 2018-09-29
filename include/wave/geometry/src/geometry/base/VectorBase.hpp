@@ -75,8 +75,7 @@ struct vector_leaf_traits_base<Tmpl<ImplType_>> : leaf_traits_base<Tmpl<ImplType
 
 /** Helper to construct a vector expression given a leaf of the same kind */
 template <typename OtherLeaf, typename ImplType>
-auto makeVectorLike(ImplType &&arg) ->
-  typename traits<OtherLeaf>::template rebind<tmp::remove_cr_t<ImplType>> {
+auto makeVectorLike(ImplType &&arg) {
     return typename traits<OtherLeaf>::template rebind<tmp::remove_cr_t<ImplType>>{
       std::forward<ImplType>(arg)};
 }
@@ -98,16 +97,14 @@ auto evalImpl(expr<Convert, ToType>, const VectorBase<Rhs> &rhs) -> ToType {
  * Since the temporary is so small, we return a plain vector instead of an Eigen::Sum.
  */
 template <typename Lhs, typename Rhs, TICK_REQUIRES(internal::same_base_tmpl<Lhs, Rhs>{})>
-auto evalImpl(expr<Sum>, const VectorBase<Lhs> &lhs, const VectorBase<Rhs> &rhs)
-  -> plain_output_t<Rhs> {
+auto evalImpl(expr<Sum>, const VectorBase<Lhs> &lhs, const VectorBase<Rhs> &rhs) {
     return plain_output_t<Rhs>{lhs.derived().value() + rhs.derived().value()};
 }
 
 /** Implementation of Minus for a vector leaf
  */
 template <typename Rhs>
-auto evalImpl(expr<Minus>, const VectorBase<Rhs> &rhs)
-  -> decltype(makeVectorLike<Rhs>(-rhs.derived().value())) {
+auto evalImpl(expr<Minus>, const VectorBase<Rhs> &rhs) {
     return makeVectorLike<Rhs>(-rhs.derived().value());
 }
 
@@ -123,8 +120,7 @@ auto evalImpl(expr<Random, Leaf>) -> Leaf {
 /** Implementation of squared L2 norm for a vector leaf
  */
 template <typename Rhs>
-auto evalImpl(expr<SquaredNorm>, const VectorBase<Rhs> &rhs)
-  -> decltype(makeScalarResult(rhs.derived().value().squaredNorm())) {
+auto evalImpl(expr<SquaredNorm>, const VectorBase<Rhs> &rhs) {
     return makeScalarResult(rhs.derived().value().squaredNorm());
 }
 
@@ -138,8 +134,7 @@ auto jacobianImpl(expr<SquaredNorm>, const Val &, const VectorBase<Rhs> &rhs)
 /** Implementation of L2 norm for a vector leaf
  */
 template <typename Rhs>
-auto evalImpl(expr<Norm>, const VectorBase<Rhs> &rhs)
-  -> decltype(makeScalarResult(rhs.derived().value().norm())) {
+auto evalImpl(expr<Norm>, const VectorBase<Rhs> &rhs) {
     return makeScalarResult(rhs.derived().value().norm());
 }
 
@@ -154,32 +149,30 @@ auto jacobianImpl(expr<Norm>, const ScalarBase<Val> &norm, const VectorBase<Rhs>
  * Defer to the implementation type's arithmetic operators.
  */
 template <typename Lhs, typename Rhs>
-auto evalImpl(expr<Scale>, const ScalarBase<Lhs> &lhs, const VectorBase<Rhs> &rhs)
-  -> decltype(makeVectorLike<Rhs>(lhs.derived().value() * rhs.derived().value())) {
+auto evalImpl(expr<Scale>, const ScalarBase<Lhs> &lhs, const VectorBase<Rhs> &rhs) {
     return makeVectorLike<Rhs>(lhs.derived().value() * rhs.derived().value());
 }
 /** Implementation of right scalar multiplication
 * Defer to the implementation type's arithmetic operators.
 */
 template <typename Lhs, typename Rhs>
-auto evalImpl(expr<ScaleR>, const VectorBase<Lhs> &lhs, const ScalarBase<Rhs> &rhs)
-  -> decltype(makeVectorLike<Lhs>(lhs.derived().value() * rhs.derived().value())) {
+auto evalImpl(expr<ScaleR>, const VectorBase<Lhs> &lhs, const ScalarBase<Rhs> &rhs) {
     return makeVectorLike<Lhs>(lhs.derived().value() * rhs.derived().value());
 }
 /** Left Jacobian implementation for left scalar multiplication */
 template <typename Res, typename Lhs, typename Rhs>
-auto leftJacobianImpl(expr<Scale>,
-                      const Res &,
-                      const ScalarBase<Lhs> &,
-                      const VectorBase<Rhs> &rhs) -> decltype(rhs.derived().value()) {
+decltype(auto) leftJacobianImpl(expr<Scale>,
+                                const Res &,
+                                const ScalarBase<Lhs> &,
+                                const VectorBase<Rhs> &rhs) {
     return rhs.derived().value();
 }
 /** Right Jacobian implementation for right scalar multiplication */
 template <typename Res, typename Lhs, typename Rhs>
-auto rightJacobianImpl(expr<ScaleR>,
-                       const Res &,
-                       const VectorBase<Lhs> &lhs,
-                       const ScalarBase<Rhs> &) -> decltype(lhs.derived().value()) {
+decltype(auto) rightJacobianImpl(expr<ScaleR>,
+                                 const Res &,
+                                 const VectorBase<Lhs> &lhs,
+                                 const ScalarBase<Rhs> &) {
     return lhs.derived().value();
 }
 /** Left Jacobian implementation for right scalar multiplication */
@@ -203,8 +196,7 @@ auto rightJacobianImpl(expr<Scale>,
  * Defer to the implementation type's arithmetic operations.
  */
 template <typename Lhs, typename Rhs>
-auto evalImpl(expr<ScaleDiv>, const VectorBase<Lhs> &lhs, const ScalarBase<Rhs> &rhs)
-  -> decltype(makeVectorLike<Lhs>(lhs.derived().value() / rhs.derived().value())) {
+auto evalImpl(expr<ScaleDiv>, const VectorBase<Lhs> &lhs, const ScalarBase<Rhs> &rhs) {
     return makeVectorLike<Lhs>(lhs.derived().value() / rhs.derived().value());
 }
 
@@ -245,25 +237,21 @@ WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator+, Sum, VectorBase, VectorBase)
  * @f[ \mathbb{R}^n \times \mathbb{R}^n \to \mathbb{R}^n @f]
  */
 template <typename L, typename R>
-auto operator-(const VectorBase<L> &lhs, const VectorBase<R> &rhs)
-  -> decltype(lhs.derived() + (-rhs.derived())) {
+auto operator-(const VectorBase<L> &lhs, const VectorBase<R> &rhs) {
     return lhs.derived() + (-rhs.derived());
 }
 
 // Overloads for rvalues
 template <typename L, typename R>
-auto operator-(VectorBase<L> &&lhs, const VectorBase<R> &rhs)
-  -> decltype(std::move(lhs).derived() + (-rhs.derived())) {
+auto operator-(VectorBase<L> &&lhs, const VectorBase<R> &rhs) {
     return std::move(lhs).derived() + (-rhs.derived());
 }
 template <typename L, typename R>
-auto operator-(const VectorBase<L> &lhs, VectorBase<R> &&rhs)
-  -> decltype(lhs.derived() + (-std::move(rhs).derived())) {
+auto operator-(const VectorBase<L> &lhs, VectorBase<R> &&rhs) {
     return lhs.derived() + (-std::move(rhs).derived());
 }
 template <typename L, typename R>
-auto operator-(VectorBase<L> &&lhs, VectorBase<R> &&rhs)
-  -> decltype(std::move(lhs).derived() + (-std::move(rhs).derived())) {
+auto operator-(VectorBase<L> &&lhs, VectorBase<R> &&rhs) {
     return std::move(lhs).derived() + (-std::move(rhs).derived());
 }
 

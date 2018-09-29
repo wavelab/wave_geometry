@@ -56,16 +56,15 @@ struct traits<MatrixRotation<ImplType>>
 
 /** Implements inverse of a rotation matrix */
 template <typename Rhs>
-auto evalImpl(expr<Inverse>, const MatrixRotation<Rhs> &m)
-  -> decltype(makeLeaf<MatrixRotation>(m.derived().value().transpose())) {
+auto evalImpl(expr<Inverse>, const MatrixRotation<Rhs> &m) {
     return makeLeaf<MatrixRotation>(m.derived().value().transpose());
 }
 
 /** Jacobian of inverse of a rotation matrix */
 template <typename Val, typename Rhs>
-auto jacobianImpl(expr<Inverse>,
-                  const MatrixRotation<Val> &inv,
-                  const MatrixRotation<Rhs> &) -> decltype(-inv.value()) {
+decltype(auto) jacobianImpl(expr<Inverse>,
+                            const MatrixRotation<Val> &inv,
+                            const MatrixRotation<Rhs> &) {
     return -inv.value();
 }
 
@@ -93,7 +92,7 @@ auto evalImpl(expr<LogMap>, const MatrixRotation<ImplType> &rhs) ->
 template <typename Lhs, typename Rhs>
 auto evalImpl(expr<Compose>,
               const MatrixRotation<Lhs> &lhs,
-              const MatrixRotation<Rhs> &rhs) -> plain_eval_t<MatrixRotation<Lhs>> {
+              const MatrixRotation<Rhs> &rhs) {
     return plain_eval_t<MatrixRotation<Lhs>>{lhs.value() * rhs.value()};
 }
 
@@ -101,17 +100,16 @@ auto evalImpl(expr<Compose>,
  *
  * Since we already have a matrix, we can return a reference. */
 template <typename Val, typename Lhs, typename Rhs>
-auto rightJacobianImpl(expr<Compose>,
-                       const Val &,
-                       const MatrixRotation<Lhs> &lhs,
-                       const RotationBase<Rhs> &) -> const Lhs & {
+decltype(auto) rightJacobianImpl(expr<Compose>,
+                                 const Val &,
+                                 const MatrixRotation<Lhs> &lhs,
+                                 const RotationBase<Rhs> &) {
     return lhs.value();
 }
 
 /** Rotates a translation by a rotation matrix */
 template <typename Lhs, typename Rhs>
-auto evalImpl(expr<Rotate>, const MatrixRotation<Lhs> &lhs, const Translation<Rhs> &rhs)
-  -> plain_eval_t<Translation<Rhs>> {
+auto evalImpl(expr<Rotate>, const MatrixRotation<Lhs> &lhs, const Translation<Rhs> &rhs) {
     return plain_eval_t<Translation<Rhs>>{lhs.value() * rhs.value()};
 }
 
@@ -119,10 +117,10 @@ auto evalImpl(expr<Rotate>, const MatrixRotation<Lhs> &lhs, const Translation<Rh
  *
  * Since we already have a matrix, we can return a reference. */
 template <typename Val, typename Lhs, typename Rhs>
-auto rightJacobianImpl(expr<Rotate>,
-                       const Translation<Val> &,
-                       const MatrixRotation<Lhs> &lhs,
-                       const Translation<Rhs> &) -> const Lhs & {
+decltype(auto) rightJacobianImpl(expr<Rotate>,
+                                 const Translation<Val> &,
+                                 const MatrixRotation<Lhs> &lhs,
+                                 const Translation<Rhs> &) {
     // Bloesch equation 68
     return lhs.value();
 }
@@ -134,8 +132,8 @@ auto rightJacobianImpl(expr<Rotate>,
  * same.
  */
 template <typename ToImpl, typename FromImpl>
-auto evalImpl(expr<Convert, MatrixRotation<ToImpl>>, const MatrixRotation<FromImpl> &rhs)
-  -> MatrixRotation<ToImpl> {
+auto evalImpl(expr<Convert, MatrixRotation<ToImpl>>,
+              const MatrixRotation<FromImpl> &rhs) {
     return MatrixRotation<ToImpl>{rhs.derived().value()};
 }
 

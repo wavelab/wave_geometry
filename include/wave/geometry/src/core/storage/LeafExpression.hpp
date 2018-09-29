@@ -14,11 +14,11 @@ struct LeafExpression {
     struct init_storage {};
 
 
-    using ValueType = tmp::decay_t<StorageType>;
+    using ValueType = std::decay_t<StorageType>;
     using RefType =
-      tmp::conditional_t<std::is_array<StorageType>{}, ValueType, ValueType &>;
-    using ConstRefType = const tmp::conditional_t<std::is_array<StorageType>{},
-                                                  tmp::decay_t<const StorageType>,
+      std::conditional_t<std::is_array<StorageType>{}, ValueType, ValueType &>;
+    using ConstRefType = const std::conditional_t<std::is_array<StorageType>{},
+                                                  std::decay_t<const StorageType>,
                                                   const ValueType &>;
 
  public:
@@ -78,7 +78,7 @@ struct LeafExpression {
 namespace internal {
 /** Helper to construct a templated leaf expression given the same template */
 template <template <typename> class LeafTmpl, typename ImplType>
-auto makeLeaf(ImplType &&arg) -> LeafTmpl<tmp::remove_cr_t<ImplType>> {
+auto makeLeaf(ImplType &&arg) {
     return LeafTmpl<tmp::remove_cr_t<ImplType>>{std::forward<ImplType>(arg)};
 }
 }  // namespace internal

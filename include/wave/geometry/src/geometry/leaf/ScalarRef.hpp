@@ -60,8 +60,7 @@ auto evalImpl(expr<ScalarRef>, ScalarType &&s) -> Scalar<ScalarType> {
 
 // Implements identity Jacobian
 template <typename ScalarType>
-auto jacobianImpl(expr<ScalarRef>, const Scalar<ScalarType> &, const ScalarType &)
-  -> identity_t<ScalarType> {
+auto jacobianImpl(expr<ScalarRef>, const Scalar<ScalarType> &, const ScalarType &) {
     return identity_t<ScalarType>{};
 }
 

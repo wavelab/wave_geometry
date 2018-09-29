@@ -223,7 +223,7 @@ void checkValueAndJacobians(const Ref &ref,
  * expected to be used.
  */
 template <bool UniqueExpr, typename Expr, typename... Wrt>
-wave::tmp::enable_if_t<UniqueExpr> checkJacobians(const Expr &expr, const Wrt &... wrt) {
+std::enable_if_t<UniqueExpr> checkJacobians(const Expr &expr, const Wrt &... wrt) {
     static_assert(wave::internal::unique_leaves_t<Expr>{},
                   "Expression is not a tree with unique types");
 
@@ -241,8 +241,7 @@ wave::tmp::enable_if_t<UniqueExpr> checkJacobians(const Expr &expr, const Wrt &.
 
 // Version for non-unique expressions
 template <bool UniqueExpr, typename Expr, typename... Wrt>
-wave::tmp::enable_if_t<not UniqueExpr> checkJacobians(const Expr &expr,
-                                                      const Wrt &... wrt) {
+std::enable_if_t<not UniqueExpr> checkJacobians(const Expr &expr, const Wrt &... wrt) {
     static_assert(!wave::internal::unique_leaves_t<Expr>{},
                   "Expression is actually a tree with unique types");
 
