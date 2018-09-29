@@ -58,8 +58,8 @@ struct rt_leaf_traits_base<Tmpl<ImplType_>> : leaf_traits_base<Tmpl<ImplType_>>,
  * Produces a transform with a random rotation on SO(3) and a translation with uniformly
  * random coefficients from -1 to 1
  */
-template <typename Leaf, TICK_REQUIRES(internal::is_rt_leaf<Leaf>{})>
-auto evalImpl(expr<Random, Leaf>) {
+template <typename Leaf, typename Rhs>
+auto evalImpl(expr<Random, Leaf>, const RigidTransformBase<Rhs> &) {
     using Scalar = internal::scalar_t<Leaf>;
     return Leaf{randomQuaternion<Scalar>(), Eigen::Matrix<Scalar, 3, 1>::Random()};
 }

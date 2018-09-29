@@ -64,12 +64,6 @@ TICK_TRAIT(valid_binary_traits, valid_expression_traits<_>) {
               typename T::RhsDerived>;
 };
 
-TICK_TRAIT(valid_nullary_traits, valid_expression_traits<_>) {
-    template <class T>
-    auto require(T &&)->valid<>;
-};
-
-
 TICK_TRAIT(has_valid_traits) {
     template <class T>
     auto require(T &&)
@@ -92,12 +86,6 @@ TICK_TRAIT(has_valid_binary_traits) {
     template <class T>
     auto require(T &&)
       ->valid<is_true<valid_binary_traits<typename ::wave::internal::traits<T>>>>;
-};
-
-TICK_TRAIT(has_valid_nullary_traits) {
-    template <class T>
-    auto require(T &&)
-      ->valid<is_true<valid_nullary_traits<typename ::wave::internal::traits<T>>>>;
 };
 
 TICK_TRAIT(is_expression, is_derived_expression<_>, has_valid_traits<_>) {
@@ -126,15 +114,6 @@ TICK_TRAIT(is_unary_expression, is_derived_expression<_>, has_valid_unary_traits
     auto require(T && x)->valid<decltype(x.rhs()), is_false<is_binary_expression<T>>>;
 };
 
-// For now a nullary expression is an expression that's not anything else
-TICK_TRAIT(is_nullary_expression, is_derived_expression<_>, has_valid_nullary_traits<_>) {
-    template <class T>
-    auto require(T && x)
-      ->valid<is_false<is_binary_expression<T>>,
-              is_false<is_unary_expression<T>>,
-              is_false<is_leaf_expression<T>>>;
-};
-
 /** True if type is a scalar (non-expression arithmetic type)
  * Note a scalar is separate from a size-1 vector.
  */
@@ -160,23 +139,11 @@ using enable_if_unary_t =
   typename std::enable_if<is_unary_expression<Derived>{}, T>::type;
 
 template <typename Derived, typename T = void>
-using enable_if_nullary_t =
-  typename std::enable_if<is_nullary_expression<Derived>{}, T>::type;
-
-template <typename Derived, typename T = void>
-using enable_if_leaf_or_nullary_t =
-  typename std::enable_if<is_leaf_expression<Derived>{} ||
-                            is_nullary_expression<Derived>{},
-                          T>::type;
-
-template <typename Derived, typename T = void>
 using enable_if_scalar_t = typename std::enable_if<is_scalar<Derived>{}, T>::type;
 
 template <typename Derived, typename T = void>
-using enable_if_leaf_nullary_or_scalar_t =
-  typename std::enable_if<is_leaf_expression<Derived>{} ||
-                            is_nullary_expression<Derived>{} || is_scalar<Derived>{},
-                          T>::type;
+using enable_if_leaf_or_scalar_t =
+  typename std::enable_if<is_leaf_expression<Derived>{} || is_scalar<Derived>{}, T>::type;
 
 /** Empty tag of an expression template for tag dispatching */
 template <template <typename...> class Tmpl, typename... Aux>
@@ -332,10 +299,6 @@ struct is_directly_evaluable_binary
   : tmp::negation<std::is_same<decltype(impl::evalOrNotImplemented(
                                  Tag(), std::declval<Lhs>(), std::declval<Rhs>())),
                                NotImplemented>> {};
-
-template <typename Tag>
-using eval_t_nullary = decltype(evalImpl(Tag()));
-
 
 // previous eval_type, needs a complete type
 // @todo clean up

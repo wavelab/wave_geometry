@@ -45,8 +45,7 @@ template <typename A, typename B, typename Enable = void>
 struct contains_same_type;
 
 template <typename A, typename B>
-struct contains_same_type<A, B, enable_if_leaf_nullary_or_scalar_t<A>>
-  : std::is_same<A, B> {};
+struct contains_same_type<A, B, enable_if_leaf_or_scalar_t<A>> : std::is_same<A, B> {};
 
 template <typename A, typename B>
 struct contains_same_type<A, B, enable_if_unary_t<A>>

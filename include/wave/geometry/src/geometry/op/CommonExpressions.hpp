@@ -12,6 +12,11 @@ template <typename Derived>
 struct Random : internal::base_tmpl_t<Derived, Random<Derived>> {
     static_assert(internal::is_leaf_expression<Derived>{},
                   "Random expression can only be made for leaf expressions");
+
+    // Satisfy the Leaf Expression concept
+    auto value() const {
+        return eval(this->derived()).value();
+    }
 };
 
 /** Scalar expression representing the square of the L2 norm of a vector value

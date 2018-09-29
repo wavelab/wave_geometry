@@ -19,7 +19,7 @@ struct JacobianEvaluator;
 
 /** Specialization for leaf expression of same type */
 template <typename Derived>
-struct JacobianEvaluator<Derived, Derived, enable_if_leaf_nullary_or_scalar_t<Derived>> {
+struct JacobianEvaluator<Derived, Derived, enable_if_leaf_or_scalar_t<Derived>> {
     using Scalar = scalar_t<Derived>;
 
     WAVE_STRONG_INLINE JacobianEvaluator(const Evaluator<Derived> &evaluator,
@@ -51,7 +51,7 @@ struct JacobianEvaluator<Derived, Derived, enable_if_leaf_nullary_or_scalar_t<De
 
 /** Specialization for leaf expression of different type */
 template <typename Derived, typename Target>
-struct JacobianEvaluator<Derived, Target, enable_if_leaf_nullary_or_scalar_t<Derived>> {
+struct JacobianEvaluator<Derived, Target, enable_if_leaf_or_scalar_t<Derived>> {
     WAVE_STRONG_INLINE JacobianEvaluator(const Evaluator<Derived> &, const Target &) {}
 
     /** Finds (trivial) jacobian of the leaf expression

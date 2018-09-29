@@ -43,7 +43,7 @@ struct nullary_traits_base<Tmpl<Wrapped>> : traits<Wrapped> {
     // A tag for calling evalImpl()
     using Tag = internal::expr<Tmpl, eval_t<Wrapped>>;
     using PreparedType = Derived;
-    using EvalType = eval_t_nullary<Tag>;
+    using EvalType = eval_t_unary<Tag, eval_t<Wrapped>>;
     using UniqueLeaves = has_unique_leaves_leaf<Derived>;
 };
 

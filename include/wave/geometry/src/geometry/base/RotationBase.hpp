@@ -81,8 +81,8 @@ struct rotation_leaf_traits_base<Tmpl<ImplType_>> : leaf_traits_base<Tmpl<ImplTy
  *
  * Produces a random rotation on SO(3), constructing it from a quaternion
  */
-template <typename Leaf, TICK_REQUIRES(internal::is_derived_rotation<Leaf>{})>
-auto evalImpl(expr<Random, Leaf>) {
+template <typename Leaf, typename Rhs>
+auto evalImpl(expr<Random, Leaf>, const RotationBase<Rhs> &) {
     return Leaf{randomQuaternion<internal::scalar_t<Leaf>>()};
 }
 

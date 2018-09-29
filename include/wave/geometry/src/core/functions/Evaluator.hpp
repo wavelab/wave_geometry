@@ -35,23 +35,6 @@ struct Evaluator<Derived, enable_if_leaf_t<Derived>> {
     const EvalType result;
 };
 
-/** Specialization for nullary expression */
-template <typename Derived>
-struct Evaluator<Derived, enable_if_nullary_t<Derived>> {
-    using EvalType = eval_t<Derived>;
-
-    WAVE_STRONG_INLINE explicit Evaluator(const Derived &expr)
-        : expr{expr}, result{evalImpl(get_expr_tag_t<Derived>())} {}
-
-    const EvalType &operator()() const {
-        return this->result;
-    }
-
- public:
-    const wave_ref_sel_t<Derived> expr;
-    const EvalType result;
-};
-
 /** Specialization for scalar type */
 template <typename Derived>
 struct Evaluator<Derived, std::enable_if_t<is_scalar<Derived>{}>> {

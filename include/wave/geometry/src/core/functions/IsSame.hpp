@@ -42,7 +42,7 @@ inline constexpr bool isSame(const A &, const B &) noexcept {
 }
 
 // Version for leaf expression (matching types)
-template <typename Derived, internal::enable_if_leaf_or_nullary_t<Derived, int> = 0>
+template <typename Derived, internal::enable_if_leaf_t<Derived, int> = 0>
 inline constexpr bool isSame(const ExpressionBase<Derived> &a,
                              const ExpressionBase<Derived> &b) noexcept {
     return &a.derived() == &b.derived();

@@ -112,8 +112,8 @@ auto evalImpl(expr<Minus>, const VectorBase<Rhs> &rhs) {
  *
  * Produces a random vector with coefficients from -1 to 1
  */
-template <typename Leaf, TICK_REQUIRES(internal::is_vector_leaf<Leaf>{})>
-auto evalImpl(expr<Random, Leaf>) -> Leaf {
+template <typename Leaf, typename Rhs>
+auto evalImpl(expr<Random, Leaf>, const VectorBase<Rhs> &) {
     return Leaf{internal::traits<Leaf>::ImplType::Random()};
 }
 
