@@ -107,6 +107,22 @@ TYPED_TEST_P(ManifoldTest, inverseIdentity) {
     EXPECT_APPROX(TestFixture::LeafAA::Identity(), res);
 }
 
+TYPED_TEST_P(ManifoldTest, composeWithIdentity) {
+    const auto r1 = TestFixture::LeafAB::Random();
+    const auto r2 = TestFixture::LeafBA::Identity();
+    const auto res = typename TestFixture::LeafAA{r1 * r2};
+    EXPECT_APPROX(r1, res);
+    CHECK_JACOBIANS(true, r1 * r2, r1, r2);
+}
+
+TYPED_TEST_P(ManifoldTest, composeWithIdentityLeft) {
+    const auto r1 = TestFixture::LeafAB::Identity();
+    const auto r2 = TestFixture::LeafBA::Random();
+    const auto res = typename TestFixture::LeafAA{r1 * r2};
+    EXPECT_APPROX(r2, res);
+    CHECK_JACOBIANS(true, r1 * r2, r1, r2);
+}
+
 TYPED_TEST_P(ManifoldTest, boxPlusZero) {
     // Bloesch Equation 16
     const auto r1 = TestFixture::LeafAB::Random();
@@ -200,6 +216,8 @@ REGISTER_TYPED_TEST_CASE_P(ManifoldTest,
                            isApproxTrivial,
                            isApprox,
                            inverseIdentity,
+                           composeWithIdentity,
+                           composeWithIdentityLeft,
                            boxPlusZero,
                            boxPlusMinus,
                            boxMinusPlus,
