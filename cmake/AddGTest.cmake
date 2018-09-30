@@ -12,17 +12,18 @@ else(TARGET GTest::GTest)
   endif()
 
   # Try to build it from /usr/src (where debian package goes)
-  find_path(GTEST_SRC_ROOT gtest/CMakeLists.txt
-    HINTS "${GTEST_ROOT}" "$ENV{GTEST_ROOT}"
+  find_path(GTEST_SRC_ROOT CMakeLists.txt
+    HINTS ${GTEST_ROOT} $ENV{GTEST_ROOT}
     PATH /usr/src/googletest/googletest
-    PATH /usr/src/)
+    PATH /usr/src/gtest)
 
   if(NOT GTEST_SRC_ROOT)
     MESSAGE(FATAL_ERROR
-      "Neither a GTest::GTest library nor a gtest source package was found")
+      "Neither a GTest::GTest library nor a googletest source package was found.\n"
+      "To continue without building tests, add -DBUILD_TESTING=OFF to CMake arguments.")
   else(NOT GTEST_SRC_ROOT)
     # Build it as part of this project
-    set(GTEST_SRC_DIR ${GTEST_SRC_ROOT}/gtest)
+    set(GTEST_SRC_DIR ${GTEST_SRC_ROOT})
     set(GTEST_BINARY_DIR ${CMAKE_BINARY_DIR}/gtest)
     add_subdirectory(${GTEST_SRC_DIR} ${GTEST_BINARY_DIR})
 

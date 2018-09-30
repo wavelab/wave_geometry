@@ -7,6 +7,9 @@
 ### Backward-incompatible API changes
 - C++14 is now required
 
+### Fixes and minor changes
+- Fixed finding googletest source package on Ubuntu bionic
+
 ## [0.3.0](https://github.com/wavelab/wave_geometry/compare/0.2.0...0.3.0) (2018-08-19)
 ### New features
 - Scalar multiplication (scalar\*vector, vector\*scalar, and vector\/scalar)
