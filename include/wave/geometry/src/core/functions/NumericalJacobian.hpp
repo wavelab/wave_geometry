@@ -67,7 +67,7 @@ template <typename Derived, typename Enable = void>
 struct EvaluatorWithDelta;
 
 /**Specialization for leaf expression
-*/
+ */
 template <typename Derived>
 struct EvaluatorWithDelta<Derived, enable_if_leaf_t<Derived>> {
     using Scalar = scalar_t<Derived>;

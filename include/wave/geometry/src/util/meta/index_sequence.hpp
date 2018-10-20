@@ -72,7 +72,7 @@ struct make_index_sequence<0, S, Indices...> : index_sequence<Indices...> {};
 // onto the first, and discard the second sequence.
 template <int... I1, int... I2, typename... Seqs>
 struct concat_index_sequence<index_sequence<I1...>, index_sequence<I2...>, Seqs...>
-  : concat_index_sequence<index_sequence<I1..., I2...>, Seqs...> {};
+    : concat_index_sequence<index_sequence<I1..., I2...>, Seqs...> {};
 
 // Base case: one sequence left
 template <int... I1>

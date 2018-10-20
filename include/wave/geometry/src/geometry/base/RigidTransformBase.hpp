@@ -197,7 +197,7 @@ auto jacobianImpl(expr<LogMap>,
 template <typename Leaf, typename LeftFrame, typename RightFrame>
 struct FramedLeafAccess<Framed<Leaf, LeftFrame, RightFrame>,
                         TICK_CLASS_REQUIRES(internal::is_rt_leaf<Leaf>{})>
-  : FramedLeafAccessBase<Framed<Leaf, LeftFrame, RightFrame>> {
+    : FramedLeafAccessBase<Framed<Leaf, LeftFrame, RightFrame>> {
     using RotationType = decltype(std::declval<Leaf>().rotation());
     using ConstRotationType = decltype(std::declval<const Leaf>().rotation());
     using TranslationType = decltype(std::declval<Leaf>().translation());
@@ -205,13 +205,13 @@ struct FramedLeafAccess<Framed<Leaf, LeftFrame, RightFrame>,
 
  public:
     /** Returns a mutable expression referring to the translation portion of this
-    * transform */
+     * transform */
     decltype(auto) rotation() & {
         return internal::WrapWithFrames<LeftFrame, RightFrame>{}(this->leaf().rotation());
     }
 
     /** Returns a mutable expression referring to the translation portion of this
-    * transform */
+     * transform */
     decltype(auto) rotation() && noexcept {
         return internal::WrapWithFrames<LeftFrame, RightFrame>{}(this->leaf().rotation());
     }

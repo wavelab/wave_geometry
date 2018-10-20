@@ -51,7 +51,7 @@ namespace internal {
 
 template <typename ImplType>
 struct traits<AngleAxisRotation<ImplType>>
-  : rotation_leaf_traits_base<AngleAxisRotation<ImplType>> {
+    : rotation_leaf_traits_base<AngleAxisRotation<ImplType>> {
     using typename rotation_leaf_traits_base<AngleAxisRotation<ImplType>>::Scalar;
     using PlainType = AngleAxisRotation<Eigen::AngleAxis<Scalar>>;
     using ConvertTo = tmp::type_list<MatrixRotation<Eigen::Matrix<Scalar, 3, 3>>,

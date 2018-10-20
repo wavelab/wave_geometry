@@ -31,7 +31,7 @@ template <class B1>
 struct conjunction<B1> : B1 {};
 template <class B1, class... Bn>
 struct conjunction<B1, Bn...>
-  : std::conditional_t<bool(B1::value), conjunction<Bn...>, B1> {};
+    : std::conditional_t<bool(B1::value), conjunction<Bn...>, B1> {};
 
 /** Logical OR with short-circutiting, from C++17
  * (see http://en.cppreference.com/w/cpp/types/disjunction)
@@ -42,7 +42,7 @@ template <class B1>
 struct disjunction<B1> : B1 {};
 template <class B1, class... Bn>
 struct disjunction<B1, Bn...>
-  : std::conditional_t<bool(B1::value), B1, disjunction<Bn...>> {};
+    : std::conditional_t<bool(B1::value), B1, disjunction<Bn...>> {};
 
 // End of std:: backports. Custom metaprogramming helpers follow.
 
@@ -128,9 +128,12 @@ struct matching_base_impl;
 
 // Recursive step for unary expression template
 template <typename Derived,
-          template <typename> class Tmpl,
-          template <typename> class Head,
-          template <typename> class... Tail>
+          template <typename>
+          class Tmpl,
+          template <typename>
+          class Head,
+          template <typename>
+          class... Tail>
 struct matching_base_impl<Tmpl<Derived>, Head, Tail...> {
     using type = std::conditional_t<
       std::is_base_of<Head<Derived>, Derived>::value,
@@ -142,9 +145,12 @@ struct matching_base_impl<Tmpl<Derived>, Head, Tail...> {
 // Recursive step for binary expression template - enforces matching of both sides
 template <typename Lhs,
           typename Rhs,
-          template <typename, typename> class Tmpl,
-          template <typename> class Head,
-          template <typename> class... Tail>
+          template <typename, typename>
+          class Tmpl,
+          template <typename>
+          class Head,
+          template <typename>
+          class... Tail>
 struct matching_base_impl<Tmpl<Lhs, Rhs>, Head, Tail...> {
     using type = std::conditional_t<
       std::is_base_of<Head<Lhs>, Lhs>::value && std::is_base_of<Head<Rhs>, Rhs>::value,
@@ -198,7 +204,7 @@ struct function_traits<Return (Class::*)(Args...)> : function_traits<Return(Args
 /** Specialization for const member function */
 template <typename Class, typename Return, typename... Args>
 struct function_traits<Return (Class::*)(Args...) const>
-  : function_traits<Return(Args...)> {};
+    : function_traits<Return(Args...)> {};
 
 /** Specialization for bare function pointer */
 template <typename Return, typename... Args>

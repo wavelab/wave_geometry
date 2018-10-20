@@ -121,9 +121,8 @@ struct DynamicJacobianEvaluator<Derived, enable_if_proxy_t<Derived>> {
 
     WAVE_STRONG_INLINE explicit DynamicJacobianEvaluator(const Evaluator<Derived> &v_eval,
                                                          const void *target)
-      // Dynamically get the Jacobian of the derived expression
-      : v_eval{v_eval},
-        target{target} {}
+        // Dynamically get the Jacobian of the derived expression
+        : v_eval{v_eval}, target{target} {}
 
     WAVE_STRONG_INLINE JacobianType jacobian() const {
         // Check if Jacobian is wrt this Proxy
@@ -144,7 +143,7 @@ struct JacobianEvaluator<
   Derived,
   Target,
   std::enable_if_t<is_proxy<Derived>{} && !std::is_same<Derived, Target>{}>>
-  : DynamicJacobianEvaluator<Derived> {
+    : DynamicJacobianEvaluator<Derived> {
     WAVE_STRONG_INLINE explicit JacobianEvaluator(const Evaluator<Derived> &v_eval,
                                                   const Target &target)
         : DynamicJacobianEvaluator<Derived>{v_eval, &target} {}

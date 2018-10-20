@@ -17,7 +17,7 @@ _common_packages: &common_packages
   - libboost1.54-dev
   - libeigen3-dev
   - libgtest-dev
-  - clang-format-3.8
+  - clang-format-6.0
 
 jobs:
   include:

@@ -47,7 +47,7 @@ class RotateChain : public benchmark::Fixture {
 BENCHMARK_F(RotateChain, wave1)(benchmark::State &state) {
     for (auto _ : state) {
         for (auto i = N; i-- > 0;) {
-            auto[v0, J10, Jv10] = (R10[i] * v10[i]).evalWithJacobians();
+            auto [v0, J10, Jv10] = (R10[i] * v10[i]).evalWithJacobians();
 
             benchmark::DoNotOptimize(J10);
             benchmark::DoNotOptimize(Jv10);
@@ -59,7 +59,7 @@ BENCHMARK_F(RotateChain, wave1)(benchmark::State &state) {
 BENCHMARK_F(RotateChain, wave2)(benchmark::State &state) {
     for (auto _ : state) {
         for (auto i = N; i-- > 0;) {
-            auto[v0, J9, J10, Jv10] = (R9[i] * R10[i] * v10[i]).evalWithJacobians();
+            auto [v0, J9, J10, Jv10] = (R9[i] * R10[i] * v10[i]).evalWithJacobians();
 
             benchmark::DoNotOptimize(J9);
             benchmark::DoNotOptimize(J10);
@@ -72,7 +72,7 @@ BENCHMARK_F(RotateChain, wave2)(benchmark::State &state) {
 BENCHMARK_F(RotateChain, wave3)(benchmark::State &state) {
     for (auto _ : state) {
         for (auto i = N; i-- > 0;) {
-            auto[v0, J8, J9, J10, Jv10] =
+            auto [v0, J8, J9, J10, Jv10] =
               (R8[i] * R9[i] * R10[i] * v10[i]).evalWithJacobians();
 
             benchmark::DoNotOptimize(J8);
@@ -87,7 +87,7 @@ BENCHMARK_F(RotateChain, wave3)(benchmark::State &state) {
 BENCHMARK_F(RotateChain, wave4)(benchmark::State &state) {
     for (auto _ : state) {
         for (auto i = N; i-- > 0;) {
-            auto[v0, J7, J8, J9, J10, Jv10] =
+            auto [v0, J7, J8, J9, J10, Jv10] =
               (R7[i] * R8[i] * R9[i] * R10[i] * v10[i]).evalWithJacobians();
 
             benchmark::DoNotOptimize(J7);
@@ -103,7 +103,7 @@ BENCHMARK_F(RotateChain, wave4)(benchmark::State &state) {
 BENCHMARK_F(RotateChain, wave5)(benchmark::State &state) {
     for (auto _ : state) {
         for (auto i = N; i-- > 0;) {
-            auto[v0, J6, J7, J8, J9, J10, Jv10] =
+            auto [v0, J6, J7, J8, J9, J10, Jv10] =
               (R6[i] * R7[i] * R8[i] * R9[i] * R10[i] * v10[i]).evalWithJacobians();
 
             benchmark::DoNotOptimize(J6);
@@ -120,7 +120,7 @@ BENCHMARK_F(RotateChain, wave5)(benchmark::State &state) {
 BENCHMARK_F(RotateChain, wave6)(benchmark::State &state) {
     for (auto _ : state) {
         for (auto i = N; i-- > 0;) {
-            auto[v0, J5, J6, J7, J8, J9, J10, Jv10] =
+            auto [v0, J5, J6, J7, J8, J9, J10, Jv10] =
               (R5[i] * R6[i] * R7[i] * R8[i] * R9[i] * R10[i] * v10[i])
                 .evalWithJacobians();
             benchmark::DoNotOptimize(J5);
@@ -138,7 +138,7 @@ BENCHMARK_F(RotateChain, wave6)(benchmark::State &state) {
 BENCHMARK_F(RotateChain, wave7)(benchmark::State &state) {
     for (auto _ : state) {
         for (auto i = N; i-- > 0;) {
-            auto[v0, J4, J5, J6, J7, J8, J9, J10, Jv10] =
+            auto [v0, J4, J5, J6, J7, J8, J9, J10, Jv10] =
               (R4[i] * R5[i] * R6[i] * R7[i] * R8[i] * R9[i] * R10[i] * v10[i])
                 .evalWithJacobians();
             benchmark::DoNotOptimize(J4);
@@ -157,7 +157,7 @@ BENCHMARK_F(RotateChain, wave7)(benchmark::State &state) {
 BENCHMARK_F(RotateChain, wave8)(benchmark::State &state) {
     for (auto _ : state) {
         for (auto i = N; i-- > 0;) {
-            auto[v0, J3, J4, J5, J6, J7, J8, J9, J10, Jv10] =
+            auto [v0, J3, J4, J5, J6, J7, J8, J9, J10, Jv10] =
               (R3[i] * R4[i] * R5[i] * R6[i] * R7[i] * R8[i] * R9[i] * R10[i] * v10[i])
                 .evalWithJacobians();
             benchmark::DoNotOptimize(J3);
@@ -177,7 +177,7 @@ BENCHMARK_F(RotateChain, wave8)(benchmark::State &state) {
 BENCHMARK_F(RotateChain, wave9)(benchmark::State &state) {
     for (auto _ : state) {
         for (auto i = N; i-- > 0;) {
-            auto[v0, J2, J3, J4, J5, J6, J7, J8, J9, J10, Jv10] =
+            auto [v0, J2, J3, J4, J5, J6, J7, J8, J9, J10, Jv10] =
               (R2[i] * R3[i] * R4[i] * R5[i] * R6[i] * R7[i] * R8[i] * R9[i] * R10[i] *
                v10[i])
                 .evalWithJacobians();
@@ -200,7 +200,7 @@ BENCHMARK_F(RotateChain, wave9)(benchmark::State &state) {
 BENCHMARK_F(RotateChain, wave10)(benchmark::State &state) {
     for (auto _ : state) {
         for (auto i = N; i-- > 0;) {
-            auto[v0, J1, J2, J3, J4, J5, J6, J7, J8, J9, J10, Jv10] =
+            auto [v0, J1, J2, J3, J4, J5, J6, J7, J8, J9, J10, Jv10] =
               (R1[i] * R2[i] * R3[i] * R4[i] * R5[i] * R6[i] * R7[i] * R8[i] * R9[i] *
                R10[i] * v10[i])
                 .evalWithJacobians();

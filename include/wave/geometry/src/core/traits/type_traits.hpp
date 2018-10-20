@@ -155,7 +155,7 @@ using enable_if_scalar_t = typename std::enable_if<is_scalar<Derived>{}, T>::typ
 
 template <typename Derived>
 struct is_leaf_or_scalar
-  : tmp::bool_constant<is_leaf_expression<Derived>{} || is_scalar<Derived>{}> {};
+    : tmp::bool_constant<is_leaf_expression<Derived>{} || is_scalar<Derived>{}> {};
 
 template <typename Derived, typename T = void>
 using enable_if_leaf_or_scalar_t =
@@ -306,9 +306,9 @@ using traits_safe_t = typename traits_safe_impl<tmp::remove_cr_t<Target>,
 /** True if eval function defined for the given expression type and folded rhs */
 template <typename Tag, typename Rhs>
 struct is_directly_evaluable_unary
-  : tmp::negation<
-      std::is_same<decltype(impl::evalOrNotImplemented(Tag(), std::declval<Rhs>())),
-                   NotImplemented>> {};
+    : tmp::negation<
+        std::is_same<decltype(impl::evalOrNotImplemented(Tag(), std::declval<Rhs>())),
+                     NotImplemented>> {};
 
 template <typename Tag, typename FoldedLhs, typename FoldedRhs>
 using eval_t_binary =
@@ -317,9 +317,9 @@ using eval_t_binary =
 /** True if eval function defined for the given expression type and folded rhs */
 template <typename Tag, typename Lhs, typename Rhs>
 struct is_directly_evaluable_binary
-  : tmp::negation<std::is_same<decltype(impl::evalOrNotImplemented(
-                                 Tag(), std::declval<Lhs>(), std::declval<Rhs>())),
-                               NotImplemented>> {};
+    : tmp::negation<std::is_same<decltype(impl::evalOrNotImplemented(
+                                   Tag(), std::declval<Lhs>(), std::declval<Rhs>())),
+                                 NotImplemented>> {};
 
 // previous eval_type, needs a complete type
 // @todo clean up
@@ -373,11 +373,11 @@ struct has_unique_leaves_unary : unique_leaves_t<RhsDerived> {};
  */
 template <typename LhsDerived, typename RhsDerived>
 struct has_unique_leaves_binary
-  : std::conditional_t<unique_leaves_t<LhsDerived>::value &&
-                         unique_leaves_t<RhsDerived>::value,
-                       tmp::concat_if_unique<typename unique_leaves_t<LhsDerived>::type,
-                                             typename unique_leaves_t<RhsDerived>::type>,
-                       std::false_type> {};
+    : std::conditional_t<
+        unique_leaves_t<LhsDerived>::value && unique_leaves_t<RhsDerived>::value,
+        tmp::concat_if_unique<typename unique_leaves_t<LhsDerived>::type,
+                              typename unique_leaves_t<RhsDerived>::type>,
+        std::false_type> {};
 
 
 /** Use the derived class's BaseTmpl. For binary expressions, check that both match. */

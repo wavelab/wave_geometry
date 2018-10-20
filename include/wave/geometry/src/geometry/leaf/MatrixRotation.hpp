@@ -50,7 +50,7 @@ namespace internal {
 
 template <typename ImplType>
 struct traits<MatrixRotation<ImplType>>
-  : rotation_leaf_traits_base<MatrixRotation<ImplType>> {
+    : rotation_leaf_traits_base<MatrixRotation<ImplType>> {
     using PlainType = MatrixRotation<typename ImplType::PlainObject>;
 };
 
@@ -75,8 +75,8 @@ auto evalImpl(expr<LogMap>, const MatrixRotation<ImplType> &rhs) ->
     using Scalar = scalar_t<MatrixRotation<ImplType>>;
 
     // From http://ethaneade.com/lie.pdf
-    using std::sin;
     using std::acos;
+    using std::sin;
     const auto &m = rhs.value();
     const auto angle = acos((m.trace() - Scalar{1}) / Scalar{2});
 

@@ -76,8 +76,8 @@ bool checkApproxCoeffWise(const Matrix &expected, const Matrix &actual, double p
         for (int j = 0; j < expected.cols(); ++j) {
             using std::abs;
             const auto err = abs(expected(i, j) - actual(i, j));
-            EXPECT_NEAR(expected(i, j), actual(i, j), prec) << " (" << i << ", " << j
-                                                            << ")";
+            EXPECT_NEAR(expected(i, j), actual(i, j), prec)
+              << " (" << i << ", " << j << ")";
             if (err >= prec) {
                 return false;
             }
@@ -314,7 +314,7 @@ std::enable_if_t<not UniqueExpr> checkJacobians(const Expr &expr, const Wrt &...
     if (condition)                                                \
         EXPECT_THROW(statement, expected_exception);              \
     else                                                          \
-    EXPECT_NO_THROW(statement)
+        EXPECT_NO_THROW(statement)
 
 namespace Eigen {
 

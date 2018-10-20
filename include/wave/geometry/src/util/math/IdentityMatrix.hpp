@@ -43,7 +43,7 @@ namespace internal {
 // See https://eigen.tuxfamily.org/dox/TopicNewExpressionType.html
 template <typename Scalar, int N>
 struct traits<::wave::IdentityMatrix<Scalar, N>>
-  : Eigen::Matrix<Scalar, N, N>::IdentityReturnType {};
+    : Eigen::Matrix<Scalar, N, N>::IdentityReturnType {};
 
 }  // namespace internal
 

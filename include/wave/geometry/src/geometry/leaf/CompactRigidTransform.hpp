@@ -19,8 +19,8 @@ namespace wave {
  */
 template <typename ImplType>
 class CompactRigidTransform
-  : public RigidTransformBase<CompactRigidTransform<ImplType>>,
-    public LeafExpression<ImplType, CompactRigidTransform<ImplType>> {
+    : public RigidTransformBase<CompactRigidTransform<ImplType>>,
+      public LeafExpression<ImplType, CompactRigidTransform<ImplType>> {
     static_assert(internal::is_eigen_vector<7, ImplType>::value,
                   "ImplType must be an Eigen 7-vector type.");
 
@@ -100,7 +100,7 @@ namespace internal {
 
 template <typename ImplType>
 struct traits<CompactRigidTransform<ImplType>>
-  : rt_leaf_traits_base<CompactRigidTransform<ImplType>> {
+    : rt_leaf_traits_base<CompactRigidTransform<ImplType>> {
     using PlainType = CompactRigidTransform<typename ImplType::PlainObject>;
 };
 

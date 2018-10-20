@@ -18,7 +18,7 @@ void BM_waveAll(benchmark::State &state) {
     }
 
     for (auto _ : state) {
-        auto[res, jac_map] = wave::internal::evaluateWithDynamicReverseJacobians(expr);
+        auto [res, jac_map] = wave::internal::evaluateWithDynamicReverseJacobians(expr);
 
         benchmark::DoNotOptimize(res);
         benchmark::DoNotOptimize(jac_map);
@@ -36,7 +36,7 @@ void BM_dynamicNoVirtual(benchmark::State &state) {
         auto expr =
           R[0] * R[1] * R[2] * R[3] * R[4] * R[5] * R[6] * R[7] * R[8] * R[9] * v;
 
-        auto[res, jac_map] = wave::internal::evaluateWithDynamicReverseJacobians(expr);
+        auto [res, jac_map] = wave::internal::evaluateWithDynamicReverseJacobians(expr);
 
         benchmark::DoNotOptimize(res);
         benchmark::DoNotOptimize(jac_map);

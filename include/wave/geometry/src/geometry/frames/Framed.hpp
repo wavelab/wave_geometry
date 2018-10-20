@@ -57,8 +57,8 @@ class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Fra
       typename OtherDerived,
       TICK_REQUIRES(WeHaveFrames and internal::same_frames<Framed, OtherDerived>{})>
     Framed(const ExpressionBase<OtherDerived> &other)
-      // Evaluate to Framed and delegate to our copy or move constructor
-      : Framed{wave::internal::evaluateTo<Framed>(other.derived())} {}
+        // Evaluate to Framed and delegate to our copy or move constructor
+        : Framed{wave::internal::evaluateTo<Framed>(other.derived())} {}
 
     /** Construct from an expression in the special case we have all NoFrame*/
     // The above constructor won't work in this case since evaluateTo will return an
@@ -67,8 +67,8 @@ class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Fra
               TICK_REQUIRES(!WeHaveFrames and
                             internal::same_frames<Framed, OtherDerived>{})>
     Framed(const ExpressionBase<OtherDerived> &other)
-      // Evaluate to Framed and delegate to our copy or move constructor
-      : wrapped_leaf{wave::internal::evaluateTo<WrappedLeaf>(other.derived())} {}
+        // Evaluate to Framed and delegate to our copy or move constructor
+        : wrapped_leaf{wave::internal::evaluateTo<WrappedLeaf>(other.derived())} {}
 
     // Forward args to rhs (version for one argument)
     // Disable if copy ctor would apply - https://stackoverflow.com/a/39646176
@@ -196,7 +196,7 @@ struct FramedLeafAccess : FramedLeafAccessBase<Derived> {};
 // Traits for Framed with two frames
 template <typename WrappedLeaf, typename LeftFrame_, typename RightFrame_>
 struct traits<Framed<WrappedLeaf, LeftFrame_, RightFrame_>>
-  : frames_traits_base<WrappedLeaf, LeftFrame_, RightFrame_> {
+    : frames_traits_base<WrappedLeaf, LeftFrame_, RightFrame_> {
     using LeftFrame = LeftFrame_;
     using RightFrame = RightFrame_;
 };
@@ -207,7 +207,7 @@ template <typename WrappedLeaf,
           typename MiddleFrame_,
           typename RightFrame_>
 struct traits<Framed<WrappedLeaf, LeftFrame_, MiddleFrame_, RightFrame_>>
-  : frames_traits_base<WrappedLeaf, LeftFrame_, MiddleFrame_, RightFrame_> {
+    : frames_traits_base<WrappedLeaf, LeftFrame_, MiddleFrame_, RightFrame_> {
     using LeftFrame = LeftFrame_;
     using MiddleFrame = MiddleFrame_;
     using RightFrame = RightFrame_;

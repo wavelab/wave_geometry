@@ -62,14 +62,14 @@ struct UnaryExpressionBase {
 // Inverse)
 template <template <typename> class Tmpl, typename RhsDerived>
 struct UnaryExpression<Tmpl<RhsDerived>>
-  : UnaryExpressionBase<Tmpl<RhsDerived>, RhsDerived> {
+    : UnaryExpressionBase<Tmpl<RhsDerived>, RhsDerived> {
     using UnaryExpressionBase<Tmpl<RhsDerived>, RhsDerived>::UnaryExpressionBase;
 };
 
 // Specialization for unary expression with an extra parameter (such as Convert)
 template <template <typename, typename> class Tmpl, typename Aux, typename RhsDerived>
 struct UnaryExpression<Tmpl<Aux, RhsDerived>>
-  : UnaryExpressionBase<Tmpl<Aux, RhsDerived>, RhsDerived> {
+    : UnaryExpressionBase<Tmpl<Aux, RhsDerived>, RhsDerived> {
     using UnaryExpressionBase<Tmpl<Aux, RhsDerived>, RhsDerived>::UnaryExpressionBase;
 };
 

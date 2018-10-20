@@ -51,7 +51,7 @@ namespace internal {
 
 template <typename ImplType>
 struct traits<QuaternionRotation<ImplType>>
-  : rotation_leaf_traits_base<QuaternionRotation<ImplType>> {
+    : rotation_leaf_traits_base<QuaternionRotation<ImplType>> {
     using PlainType =
       QuaternionRotation<typename Eigen::internal::traits<ImplType>::PlainObject>;
     using typename rotation_leaf_traits_base<QuaternionRotation<ImplType>>::Scalar;

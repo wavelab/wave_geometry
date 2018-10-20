@@ -50,24 +50,24 @@ struct same_frames<
   Lhs,
   Rhs,
   std::enable_if_t<has_three_decorators<Lhs>{} && has_three_decorators<Rhs>{}>>
-  : std::integral_constant<bool,
-                           std::is_same<typename eval_traits<Lhs>::LeftFrame,
-                                        typename eval_traits<Rhs>::LeftFrame>{} &&
-                             std::is_same<typename eval_traits<Lhs>::MiddleFrame,
-                                          typename eval_traits<Rhs>::MiddleFrame>{} &&
-                             std::is_same<typename eval_traits<Lhs>::RightFrame,
-                                          typename eval_traits<Rhs>::RightFrame>{}> {};
+    : std::integral_constant<bool,
+                             std::is_same<typename eval_traits<Lhs>::LeftFrame,
+                                          typename eval_traits<Rhs>::LeftFrame>{} &&
+                               std::is_same<typename eval_traits<Lhs>::MiddleFrame,
+                                            typename eval_traits<Rhs>::MiddleFrame>{} &&
+                               std::is_same<typename eval_traits<Lhs>::RightFrame,
+                                            typename eval_traits<Rhs>::RightFrame>{}> {};
 
 template <typename Lhs, typename Rhs>
 struct same_frames<
   Lhs,
   Rhs,
   std::enable_if_t<has_two_decorators<Lhs>{} && has_two_decorators<Rhs>{}>>
-  : std::integral_constant<bool,
-                           std::is_same<typename eval_traits<Lhs>::LeftFrame,
-                                        typename eval_traits<Rhs>::LeftFrame>{} &&
-                             std::is_same<typename eval_traits<Lhs>::RightFrame,
-                                          typename eval_traits<Rhs>::RightFrame>{}> {};
+    : std::integral_constant<bool,
+                             std::is_same<typename eval_traits<Lhs>::LeftFrame,
+                                          typename eval_traits<Rhs>::LeftFrame>{} &&
+                               std::is_same<typename eval_traits<Lhs>::RightFrame,
+                                            typename eval_traits<Rhs>::RightFrame>{}> {};
 
 
 template <typename...>
@@ -89,14 +89,14 @@ struct is_unframed : std::false_type {};
 
 template <typename Derived>
 struct is_unframed<Derived, std::enable_if_t<has_two_decorators<Derived>{}>>
-  : is_unframed_impl<typename eval_traits<Derived>::LeftFrame,
-                     typename eval_traits<Derived>::RightFrame> {};
+    : is_unframed_impl<typename eval_traits<Derived>::LeftFrame,
+                       typename eval_traits<Derived>::RightFrame> {};
 
 template <typename Derived>
 struct is_unframed<Derived, std::enable_if_t<has_three_decorators<Derived>{}>>
-  : is_unframed_impl<typename eval_traits<Derived>::LeftFrame,
-                     typename eval_traits<Derived>::MiddleFrame,
-                     typename eval_traits<Derived>::RightFrame> {};
+    : is_unframed_impl<typename eval_traits<Derived>::LeftFrame,
+                       typename eval_traits<Derived>::MiddleFrame,
+                       typename eval_traits<Derived>::RightFrame> {};
 
 
 template <typename... Frames>

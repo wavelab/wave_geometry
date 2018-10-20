@@ -23,12 +23,12 @@ template <class...>
 struct expanding_disjunction : std::false_type {};
 template <class... T, class... Bn>
 struct expanding_disjunction<type_list<T...>, Bn...>
-  : expanding_disjunction<T..., Bn...> {};
+    : expanding_disjunction<T..., Bn...> {};
 template <class B1>
 struct expanding_disjunction<B1> : B1 {};
 template <class B1, class... Bn>
 struct expanding_disjunction<B1, Bn...>
-  : std::conditional_t<bool(B1::value), B1, expanding_disjunction<Bn...>> {};
+    : std::conditional_t<bool(B1::value), B1, expanding_disjunction<Bn...>> {};
 
 
 /** Concatenate variadic type lists (of the same kind)
@@ -73,7 +73,8 @@ template <template <typename...> class F, typename... T>
 using apply_t = typename apply<F, T...>::type;
 
 template <template <typename...> class F,
-          template <typename...> class List,
+          template <typename...>
+          class List,
           typename... Items>
 struct apply<F, List<Items...>> {
     using type = F<Items...>;
@@ -81,7 +82,8 @@ struct apply<F, List<Items...>> {
 
 template <template <typename...> class F,
           typename A,
-          template <typename...> class List,
+          template <typename...>
+          class List,
           typename... Items>
 struct apply<F, A, List<Items...>> {
     using type = F<A, Items...>;
@@ -90,7 +92,8 @@ struct apply<F, A, List<Items...>> {
 template <template <typename...> class F,
           typename A,
           typename B,
-          template <typename...> class List,
+          template <typename...>
+          class List,
           typename... Items>
 struct apply<F, A, B, List<Items...>> {
     using type = F<A, B, Items...>;
@@ -116,7 +119,8 @@ template <template <typename...> class F, typename... T>
 using apply_each_t = typename apply_each<F, T...>::type;
 
 template <template <typename...> class F,
-          template <typename...> class List,
+          template <typename...>
+          class List,
           typename... Items>
 struct apply_each<F, List<Items...>> {
     using type = List<F<Items>...>;
@@ -124,7 +128,8 @@ struct apply_each<F, List<Items...>> {
 
 template <template <typename...> class F,
           typename A,
-          template <typename...> class List,
+          template <typename...>
+          class List,
           typename... Items>
 struct apply_each<F, A, List<Items...>> {
     using type = List<F<A, Items>...>;
@@ -133,7 +138,8 @@ struct apply_each<F, A, List<Items...>> {
 template <template <typename...> class F,
           typename A,
           typename B,
-          template <typename...> class List,
+          template <typename...>
+          class List,
           typename... Items>
 struct apply_each<F, A, B, List<Items...>> {
     using type = List<F<A, B, Items>...>;
@@ -151,7 +157,8 @@ template <template <typename...> class C, typename A, typename B>
 using apply_cartesian_t = typename apply_cartesian<C, A, B>::type;
 
 template <template <typename...> class C,
-          template <typename...> class List,
+          template <typename...>
+          class List,
           typename... As,
           typename... Bs>
 struct apply_cartesian<C, List<As...>, List<Bs...>> {
@@ -194,9 +201,9 @@ struct concat_if_unique;
 
 template <template <typename...> class List, typename... As, typename B0, typename... Bs>
 struct concat_if_unique<List<As...>, List<B0, Bs...>>
-  : std::conditional_t<find<List<As...>, B0>::value >= 0,
-                       std::false_type,
-                       concat_if_unique<List<As..., B0>, List<Bs...>>> {};
+    : std::conditional_t<find<List<As...>, B0>::value >= 0,
+                         std::false_type,
+                         concat_if_unique<List<As..., B0>, List<Bs...>>> {};
 
 template <template <typename...> class List, typename... As>
 struct concat_if_unique<List<As...>, List<>> : std::true_type {

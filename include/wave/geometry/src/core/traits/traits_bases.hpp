@@ -212,7 +212,7 @@ struct unary_traits_base_tag<Tmpl<Aux, RhsDerived_>, Tag_> {
 // Specialization for unary expression with an extra parameter (such as Convert)
 template <template <typename, typename> class Tmpl, typename Aux, typename RhsDerived_>
 struct unary_traits_base<Tmpl<Aux, RhsDerived_>>
-  : unary_traits_base_tag<Tmpl<Aux, RhsDerived_>, expr<Tmpl, Aux>> {};
+    : unary_traits_base_tag<Tmpl<Aux, RhsDerived_>, expr<Tmpl, Aux>> {};
 
 // Used so we can instantiate traits of non-evaluable types
 template <>

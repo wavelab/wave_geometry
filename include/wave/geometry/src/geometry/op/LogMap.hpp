@@ -27,7 +27,7 @@ namespace internal {
 
 template <typename ExtraFrame, typename Rhs>
 struct traits<LogMap<ExtraFrame, Rhs>>
-  : unary_traits_base_tag<LogMap<ExtraFrame, Rhs>, expr<LogMap>> {
+    : unary_traits_base_tag<LogMap<ExtraFrame, Rhs>, expr<LogMap>> {
     using OutputFunctor = WrapWithFrames<LeftFrameOf<Rhs>, LeftFrameOf<Rhs>, ExtraFrame>;
 };
 

@@ -44,7 +44,7 @@ BENCHMARK_F(Imu, waveTyped)(benchmark::State &state) {
               inverse(meas_Rij[i] * exp(wg[i])) * inverse(R_i[i]) * R_j[i];
             const auto &expr = log(expr1);
 
-            auto[r, J1, J2, J_phi_i, J_phi_j] =
+            auto [r, J1, J2, J_phi_i, J_phi_j] =
               expr.evalWithJacobians(meas_Rij[i], wg[i], R_i[i], R_j[i]);
             benchmark::DoNotOptimize(r);
             benchmark::DoNotOptimize(J1);
@@ -63,7 +63,7 @@ BENCHMARK_F(Imu, waveReverse)(benchmark::State &state) {
             const auto &expr = log(expr1);
 
 
-            auto[r, J1, J2, J_phi_i, J_phi_j] =
+            auto [r, J1, J2, J_phi_i, J_phi_j] =
               wave::internal::evaluateWithReverseJacobians(expr);
             benchmark::DoNotOptimize(r);
             benchmark::DoNotOptimize(J1);
@@ -81,7 +81,7 @@ BENCHMARK_F(Imu, waveUntyped)(benchmark::State &state) {
               inverse(meas_Rij[i] * exp(wg[i])) * inverse(R_i[i]) * R_j[i];
             const auto &expr = log(expr1);
 
-            auto[r, J1, J2, J_phi_i, J_phi_j] = wave::internal::evaluateWithJacobians(
+            auto [r, J1, J2, J_phi_i, J_phi_j] = wave::internal::evaluateWithJacobians(
               expr, meas_Rij[i], wg[i], R_i[i], R_j[i]);
             benchmark::DoNotOptimize(r);
             benchmark::DoNotOptimize(J1);

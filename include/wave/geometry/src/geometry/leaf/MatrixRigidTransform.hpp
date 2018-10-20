@@ -16,8 +16,8 @@ namespace wave {
  */
 template <typename ImplType>
 class MatrixRigidTransform
-  : public RigidTransformBase<MatrixRigidTransform<ImplType>>,
-    public LeafExpression<ImplType, MatrixRigidTransform<ImplType>> {
+    : public RigidTransformBase<MatrixRigidTransform<ImplType>>,
+      public LeafExpression<ImplType, MatrixRigidTransform<ImplType>> {
     static_assert(internal::is_eigen_matrix<4, ImplType>::value,
                   "ImplType must be an Eigen 4x4 matrix type.");
 
@@ -109,7 +109,7 @@ struct rt_leaf_traits_base;
 
 template <typename ImplType>
 struct traits<MatrixRigidTransform<ImplType>>
-  : rt_leaf_traits_base<MatrixRigidTransform<ImplType>> {
+    : rt_leaf_traits_base<MatrixRigidTransform<ImplType>> {
     using PlainType = MatrixRigidTransform<typename ImplType::PlainObject>;
 };
 

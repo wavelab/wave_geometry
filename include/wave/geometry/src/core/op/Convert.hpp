@@ -22,7 +22,7 @@ namespace internal {
 
 template <typename ToDerived, typename FromDerived>
 struct traits<Convert<ToDerived, FromDerived>>
-  : unary_traits_base<Convert<ToDerived, FromDerived>> {
+    : unary_traits_base<Convert<ToDerived, FromDerived>> {
     using OutputFunctor = typename traits<FromDerived>::OutputFunctor;
 };
 

@@ -38,8 +38,8 @@ struct traits<AngleAxisRotation<ImplType, ToFrame_, FromFrame_>> {
 /** A rotation stored as a rotation matrix */
 template <typename ImplType, typename ToFrame, typename FromFrame>
 class MatrixRotation
-  : public RotationBase<MatrixRotation<ImplType, ToFrame, FromFrame>>,
-    public LeafExpression<MatrixRotation<ImplType, ToFrame, FromFrame>> {
+    : public RotationBase<MatrixRotation<ImplType, ToFrame, FromFrame>>,
+      public LeafExpression<MatrixRotation<ImplType, ToFrame, FromFrame>> {
     using Scalar = typename Eigen::internal::traits<ImplType>::Scalar;
     using Real = typename Eigen::NumTraits<Scalar>::Real;
     using TangentType = RelativeRotation<Eigen::Matrix<Scalar, 3, 1>>;
@@ -100,8 +100,8 @@ class MatrixRotation
 /** A rotation stored as a quaternion */
 template <typename ImplType, typename ToFrame, typename FromFrame>
 class QuaternionRotation
-  : public RotationBase<QuaternionRotation<ImplType, ToFrame, FromFrame>>,
-    public LeafExpression<QuaternionRotation<ImplType, ToFrame, FromFrame>> {
+    : public RotationBase<QuaternionRotation<ImplType, ToFrame, FromFrame>>,
+      public LeafExpression<QuaternionRotation<ImplType, ToFrame, FromFrame>> {
     using Scalar = typename Eigen::internal::traits<ImplType>::Scalar;
     using Real = typename Eigen::NumTraits<Scalar>::Real;
     using TangentType = RelativeRotation<Eigen::Matrix<Scalar, 3, 1>>;
@@ -158,8 +158,8 @@ class QuaternionRotation
 /** A rotation stored as an axis of rotation and magnitude */
 template <typename ImplType, typename ToFrame, typename FromFrame>
 class AngleAxisRotation
-  : public RotationBase<AngleAxisRotation<ImplType, ToFrame, FromFrame>>,
-    public LeafExpression<AngleAxisRotation<ImplType, ToFrame, FromFrame>> {
+    : public RotationBase<AngleAxisRotation<ImplType, ToFrame, FromFrame>>,
+      public LeafExpression<AngleAxisRotation<ImplType, ToFrame, FromFrame>> {
     using Scalar = typename Eigen::internal::traits<ImplType>::Scalar;
     using Real = typename Eigen::NumTraits<Scalar>::Real;
     using TangentType = RelativeRotation<Eigen::Matrix<Scalar, 3, 1>>;

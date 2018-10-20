@@ -30,8 +30,8 @@ struct FrameCast<F1, F2, Rhs> : internal::base_tmpl_t<Rhs, FrameCast<F1, F2, Rhs
 
 template <typename F1, typename F2, typename F3, typename Rhs>
 struct FrameCast<F1, F2, F3, Rhs>
-  : internal::base_tmpl_t<Rhs, FrameCast<F1, F2, F3, Rhs>>,
-    UnaryExpressionBase<FrameCast<F1, F2, F3, Rhs>, Rhs> {
+    : internal::base_tmpl_t<Rhs, FrameCast<F1, F2, F3, Rhs>>,
+      UnaryExpressionBase<FrameCast<F1, F2, F3, Rhs>, Rhs> {
  private:
     using Storage = UnaryExpressionBase<FrameCast<F1, F2, F3, Rhs>, Rhs>;
 
@@ -41,10 +41,10 @@ struct FrameCast<F1, F2, F3, Rhs>
 
 
 /**
-* Forcibly changes the frame descriptors of an existing vector expression.
-*
-* @tparam F1, F2, F3 the new frame descriptors
-*/
+ * Forcibly changes the frame descriptors of an existing vector expression.
+ *
+ * @tparam F1, F2, F3 the new frame descriptors
+ */
 template <typename F1, typename F2, typename F3, typename Rhs>
 auto frame_cast(const ExpressionBase<Rhs> &rhs) -> TICK_FUNCTION_REQUIRES(
   internal::has_three_decorators<Rhs>{})(FrameCast<F1, F2, F3, Rhs>) {
@@ -52,10 +52,10 @@ auto frame_cast(const ExpressionBase<Rhs> &rhs) -> TICK_FUNCTION_REQUIRES(
 }
 
 /**
-* Forcibly changes the frame descriptors of an existing vector expression.
-*
-* @tparam F1, F2, F3 the new frame descriptors
-*/
+ * Forcibly changes the frame descriptors of an existing vector expression.
+ *
+ * @tparam F1, F2, F3 the new frame descriptors
+ */
 template <typename F1, typename F2, typename F3, typename Rhs>
 auto frame_cast(ExpressionBase<Rhs> &&rhs) -> TICK_FUNCTION_REQUIRES(
   internal::has_three_decorators<Rhs>{})(FrameCast<F1, F2, F3, Rhs &&>) {
@@ -63,10 +63,10 @@ auto frame_cast(ExpressionBase<Rhs> &&rhs) -> TICK_FUNCTION_REQUIRES(
 }
 
 /**
-* Forcibly changes the frame descriptors of an existing transform expression.
-*
-* @tparam F1, F2 the new frame descriptors
-*/
+ * Forcibly changes the frame descriptors of an existing transform expression.
+ *
+ * @tparam F1, F2 the new frame descriptors
+ */
 template <typename F1, typename F2, typename Rhs>
 auto frame_cast(const ExpressionBase<Rhs> &rhs)
   -> TICK_FUNCTION_REQUIRES(internal::has_two_decorators<Rhs>{})(FrameCast<F1, F2, Rhs>) {
@@ -74,10 +74,10 @@ auto frame_cast(const ExpressionBase<Rhs> &rhs)
 }
 
 /**
-* Forcibly changes the frame descriptors of an existing transform expression.
-*
-* @tparam F1, F2 the new frame descriptors
-*/
+ * Forcibly changes the frame descriptors of an existing transform expression.
+ *
+ * @tparam F1, F2 the new frame descriptors
+ */
 template <typename F1, typename F2, typename Rhs>
 auto frame_cast(ExpressionBase<Rhs> &&rhs) -> TICK_FUNCTION_REQUIRES(
   internal::has_two_decorators<Rhs>{})(FrameCast<F1, F2, Rhs &&>) {

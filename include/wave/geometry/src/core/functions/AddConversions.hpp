@@ -21,7 +21,8 @@ namespace internal {
  */
 template <typename Derived,
           typename Tag,
-          template <typename> class Rebind,
+          template <typename>
+          class Rebind,
           typename Rhs,
           typename... ConvertTo>
 struct first_directly_evaluable_conversion_unary;
@@ -33,9 +34,11 @@ struct first_directly_evaluable_conversion_unary;
  */
 template <typename Derived,
           typename Tag,
-          template <typename> class Rebind,
+          template <typename>
+          class Rebind,
           typename Rhs,
-          template <typename...> class List,
+          template <typename...>
+          class List,
           typename... ConvertTo>
 struct first_directly_evaluable_conversion_unary<Derived,
                                                  Tag,
@@ -49,8 +52,8 @@ struct first_directly_evaluable_conversion_unary<Derived,
 
     template <typename ToRhs>
     struct is_evaluable_after_conversion_test
-      : tmp::conjunction<is_directly_evaluable_unary<expr<Convert, ToRhs>, eval_t<Rhs>>,
-                         is_directly_evaluable_unary<Tag, ToRhs>> {
+        : tmp::conjunction<is_directly_evaluable_unary<expr<Convert, ToRhs>, eval_t<Rhs>>,
+                           is_directly_evaluable_unary<Tag, ToRhs>> {
         using type = Rebind<Convert<ToRhs, Rhs> &&>;
     };
 
@@ -83,7 +86,8 @@ struct first_directly_evaluable_conversion_unary<Derived,
  */
 template <typename Derived,
           typename Tag,
-          template <typename, typename> class Rebind,
+          template <typename, typename>
+          class Rebind,
           typename Lhs,
           typename Rhs,
           typename LhsConvertTo,
@@ -96,10 +100,12 @@ struct first_directly_evaluable_conversion_binary;
  */
 template <typename Derived,
           typename Tag,
-          template <typename, typename> class Rebind,
+          template <typename, typename>
+          class Rebind,
           typename Lhs,
           typename Rhs,
-          template <typename...> class List,
+          template <typename...>
+          class List,
           typename... LhsConvertTo,
           typename... RhsConvertTo>
 struct first_directly_evaluable_conversion_binary<Derived,
@@ -118,29 +124,29 @@ struct first_directly_evaluable_conversion_binary<Derived,
 
     // todo: factor out to short-circuit in this most common case
     struct is_evaluable_test
-      : is_directly_evaluable_binary<Tag, eval_t<Lhs>, eval_t<Rhs>> {
+        : is_directly_evaluable_binary<Tag, eval_t<Lhs>, eval_t<Rhs>> {
         using type = Derived;
     };
 
     template <typename ToLhs>
     struct convert_left_test
-      : tmp::conjunction<is_directly_evaluable_unary<expr<Convert, ToLhs>, eval_t<Lhs>>,
-                         is_directly_evaluable_binary<Tag, ToLhs, eval_t<Rhs>>> {
+        : tmp::conjunction<is_directly_evaluable_unary<expr<Convert, ToLhs>, eval_t<Lhs>>,
+                           is_directly_evaluable_binary<Tag, ToLhs, eval_t<Rhs>>> {
         using type = Rebind<Convert<ToLhs, Lhs> &&, Rhs>;
     };
 
     template <typename ToRhs>
     struct convert_right_test
-      : tmp::conjunction<is_directly_evaluable_unary<expr<Convert, ToRhs>, eval_t<Rhs>>,
-                         is_directly_evaluable_binary<Tag, eval_t<Lhs>, ToRhs>> {
+        : tmp::conjunction<is_directly_evaluable_unary<expr<Convert, ToRhs>, eval_t<Rhs>>,
+                           is_directly_evaluable_binary<Tag, eval_t<Lhs>, ToRhs>> {
         using type = Rebind<Lhs, Convert<ToRhs, Rhs> &&>;
     };
 
     template <typename ToLhs, typename ToRhs>
     struct convert_both_test
-      : tmp::conjunction<is_directly_evaluable_unary<expr<Convert, ToLhs>, eval_t<Lhs>>,
-                         is_directly_evaluable_unary<expr<Convert, ToRhs>, eval_t<Rhs>>,
-                         is_directly_evaluable_binary<Tag, ToLhs, ToRhs>> {
+        : tmp::conjunction<is_directly_evaluable_unary<expr<Convert, ToLhs>, eval_t<Lhs>>,
+                           is_directly_evaluable_unary<expr<Convert, ToRhs>, eval_t<Rhs>>,
+                           is_directly_evaluable_binary<Tag, ToLhs, ToRhs>> {
         using type = Rebind<Convert<ToLhs, Lhs> &&, Convert<ToRhs, Rhs> &&>;
     };
 

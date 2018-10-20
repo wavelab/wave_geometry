@@ -13,8 +13,8 @@ namespace wave {
  */
 template <typename Rhs>
 struct ExpMap
-  : internal::base_tmpl_t<typename internal::eval_traits<Rhs>::ExpType, ExpMap<Rhs>>,
-    UnaryExpression<ExpMap<Rhs>> {
+    : internal::base_tmpl_t<typename internal::eval_traits<Rhs>::ExpType, ExpMap<Rhs>>,
+      UnaryExpression<ExpMap<Rhs>> {
  private:
     using Storage = UnaryExpression<ExpMap<Rhs>>;
 

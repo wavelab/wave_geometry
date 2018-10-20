@@ -49,14 +49,14 @@ struct contains_same_type<A, B, enable_if_leaf_or_scalar_t<A>> : std::is_same<A,
 
 template <typename A, typename B>
 struct contains_same_type<A, B, enable_if_unary_t<A>>
-  : tmp::bool_constant<std::is_same<A, B>{} ||
-                       contains_same_type<typename traits<A>::RhsDerived, B>{}> {};
+    : tmp::bool_constant<std::is_same<A, B>{} ||
+                         contains_same_type<typename traits<A>::RhsDerived, B>{}> {};
 
 template <typename A, typename B>
 struct contains_same_type<A, B, enable_if_binary_t<A>>
-  : tmp::bool_constant<std::is_same<A, B>{} ||
-                       contains_same_type<typename traits<A>::LhsDerived, B>{} ||
-                       contains_same_type<typename traits<A>::RhsDerived, B>{}> {};
+    : tmp::bool_constant<std::is_same<A, B>{} ||
+                         contains_same_type<typename traits<A>::LhsDerived, B>{} ||
+                         contains_same_type<typename traits<A>::RhsDerived, B>{}> {};
 
 
 }  // namespace internal

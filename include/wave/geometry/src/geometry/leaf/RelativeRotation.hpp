@@ -86,7 +86,7 @@ namespace internal {
 
 template <typename ImplType>
 struct traits<RelativeRotation<ImplType>>
-  : vector_leaf_traits_base<RelativeRotation<ImplType>> {
+    : vector_leaf_traits_base<RelativeRotation<ImplType>> {
     using ExpType = MatrixRotation<Eigen::Matrix<typename ImplType::Scalar, 3, 3>>;
 };
 
@@ -96,8 +96,8 @@ auto evalImpl(expr<ExpMap>, const RelativeRotation<ImplType> &rhs) {
     using ExpType = typename traits<RelativeRotation<ImplType>>::ExpType;
     using Scalar = typename ImplType::Scalar;
     using Mat3 = Eigen::Matrix<Scalar, 3, 3>;
-    using std::sin;
     using std::cos;
+    using std::sin;
     using std::sqrt;
     const auto &r = rhs.value();
     // Rodrigues formula - see http://ethaneade.com/lie.pdf
