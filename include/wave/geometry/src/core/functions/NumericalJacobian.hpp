@@ -69,7 +69,7 @@ struct EvaluatorWithDelta;
 /**Specialization for leaf expression
  */
 template <typename Derived>
-struct EvaluatorWithDelta<Derived, enable_if_leaf_t<Derived>> {
+struct EvaluatorWithDelta<Derived, enable_if_leaf_or_scalar_t<Derived>> {
     using Scalar = scalar_t<Derived>;
     using PlainType = plain_eval_t<Derived>;
 
@@ -79,18 +79,6 @@ struct EvaluatorWithDelta<Derived, enable_if_leaf_t<Derived>> {
                          Scalar delta) const {
         const auto &value = evalImpl(get_expr_tag_t<Derived>{}, expr);
         return evaluateWithDeltaImpl(expr, target, PlainType{value}, coeff, delta);
-    }
-};
-
-/** Specialization for scalar type */
-template <typename Scalar>
-struct EvaluatorWithDelta<Scalar, enable_if_scalar_t<Scalar>> {
-    using PlainType = plain_eval_t<Scalar>;
-    PlainType operator()(const Scalar &value,
-                         const void *target,
-                         int coeff,
-                         Scalar delta) const {
-        return evaluateWithDeltaImpl(value, target, PlainType{value}, coeff, delta);
     }
 };
 
@@ -202,8 +190,8 @@ auto evaluateNumericalJacobian(const ExpressionBase<Derived> &expr,
     using OutputType = internal::plain_output_t<Derived>;
     const auto &v_eval = internal::prepareEvaluatorTo<OutputType>(expr.derived());
 
-    return internal::evaluateNumericalJacobianImpl(
-      v_eval, getWrtTarget(internal::leaf{}, target));
+    return internal::evaluateNumericalJacobianImpl(v_eval,
+                                                   getWrtTarget(internal::adl{}, target));
 }
 
 /** Numerically evaluate multiple Jacobians of am expression tree.
@@ -223,7 +211,7 @@ auto evaluateNumericalJacobians(const ExpressionBase<Derived> &expr,
     const auto &v_eval = internal::prepareEvaluatorTo<OutputType>(expr.derived());
 
     return std::make_tuple(internal::evaluateNumericalJacobianImpl(
-      v_eval, getWrtTarget(internal::leaf{}, targets))...);
+      v_eval, getWrtTarget(internal::adl{}, targets))...);
 }
 
 }  // namespace wave

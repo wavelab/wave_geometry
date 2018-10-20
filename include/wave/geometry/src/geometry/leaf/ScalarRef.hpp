@@ -17,9 +17,8 @@ namespace wave {
  */
 template <typename ScalarType>
 struct ScalarRef : public ScalarBase<ScalarRef<ScalarType>> {
-    TICK_TRAIT_CHECK(internal::is_scalar<ScalarType>);
-
-    using RhsDerived = tmp::remove_cr_t<ScalarType>;
+    using RhsDerived = std::remove_reference_t<ScalarType>;
+    TICK_TRAIT_CHECK(internal::is_scalar<RhsDerived>);
 
  public:
     ScalarRef() = delete;
@@ -27,15 +26,15 @@ struct ScalarRef : public ScalarBase<ScalarRef<ScalarType>> {
     ScalarRef(ScalarRef &&) noexcept = default;
 
     /** Constructs from a reference to scalar */
-    explicit ScalarRef(const ScalarType &s) : rhs_{s} {}
+    explicit ScalarRef(const RhsDerived &s) : rhs_{s} {}
 
     /** Returns stored const reference */
-    const ScalarType &rhs() const noexcept {
+    const RhsDerived &rhs() const noexcept {
         return rhs_;
     }
 
  private:
-    const ScalarType &rhs_;
+    const internal::ref_sel_t<ScalarType> rhs_;
 };
 
 namespace internal {

@@ -96,7 +96,7 @@ struct traits<RefProxy<Leaf>> {
 };
 
 template <typename Leaf>
-decltype(auto) getWrtTarget(leaf, const ExpressionBase<RefProxy<Leaf>> &proxy) {
+decltype(auto) getWrtTarget(adl, const ExpressionBase<RefProxy<Leaf>> &proxy) {
     return proxy.derived().follow();
 }
 

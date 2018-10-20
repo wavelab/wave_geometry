@@ -22,8 +22,13 @@ struct JacobianEvaluator;
  * have ADL
  */
 template <typename Derived>
-decltype(auto) getWrtTarget(leaf, const ExpressionBase<Derived> &target) {
+auto getWrtTarget(adl, const ExpressionBase<Derived> &target) -> const Derived & {
     return target.derived();
+}
+
+template <typename S, std::enable_if_t<internal::is_scalar<S>{}, int> = 0>
+auto getWrtTarget(adl, const S &target) -> const S & {
+    return target;
 }
 
 /** Specialization for expression of same type as the target */
@@ -267,7 +272,7 @@ auto evaluateJacobian(const ExpressionBase<Derived> &expr, const Target &target)
     // Note since we don't return the value, we don't need the user-facing OutputType
     using OutType = eval_output_t<Derived>;
     const auto &v_eval = prepareEvaluatorTo<OutType>(expr.derived());
-    return evaluateOneJacobian(v_eval, getWrtTarget(leaf{}, target));
+    return evaluateOneJacobian(v_eval, getWrtTarget(adl{}, target));
 }
 
 /** Evaluate the result of an expression tree and any number of jacobians
@@ -284,7 +289,7 @@ auto evaluateWithJacobians(const ExpressionBase<Derived> &expr,
     const auto &v_eval = prepareEvaluatorTo<plain_output_t<Derived>>(expr.derived());
 
     return std::make_tuple(prepareOutput(v_eval),
-                           evaluateOneJacobian(v_eval, getWrtTarget(leaf{}, targets))...);
+                           evaluateOneJacobian(v_eval, getWrtTarget(adl{}, targets))...);
 }
 
 }  // namespace internal

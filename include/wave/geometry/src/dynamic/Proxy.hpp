@@ -210,7 +210,7 @@ struct traits<Proxy<Leaf>> {
 };
 
 template <typename Leaf>
-decltype(auto) getWrtTarget(leaf, const ExpressionBase<Proxy<Leaf>> &proxy) {
+decltype(auto) getWrtTarget(adl, const ExpressionBase<Proxy<Leaf>> &proxy) {
     return proxy.derived().follow();
 }
 

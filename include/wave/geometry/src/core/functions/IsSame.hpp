@@ -66,7 +66,13 @@ inline constexpr bool isSame(const ExpressionBase<Derived> &a,
 // Version for unknown target type (used by dynamic evaluators)
 template <typename A>
 inline constexpr bool isSame(const ExpressionBase<A> &a, const void *b) noexcept {
-    return static_cast<const void *>(&getWrtTarget(internal::leaf{}, a.derived())) == b;
+    return static_cast<const void *>(&getWrtTarget(internal::adl{}, a.derived())) == b;
+}
+
+// Version for scalar and unknown target type (used by dynamic evaluators)
+template <typename A, internal::enable_if_scalar_t<A, int> = 0>
+inline constexpr bool isSame(const A &a, const void *b) noexcept {
+    return static_cast<const void *>(&a) == b;
 }
 
 /** Attempt to determine whether `a` contains an expression identical to `b`

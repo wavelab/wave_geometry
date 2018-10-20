@@ -29,8 +29,8 @@ using DynamicReverseResult = MatrixMap<const void *, Scalar>;
 using DynamicLeavesVec = std::vector<std::pair<const void *, int>>;
 
 template <typename Derived, enable_if_leaf_or_scalar_t<Derived, int> = 0>
-void getLeaves(adl, DynamicLeavesVec &vec, const ExpressionBase<Derived> &expr) {
-    vec.emplace_back(&expr.derived(), traits<Derived>::TangentSize);
+void getLeaves(adl, DynamicLeavesVec &vec, const Derived &expr) {
+    vec.emplace_back(&expr, traits<Derived>::TangentSize);
 }
 
 template <typename Derived, enable_if_unary_t<Derived, int> = 0>

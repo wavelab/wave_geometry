@@ -192,7 +192,7 @@ template <typename Derived, typename Target>
 inline auto evaluateOneDynamicJacobian(const Evaluator<Derived> &v_eval,
                                        const Target &target)
   -> jacobian_t<Derived, Target> {
-    const auto &actual_target = getWrtTarget(leaf{}, target);
+    const auto &actual_target = getWrtTarget(adl{}, target);
     internal::DynamicJacobianEvaluator<Derived> j_eval{v_eval, &actual_target};
     const auto &result = j_eval.jacobian();
     if (result) {
