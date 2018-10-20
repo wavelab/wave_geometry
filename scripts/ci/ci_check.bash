@@ -3,6 +3,9 @@ set -e  # exit on first error
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}" )" && pwd)" # This script's directory
 
 check_format() {
+    # Use specifically this version of clang-format on CI
+    export FORMAT_EXE=clang-format-7
+
     # Run clang-format on all files
     bash "${DIR}/../format.bash"
     # Check if it replaced anything, and print the files if so

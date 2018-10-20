@@ -13,11 +13,15 @@ cache:
   # There is little benefit from ccache for testing a header-only library
   ccache: false
 
+_common_sources: &common_sources
+  - ubuntu-toolchain-r-test
+  - llvm-toolchain-trusty-7
+
 _common_packages: &common_packages
   - libboost1.54-dev
   - libeigen3-dev
   - libgtest-dev
-  - clang-format-6.0
+  - clang-format-7
 
 jobs:
   include:
@@ -26,8 +30,8 @@ jobs:
       addons:
         apt:
           sources:
-            - ubuntu-toolchain-r-test
             - sourceline: 'ppa:lkoppel/robotics'
+            - *common_sources
           packages:
             - *common_packages
             - g++-5
@@ -36,26 +40,26 @@ jobs:
       addons:
         apt:
           sources:
-            - ubuntu-toolchain-r-test
             - llvm-toolchain-trusty-4.0
             - sourceline: 'ppa:lkoppel/robotics'
+            - *common_sources
           packages:
             - *common_packages
             - g++-5
             - clang-4.0
-    - name: "GCC 7 AddressSanitizer"
-      env: WAVE_CXX=g++-7 WAVE_CC=gcc-7 \
+    - name: "GCC 8 AddressSanitizer"
+      env: WAVE_CXX=g++-8 WAVE_CC=gcc-8 \
         ASAN_OPTIONS=detect_leaks=0:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1 \
         WAVE_CXX_FLAGS="-fsanitize=address -fsanitize-address-use-after-scope -O1 -DNDEBUG -fno-omit-frame-pointer -ftrack-macro-expansion=0 -fuse-ld=gold -Wno-misleading-indentation" \
         WAVE_BUILD_TYPE=None
       addons:
         apt:
           sources:
-            - ubuntu-toolchain-r-test
             - sourceline: 'ppa:lkoppel/robotics'
+            - *common_sources
           packages:
             - *common_packages
-            - g++-7
+            - g++-8
             - binutils
     - stage: deploy
       name: "Docs"
