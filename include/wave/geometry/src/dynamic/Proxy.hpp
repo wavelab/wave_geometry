@@ -69,7 +69,8 @@ class Proxy final : public internal::base_tmpl_t<Leaf, Proxy<Leaf>> {
  * the stack, and the proxy outlasts it.
  */
 template <typename Derived>
-auto makeProxy(ExpressionBase<Derived> &&expr) {
+auto makeProxy(ExpressionBase<Derived> &&expr)
+  -> Proxy<internal::plain_output_t<Derived>> {  // return type for gcc5
     return Proxy<internal::plain_output_t<Derived>>{std::move(expr).derived()};
 }
 

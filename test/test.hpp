@@ -267,7 +267,7 @@ std::enable_if_t<UniqueExpr> checkJacobians(const Expr &expr, const Wrt &... wrt
     const auto &reverse = expr.evalWithJacobians();
     const auto &reverse_dynamic =
       wave::internal::evaluateWithDynamicReverseJacobians(expr);
-    const auto wrt_addresses = std::array<const void *, sizeof...(Wrt)>{&wrt...};
+    const auto wrt_addresses = std::array<const void *, sizeof...(Wrt)>{{&wrt...}};
     const auto &jac_indices = wave::tmp::make_index_sequence<sizeof...(Wrt), 1>{};
     checkValueAndJacobians(value_and_numerical,
                            forward_dynamic,

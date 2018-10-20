@@ -184,7 +184,7 @@ In your C++ file, write:
 `wave_geometry` requires:
   * an existing installation of [Eigen](http://eigen.tuxfamily.org) 3.3.2 or above
   * an existing installation of Boost (only the header-only Optional library is used)
-  * a modern C++14 compiler (tested on GCC 5.4, clang 4.0)
+  * a modern C++14 compiler (tested on GCC 5.5, clang 4.0)
 
 ### Development status
 

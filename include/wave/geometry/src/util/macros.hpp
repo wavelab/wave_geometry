@@ -69,7 +69,7 @@
  */
 #define WAVE_OVERLOAD_FUNCTION_FOR_RVALUE(FuncName, ExprName, RhsBase) \
     template <typename R>                                              \
-    auto FuncName(RhsBase<R> &&rhs) {                                  \
+    auto FuncName(RhsBase<R> &&rhs)->ExprName<internal::arg_t<R>> {    \
         return ExprName<internal::arg_t<R>>{std::move(rhs).derived()}; \
     }
 

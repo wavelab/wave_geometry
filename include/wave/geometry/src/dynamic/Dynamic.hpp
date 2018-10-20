@@ -125,7 +125,9 @@ struct Dynamic final : internal::base_tmpl_t<RhsDerived, Dynamic<RhsDerived>>,
  * @see RefProxy for usage example
  */
 template <typename Derived>
-auto makeDynamic(const ExpressionBase<Derived> &expr) {
+auto makeDynamic(const ExpressionBase<Derived> &expr)
+  -> Dynamic<Derived>  // return type for gcc5
+{
     return Dynamic<Derived>{expr.derived()};
 }
 
@@ -136,7 +138,8 @@ WAVE_OVERLOAD_FUNCTION_FOR_RVALUE(makeDynamic, Dynamic, ExpressionBase);
  * @see RefProxy for usage example
  */
 template <typename Leaf>
-auto ref(const DynamicBase<Leaf> &dynamic) {
+auto ref(const DynamicBase<Leaf> &dynamic) -> RefProxy<Leaf>  // return type for gcc5
+{
     return RefProxy<Leaf>{dynamic};
 }
 
