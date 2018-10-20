@@ -18,7 +18,7 @@ _common_sources: &common_sources
   - llvm-toolchain-trusty-7
 
 _common_packages: &common_packages
-  - libboost1.54-dev
+  - libboost1.58-dev
   - libeigen3-dev
   - libgtest-dev
   - clang-format-7
@@ -31,6 +31,7 @@ jobs:
         apt:
           sources:
             - sourceline: 'ppa:lkoppel/robotics'
+            - sourceline: 'ppa:kzemek/boost'
             - *common_sources
           packages:
             - *common_packages
@@ -42,6 +43,7 @@ jobs:
           sources:
             - llvm-toolchain-trusty-4.0
             - sourceline: 'ppa:lkoppel/robotics'
+            - sourceline: 'ppa:kzemek/boost'
             - *common_sources
           packages:
             - *common_packages
@@ -56,6 +58,7 @@ jobs:
         apt:
           sources:
             - sourceline: 'ppa:lkoppel/robotics'
+            - sourceline: 'ppa:kzemek/boost'
             - *common_sources
           packages:
             - *common_packages

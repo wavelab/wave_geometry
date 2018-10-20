@@ -7,6 +7,7 @@
 
 ### Backward-incompatible API changes
 - C++14 is now required
+- Boost 1.58 is now required
 
 ### Fixes and minor changes
 - Fix finding googletest source package on Ubuntu bionic

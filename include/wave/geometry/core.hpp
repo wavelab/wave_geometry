@@ -10,7 +10,6 @@
 // For optional, used by JacobianEvaluator
 #include <boost/optional.hpp>
 // Used by DynamicReverseJacobianEvaluator
-#include <map>
 #include <boost/container/flat_map.hpp>
 
 // Tick library for traits checking
