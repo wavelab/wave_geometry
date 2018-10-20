@@ -116,38 +116,61 @@ struct Evaluator<Derived, std::enable_if_t<is_proxy<Derived>{}>> {
 template <typename Derived>
 struct DynamicJacobianEvaluator<Derived, enable_if_proxy_t<Derived>> {
     using Scalar = scalar_t<Derived>;
-    using JacobianType = boost::optional<DynamicMatrix<Scalar>>;
+    using DynamicJacobian = DynamicMatrix<Scalar>;
     enum : int { TangentSize = eval_traits<Derived>::TangentSize };
 
     WAVE_STRONG_INLINE explicit DynamicJacobianEvaluator(const Evaluator<Derived> &v_eval,
                                                          const void *target)
         // Dynamically get the Jacobian of the derived expression
-        : v_eval{v_eval}, target{target} {}
+        : v_eval{v_eval}, target_ptr{target} {}
 
-    WAVE_STRONG_INLINE JacobianType jacobian() const {
+    WAVE_STRONG_INLINE DynamicJacobian jacobian() const {
         // Check if Jacobian is wrt this Proxy
-        if (isSame(this->v_eval.expr, target)) {
+        if (isSame(this->v_eval.expr, this->target_ptr)) {
             return DynamicMatrix<Scalar>::Identity(TangentSize, TangentSize).eval();
         }
         // Otherwise, dynamically get the Jacobian of the derived expression
-        return this->v_eval.expr.dynJacobian(this->target);
+        return this->v_eval.expr.dynJacobian(this->target_ptr);
     }
 
  private:
     const Evaluator<Derived> &v_eval;
-    const void *target;
+    const void *target_ptr;
 };
 
 template <typename Derived, typename Target>
 struct JacobianEvaluator<
   Derived,
   Target,
-  std::enable_if_t<is_proxy<Derived>{} && !std::is_same<Derived, Target>{}>>
-    : DynamicJacobianEvaluator<Derived> {
+  std::enable_if_t<is_proxy<Derived>{} && !std::is_same<Derived, Target>{}>> {
+    using Scalar = scalar_t<Derived>;
+    enum : int { TangentSize = eval_traits<Derived>::TangentSize };
+
     WAVE_STRONG_INLINE explicit JacobianEvaluator(const Evaluator<Derived> &v_eval,
                                                   const Target &target)
-        : DynamicJacobianEvaluator<Derived>{v_eval, &target} {}
+        // Dynamically get the Jacobian of the derived expression
+        : v_eval{v_eval}, target_ptr{&target} {}
+
+    WAVE_STRONG_INLINE boost::optional<jacobian_t<Derived, Target>> jacobian() const {
+        // Check if Jacobian is wrt this Proxy
+        if (isSame(this->v_eval.expr, this->target_ptr)) {
+            return identity_t<Derived>{}.eval();
+        }
+        // Otherwise, dynamically get the Jacobian of the derived expression and convert
+        // to the expected optional-fixed-size return type
+        const auto dyn_jac = this->v_eval.expr.dynJacobian(this->target_ptr);
+        if (dyn_jac.size() > 0) {
+            return jacobian_t<Derived, Target>{dyn_jac};
+        } else {
+            return boost::none;
+        }
+    }
+
+ private:
+    const Evaluator<Derived> &v_eval;
+    const void *target_ptr;
 };
+
 
 template <typename Derived, typename Adjoint>
 struct DynamicReverseJacobianEvaluator<Derived, Adjoint, enable_if_proxy_t<Derived>> {

@@ -37,7 +37,7 @@ class DynamicBase {
      * @param target_ptr address of the target object
      */
     virtual auto dynJacobian(const void *target_ptr) const
-      -> boost::optional<Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>> = 0;
+      -> Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> = 0;
 
     /** Returns set of reverse-mode Jacobians with respect to all leaves
      *

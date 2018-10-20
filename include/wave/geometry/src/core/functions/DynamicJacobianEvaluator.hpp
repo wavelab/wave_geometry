@@ -21,6 +21,8 @@ using DynamicMatrix = Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic>;
 /** Specialization for leaf expression */
 template <typename Derived>
 struct DynamicJacobianEvaluator<Derived, enable_if_leaf_or_scalar_t<Derived>> {
+    using DynamicJacobian = DynamicMatrix<scalar_t<Derived>>;
+
  private:
     static constexpr int JSize = traits<Derived>::TangentSize;
 
@@ -31,15 +33,16 @@ struct DynamicJacobianEvaluator<Derived, enable_if_leaf_or_scalar_t<Derived>> {
 
     /** Finds Jacobian of the leaf expression
      */
-    WAVE_STRONG_INLINE boost::optional<identity_t<Derived>> jacobian() const {
+    WAVE_STRONG_INLINE DynamicJacobian jacobian() const {
         if (isSame(evaluator.expr, target)) {
             // Jacobian wrt self is always identity (dx/dx = 1)
             return identity_t<Derived>{};
         } else {
-            // Jacobian of a leaf expression wrt something else is always zero.
+            // Jacobian of a leaf expression wrt something else is always zero, here
+            // represented by uninitialized (size 0) dynamic matrix
             // Note we can't know if they're somehow related elsewhere; we only consider
             // the expressions given, and assume leaf expressions are the end of the line.
-            return boost::none;
+            return DynamicJacobian{};
         }
     }
 
@@ -51,7 +54,7 @@ struct DynamicJacobianEvaluator<Derived, enable_if_leaf_or_scalar_t<Derived>> {
 /** Specialization for unary expression */
 template <typename Derived>
 struct DynamicJacobianEvaluator<Derived, enable_if_unary_t<Derived>> {
-    using Jacobian = DynamicMatrix<scalar_t<Derived>>;
+    using DynamicJacobian = DynamicMatrix<scalar_t<Derived>>;
     enum : int { TangentSize = eval_traits<Derived>::TangentSize };
     using RhsEval = DynamicJacobianEvaluator<typename traits<Derived>::RhsDerived>;
 
@@ -76,27 +79,27 @@ struct DynamicJacobianEvaluator<Derived, enable_if_unary_t<Derived>> {
 
     /** @returns jacobian matrix if expr contains target type, or zero matrix otherwise.
      */
-    WAVE_STRONG_INLINE boost::optional<Jacobian> jacobian() const {
+    WAVE_STRONG_INLINE DynamicJacobian jacobian() const {
         if (!this->rhs_eval) {
-            return Jacobian::Identity(TangentSize, TangentSize)
+            return DynamicJacobian::Identity(TangentSize, TangentSize)
               .eval();  // We match the target
         }
 
         const auto &rhs_jac = this->rhs_eval->jacobian();
-        if (rhs_jac) {
-            return Jacobian{jacobianImpl(get_expr_tag_t<Derived>{},
-                                         this->evaluator(),
-                                         this->evaluator.rhs_eval()) *
-                            (*rhs_jac)};
+        if (rhs_jac.size() > 0) {
+            return DynamicJacobian{jacobianImpl(get_expr_tag_t<Derived>{},
+                                                this->evaluator(),
+                                                this->evaluator.rhs_eval()) *
+                                   rhs_jac};
         }
-        return boost::none;
+        return DynamicJacobian{};
     }
 };
 
 /** Specialization for binary expression where both sides *might* contain target */
 template <typename Derived>
 struct DynamicJacobianEvaluator<Derived, enable_if_binary_t<Derived>> {
-    using Jacobian = DynamicMatrix<scalar_t<Derived>>;
+    using DynamicJacobian = DynamicMatrix<scalar_t<Derived>>;
     enum : int { TangentSize = eval_traits<Derived>::TangentSize };
     using LhsEval = DynamicJacobianEvaluator<typename traits<Derived>::LhsDerived>;
     using RhsEval = DynamicJacobianEvaluator<typename traits<Derived>::RhsDerived>;
@@ -134,38 +137,38 @@ struct DynamicJacobianEvaluator<Derived, enable_if_binary_t<Derived>> {
 
     /** @returns jacobian matrix if expr contains target type, or zero matrix otherwise.
      */
-    WAVE_STRONG_INLINE boost::optional<Jacobian> jacobian() const {
+    WAVE_STRONG_INLINE DynamicJacobian jacobian() const {
         if (!this->rhs_eval) {
             // We match the target
-            return Jacobian::Identity(TangentSize, TangentSize).eval();
+            return DynamicJacobian::Identity(TangentSize, TangentSize).eval();
         }
         const auto &lhs_jac = this->lhs_eval->jacobian();
         const auto &rhs_jac = this->rhs_eval->jacobian();
-        if (lhs_jac && rhs_jac) {
-            return Jacobian{leftJacobianImpl(get_expr_tag_t<Derived>{},
-                                             this->evaluator(),
-                                             this->evaluator.lhs_eval(),
-                                             this->evaluator.rhs_eval()) *
-                              (*lhs_jac) +
-                            rightJacobianImpl(get_expr_tag_t<Derived>{},
-                                              this->evaluator(),
-                                              this->evaluator.lhs_eval(),
-                                              this->evaluator.rhs_eval()) *
-                              (*rhs_jac)};
-        } else if (lhs_jac) {
-            return Jacobian{leftJacobianImpl(get_expr_tag_t<Derived>{},
-                                             this->evaluator(),
-                                             this->evaluator.lhs_eval(),
-                                             this->evaluator.rhs_eval()) *
-                            (*lhs_jac)};
-        } else if (rhs_jac) {
-            return Jacobian{rightJacobianImpl(get_expr_tag_t<Derived>{},
-                                              this->evaluator(),
-                                              this->evaluator.lhs_eval(),
-                                              this->evaluator.rhs_eval()) *
-                            (*rhs_jac)};
+        if (lhs_jac.size() > 0 && rhs_jac.size() > 0) {
+            return DynamicJacobian{leftJacobianImpl(get_expr_tag_t<Derived>{},
+                                                    this->evaluator(),
+                                                    this->evaluator.lhs_eval(),
+                                                    this->evaluator.rhs_eval()) *
+                                     lhs_jac +
+                                   rightJacobianImpl(get_expr_tag_t<Derived>{},
+                                                     this->evaluator(),
+                                                     this->evaluator.lhs_eval(),
+                                                     this->evaluator.rhs_eval()) *
+                                     rhs_jac};
+        } else if (lhs_jac.size() > 0) {
+            return DynamicJacobian{leftJacobianImpl(get_expr_tag_t<Derived>{},
+                                                    this->evaluator(),
+                                                    this->evaluator.lhs_eval(),
+                                                    this->evaluator.rhs_eval()) *
+                                   lhs_jac};
+        } else if (rhs_jac.size() > 0) {
+            return DynamicJacobian{rightJacobianImpl(get_expr_tag_t<Derived>{},
+                                                     this->evaluator(),
+                                                     this->evaluator.lhs_eval(),
+                                                     this->evaluator.rhs_eval()) *
+                                   rhs_jac};
         }
-        return boost::none;
+        return DynamicJacobian{};
     }
 };
 
@@ -174,16 +177,9 @@ struct DynamicJacobianEvaluator<Derived, enable_if_binary_t<Derived>> {
 template <typename Derived>
 inline auto evaluateOneDynamicJacobianRaw(const Evaluator<Derived> &v_eval,
                                           const void *target)
-  -> boost::optional<DynamicMatrix<scalar_t<Derived>>> {
+  -> DynamicMatrix<scalar_t<Derived>> {
     internal::DynamicJacobianEvaluator<Derived> j_eval{v_eval, target};
-    const auto &result = j_eval.jacobian();
-
-    // Convert Jacobian type to dense where needed
-    if (result) {
-        return static_cast<DynamicMatrix<scalar_t<Derived>>>(*result);
-    } else {
-        return boost::none;
-    }
+    return j_eval.jacobian();
 }
 
 /** Evaluate a jacobian using an existing Evaluator tree
@@ -195,8 +191,8 @@ inline auto evaluateOneDynamicJacobian(const Evaluator<Derived> &v_eval,
     const auto &actual_target = getWrtTarget(adl{}, target);
     internal::DynamicJacobianEvaluator<Derived> j_eval{v_eval, &actual_target};
     const auto &result = j_eval.jacobian();
-    if (result) {
-        return *result;
+    if (result.size() > 0) {
+        return jacobian_t<Derived, Target>{result};
     } else {
         return jacobian_t<Derived, Target>::Zero();
     }

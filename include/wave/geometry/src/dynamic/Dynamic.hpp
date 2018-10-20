@@ -61,8 +61,7 @@ struct Dynamic final : internal::base_tmpl_t<RhsDerived, Dynamic<RhsDerived>>,
         return v_eval();
     }
 
-    auto dynJacobian(const void *target_ptr) const
-      -> boost::optional<MatrixType> override {
+    auto dynJacobian(const void *target_ptr) const -> MatrixType override {
         // Note we don't reconstruct the evaluator here. This is OK as long as all of our
         // user-facing methods require function evaluation before derivative.
         const auto &v_eval = this->evaluator();
