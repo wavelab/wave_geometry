@@ -49,12 +49,12 @@ struct TypedJacobianEvaluator<
  private:
     // Wrapped Evaluator and nested jacobian-evaluators
     const Evaluator<Derived> &evaluator;
-    const TypedJacobianEvaluator<typename Derived::RhsDerived, Target> rhs_eval;
+    const TypedJacobianEvaluator<typename traits<Derived>::RhsDerived, Target> rhs_eval;
 
-    using SelfJacobian =
-      decltype(jacobianImpl(get_expr_tag_t<Derived>{},
-                            std::declval<eval_t<Derived>>(),
-                            std::declval<eval_t<typename Derived::RhsDerived>>()));
+    using SelfJacobian = decltype(
+      jacobianImpl(get_expr_tag_t<Derived>{},
+                   std::declval<eval_t<Derived>>(),
+                   std::declval<eval_t<typename traits<Derived>::RhsDerived>>()));
     using RhsJacobian = decltype(rhs_eval.jacobian());
     using Jacobian = decltype(std::declval<SelfJacobian>() * std::declval<RhsJacobian>());
 
@@ -87,26 +87,26 @@ template <typename Derived, typename Target>
 struct TypedJacobianEvaluator<
   Derived,
   Target,
-  std::enable_if_t<is_binary_expression<Derived>::value &&
-                   !std::is_same<Derived, Target>{} &&
-                   contains_same_type<typename Derived::LhsDerived, Target>::value &&
-                   contains_same_type<typename Derived::RhsDerived, Target>::value>> {
+  std::enable_if_t<
+    is_binary_expression<Derived>::value && !std::is_same<Derived, Target>{} &&
+    contains_same_type<typename traits<Derived>::LhsDerived, Target>::value &&
+    contains_same_type<typename traits<Derived>::RhsDerived, Target>::value>> {
  private:
     // Wrapped Evaluator and nested jacobian-evaluators
     const Evaluator<Derived> &evaluator;
-    const TypedJacobianEvaluator<typename Derived::LhsDerived, Target> lhs_eval;
-    const TypedJacobianEvaluator<typename Derived::RhsDerived, Target> rhs_eval;
+    const TypedJacobianEvaluator<typename traits<Derived>::LhsDerived, Target> lhs_eval;
+    const TypedJacobianEvaluator<typename traits<Derived>::RhsDerived, Target> rhs_eval;
 
-    using LhsSelfJacobian =
-      decltype(leftJacobianImpl(get_expr_tag_t<Derived>{},
-                                std::declval<eval_t<Derived>>(),
-                                std::declval<eval_t<typename Derived::LhsDerived>>(),
-                                std::declval<eval_t<typename Derived::RhsDerived>>()));
-    using RhsSelfJacobian =
-      decltype(rightJacobianImpl(get_expr_tag_t<Derived>{},
-                                 std::declval<eval_t<Derived>>(),
-                                 std::declval<eval_t<typename Derived::LhsDerived>>(),
-                                 std::declval<eval_t<typename Derived::RhsDerived>>()));
+    using LhsSelfJacobian = decltype(
+      leftJacobianImpl(get_expr_tag_t<Derived>{},
+                       std::declval<eval_t<Derived>>(),
+                       std::declval<eval_t<typename traits<Derived>::LhsDerived>>(),
+                       std::declval<eval_t<typename traits<Derived>::RhsDerived>>()));
+    using RhsSelfJacobian = decltype(
+      rightJacobianImpl(get_expr_tag_t<Derived>{},
+                        std::declval<eval_t<Derived>>(),
+                        std::declval<eval_t<typename traits<Derived>::LhsDerived>>(),
+                        std::declval<eval_t<typename traits<Derived>::RhsDerived>>()));
     using LhsJacobian = decltype(lhs_eval.jacobian());
     using RhsJacobian = decltype(rhs_eval.jacobian());
     using Jacobian =
@@ -152,20 +152,20 @@ template <typename Derived, typename Target>
 struct TypedJacobianEvaluator<
   Derived,
   Target,
-  std::enable_if_t<is_binary_expression<Derived>::value &&
-                   !std::is_same<Derived, Target>{} &&
-                   contains_same_type<typename Derived::LhsDerived, Target>::value &&
-                   !contains_same_type<typename Derived::RhsDerived, Target>::value>> {
+  std::enable_if_t<
+    is_binary_expression<Derived>::value && !std::is_same<Derived, Target>{} &&
+    contains_same_type<typename traits<Derived>::LhsDerived, Target>::value &&
+    !contains_same_type<typename traits<Derived>::RhsDerived, Target>::value>> {
  private:
     // Wrapped Evaluator and nested jacobian-evaluators
     const Evaluator<Derived> &evaluator;
-    const TypedJacobianEvaluator<typename Derived::LhsDerived, Target> lhs_eval;
+    const TypedJacobianEvaluator<typename traits<Derived>::LhsDerived, Target> lhs_eval;
 
-    using LhsSelfJacobian =
-      decltype(leftJacobianImpl(get_expr_tag_t<Derived>{},
-                                std::declval<eval_t<Derived>>(),
-                                std::declval<eval_t<typename Derived::LhsDerived>>(),
-                                std::declval<eval_t<typename Derived::RhsDerived>>()));
+    using LhsSelfJacobian = decltype(
+      leftJacobianImpl(get_expr_tag_t<Derived>{},
+                       std::declval<eval_t<Derived>>(),
+                       std::declval<eval_t<typename traits<Derived>::LhsDerived>>(),
+                       std::declval<eval_t<typename traits<Derived>::RhsDerived>>()));
     using LhsJacobian = decltype(lhs_eval.jacobian());
     using Jacobian =
       decltype(std::declval<LhsSelfJacobian>() * std::declval<LhsJacobian>());
@@ -201,20 +201,20 @@ template <typename Derived, typename Target>
 struct TypedJacobianEvaluator<
   Derived,
   Target,
-  std::enable_if_t<is_binary_expression<Derived>::value &&
-                   !std::is_same<Derived, Target>{} &&
-                   !contains_same_type<typename Derived::LhsDerived, Target>::value &&
-                   contains_same_type<typename Derived::RhsDerived, Target>::value>> {
+  std::enable_if_t<
+    is_binary_expression<Derived>::value && !std::is_same<Derived, Target>{} &&
+    !contains_same_type<typename traits<Derived>::LhsDerived, Target>::value &&
+    contains_same_type<typename traits<Derived>::RhsDerived, Target>::value>> {
  private:
     // Wrapped Evaluator and nested jacobian-evaluators
     const Evaluator<Derived> &evaluator;
-    const TypedJacobianEvaluator<typename Derived::RhsDerived, Target> rhs_eval;
+    const TypedJacobianEvaluator<typename traits<Derived>::RhsDerived, Target> rhs_eval;
 
-    using RhsSelfJacobian =
-      decltype(rightJacobianImpl(get_expr_tag_t<Derived>{},
-                                 std::declval<eval_t<Derived>>(),
-                                 std::declval<eval_t<typename Derived::LhsDerived>>(),
-                                 std::declval<eval_t<typename Derived::RhsDerived>>()));
+    using RhsSelfJacobian = decltype(
+      rightJacobianImpl(get_expr_tag_t<Derived>{},
+                        std::declval<eval_t<Derived>>(),
+                        std::declval<eval_t<typename traits<Derived>::LhsDerived>>(),
+                        std::declval<eval_t<typename traits<Derived>::RhsDerived>>()));
     using RhsJacobian = decltype(rhs_eval.jacobian());
     using Jacobian =
       decltype(std::declval<RhsSelfJacobian>() * std::declval<RhsJacobian>());

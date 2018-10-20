@@ -8,11 +8,12 @@
 namespace wave {
 namespace internal {
 
-/** Functor to evaluate an expression tree with variables identified only by type
+/** Evaluates Jacobians of an expression tree in reverse mode.
  *
- * @warning experimental
+ * This evaluator requires the tree to have unique types. It must be a true tree (i.e.,
+ * each node has only one parent).
  */
-template <typename Derived, typename Target, typename = void>
+template <typename Derived, typename Adjoint, typename = void>
 struct ReverseJacobianEvaluator;
 
 /** Helper template to get the evaluated type of an eigen matrix */
@@ -29,7 +30,8 @@ struct ReverseJacobianEvaluator<Derived, Adjoint, enable_if_leaf_or_scalar_t<Der
         : evaluator{evaluator}, adjoint{adjoint} {}
 
 
-    auto jacobian() const -> std::tuple<const Adjoint &> {
+    using JacobianTuple = std::tuple<const Adjoint &>;
+    auto jacobian() const -> JacobianTuple {
         return std::forward_as_tuple(adjoint);
     }
 

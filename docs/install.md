@@ -13,7 +13,7 @@ git clone https://github.com/wavelab/wave_geometry
 wave_geometry requires:
   * an existing installation of [Eigen](http://eigen.tuxfamily.org) 3.3.2 or above
   * an existing installation of Boost (only the header-only Optional library is used)
-  * a modern C++11 compiler (tested on GCC 5.4, clang 4.0)
+  * a C++14 compiler (tested on GCC 5.4, clang 4.0)
 
 It has only been tested on Linux.
 

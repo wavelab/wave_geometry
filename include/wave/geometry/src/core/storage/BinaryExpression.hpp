@@ -16,12 +16,12 @@ struct BinaryExpression<Tmpl_<LhsDerived_, RhsDerived_>> {
     using LhsDerivedOrig = LhsDerived_;
     using RhsDerivedOrig = RhsDerived_;
 
-    // Hold a reference to leaf expressions to avoid copies, but a copy of other
-    // expressions to avoid references to temporaries.
-    using LhsStore = internal::wave_ref_sel_t<LhsDerived_>;
-    using RhsStore = internal::wave_ref_sel_t<RhsDerived_>;
+    // Hold a reference to each expression, unless the type is given as T&& -- then
+    // store it by value
+    using LhsStore = internal::ref_sel_t<LhsDerived_>;
+    using RhsStore = internal::ref_sel_t<RhsDerived_>;
 
-    using Derived = Tmpl_<LhsDerived, RhsDerived>;
+    using Derived = Tmpl_<LhsDerived_, RhsDerived_>;
 
     template <typename LhsArg, typename RhsArg>
     BinaryExpression(LhsArg &&l, RhsArg &&r)
@@ -57,7 +57,7 @@ struct BinaryExpression<Tmpl_<LhsDerived_, RhsDerived_>> {
         return std::move(rhs_);
     }
 
- protected:
+ private:
     LhsStore lhs_;
     RhsStore rhs_;
 };

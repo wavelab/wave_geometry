@@ -26,9 +26,10 @@
 /** Return a vector of random objects of type T, using setRandom() */
 template <typename T>
 std::vector<T, Eigen::aligned_allocator<T>> randomMatrices(int N) {
-    std::vector<T, Eigen::aligned_allocator<T>> v(N);
+    std::vector<T, Eigen::aligned_allocator<T>> v;
+    v.reserve(N);
     for (auto i = N; i--;) {
-        v[i] = T::Random();
+        v.push_back(T::Random());
     }
     return v;
 }

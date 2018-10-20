@@ -1,5 +1,5 @@
-#include "wave/geometry/geometry.hpp"
 #include "test.hpp"
+#include "wave/geometry/geometry.hpp"
 
 /** The list of implementation types to run each test case on */
 using LeafTypes = test_types_list<wave::Translationd>;
@@ -31,6 +31,8 @@ class RvalueTest : public testing::Test {
 
     // Used for CHECK_JACOBIANS macro
     static constexpr bool IsFramed = Params::IsFramed;
+    TICK_TRAIT_CHECK(wave::internal::is_leaf_expression<Leaf>);
+    TICK_TRAIT_CHECK(wave::internal::is_stable_expression<Leaf>);
 };
 TYPED_TEST_CASE(RvalueTest, LeafTypes);
 
@@ -83,9 +85,9 @@ TYPED_TEST(RvalueTest, addTemporaryExpr2) {
     const auto eigen_result = typename TestFixture::Vector{t1.value() - v2 - v3};
     EXPECT_APPROX(eigen_result, result.value());
 
-    // Note the user would need to know the leaf is at rhs().rhs() because - is it's own
-    // unary expression. This kind of Jacobian evaluation is not expected from the user,
-    // but we should make sure it works anyways.
+    // Note the user would need to know the leaf is at rhs().rhs() because Minus is its
+    // own unary expression. This kind of Jacobian evaluation is not expected from the
+    // user, but we make sure it works anyways.
     CHECK_JACOBIANS(TestFixture::IsFramed, expr, expr.lhs(), expr.rhs().rhs());
     CHECK_JACOBIANS(TestFixture::IsFramed,
                     expr2,
@@ -93,9 +95,11 @@ TYPED_TEST(RvalueTest, addTemporaryExpr2) {
                     expr2.lhs().rhs().rhs(),
                     expr2.rhs().rhs());
 
-    // Note that we *can't* currently differentiate expr2 wrt a leaf in expr1
-    // This is because initializing `expr2 = expr + ...` *copies* expr into expr2
-    // including any stored leaves. See the test `rvalueCopy` in is_same_test.
+
+    // We can do the same but refer to expr
+    CHECK_JACOBIANS(
+      TestFixture::IsFramed, expr2, t1, expr.rhs().rhs(), expr2.rhs().rhs());
+    EXPECT_EQ(&expr, &expr2.lhs());
 }
 
 TYPED_TEST(RvalueTest, negateWithFrameCast) {

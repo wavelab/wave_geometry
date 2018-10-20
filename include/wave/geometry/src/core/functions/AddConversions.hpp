@@ -51,7 +51,7 @@ struct first_directly_evaluable_conversion_unary<Derived,
     struct is_evaluable_after_conversion_test
       : tmp::conjunction<is_directly_evaluable_unary<expr<Convert, ToRhs>, eval_t<Rhs>>,
                          is_directly_evaluable_unary<Tag, ToRhs>> {
-        using type = Rebind<Convert<ToRhs, Rhs>>;
+        using type = Rebind<Convert<ToRhs, Rhs> &&>;
     };
 
     template <typename T>
@@ -126,14 +126,14 @@ struct first_directly_evaluable_conversion_binary<Derived,
     struct convert_left_test
       : tmp::conjunction<is_directly_evaluable_unary<expr<Convert, ToLhs>, eval_t<Lhs>>,
                          is_directly_evaluable_binary<Tag, ToLhs, eval_t<Rhs>>> {
-        using type = Rebind<Convert<ToLhs, Lhs>, Rhs>;
+        using type = Rebind<Convert<ToLhs, Lhs> &&, Rhs>;
     };
 
     template <typename ToRhs>
     struct convert_right_test
       : tmp::conjunction<is_directly_evaluable_unary<expr<Convert, ToRhs>, eval_t<Rhs>>,
                          is_directly_evaluable_binary<Tag, eval_t<Lhs>, ToRhs>> {
-        using type = Rebind<Lhs, Convert<ToRhs, Rhs>>;
+        using type = Rebind<Lhs, Convert<ToRhs, Rhs> &&>;
     };
 
     template <typename ToLhs, typename ToRhs>
@@ -141,7 +141,7 @@ struct first_directly_evaluable_conversion_binary<Derived,
       : tmp::conjunction<is_directly_evaluable_unary<expr<Convert, ToLhs>, eval_t<Lhs>>,
                          is_directly_evaluable_unary<expr<Convert, ToRhs>, eval_t<Rhs>>,
                          is_directly_evaluable_binary<Tag, ToLhs, ToRhs>> {
-        using type = Rebind<Convert<ToLhs, Lhs>, Convert<ToRhs, Rhs>>;
+        using type = Rebind<Convert<ToLhs, Lhs> &&, Convert<ToRhs, Rhs> &&>;
     };
 
     template <typename T>

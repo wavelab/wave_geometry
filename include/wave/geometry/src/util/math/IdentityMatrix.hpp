@@ -54,7 +54,9 @@ struct traits<::wave::IdentityMatrix<Scalar, N>>
 template <typename Scalar, int N, typename OtherDerived>
 EIGEN_DEVICE_FUNC inline const OtherDerived &operator*(
   const wave::IdentityMatrix<Scalar, N> &, const Eigen::MatrixBase<OtherDerived> &rhs) {
-    static_assert(OtherDerived::RowsAtCompileTime == N, "Invalid matrix product");
+    static_assert(OtherDerived::RowsAtCompileTime == N ||
+                    OtherDerived::RowsAtCompileTime == Eigen::Dynamic,
+                  "Invalid matrix product");
     return rhs.derived();
 }
 
@@ -65,7 +67,9 @@ EIGEN_DEVICE_FUNC inline const OtherDerived &operator*(
 template <typename Scalar, int N, typename OtherDerived>
 EIGEN_DEVICE_FUNC inline const OtherDerived &operator*(
   const Eigen::MatrixBase<OtherDerived> &lhs, const wave::IdentityMatrix<Scalar, N> &) {
-    static_assert(OtherDerived::ColsAtCompileTime == N, "Invalid matrix product");
+    static_assert(OtherDerived::ColsAtCompileTime == N ||
+                    OtherDerived::ColsAtCompileTime == Eigen::Dynamic,
+                  "Invalid matrix product");
     return lhs.derived();
 }
 

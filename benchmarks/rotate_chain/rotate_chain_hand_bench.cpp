@@ -23,7 +23,7 @@ using EigenVector = std::vector<T, Eigen::aligned_allocator<T>>;
 template <class RotType>
 class RotateChain : public benchmark::Fixture {
  protected:
-    const int N = 1000;
+    const int N = 1;
     // Use wave::RotationM just for the Random() method, which produces valid SO(3)
     using waveRot = wave::MatrixRotation<RotType>;
     const EigenVector<waveRot> R1 = randomMatrices<waveRot>(N);

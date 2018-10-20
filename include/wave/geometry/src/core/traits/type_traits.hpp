@@ -95,9 +95,21 @@ TICK_TRAIT(is_expression, is_derived_expression<_>, has_valid_traits<_>) {
               is_true<std::is_base_of<typename T::template BaseTmpl<T>, T>>>;
 };
 
+/** True if expression object remains unchanged (and with same address) through
+ * PrepareExpr step. This means we can differentiate with respect to it using its address.
+ */
+TICK_TRAIT(is_stable_expression) {
+    template <class T>
+    auto require(T &&)
+      ->valid<is_false<std::is_rvalue_reference<typename traits<T>::PreparedType>>>;
+};
+
 // Traits of unary, binary, and leaf expressions
 
-TICK_TRAIT(is_leaf_expression, is_derived_expression<_>, has_valid_leaf_traits<_>) {
+TICK_TRAIT(is_leaf_expression,
+           is_derived_expression<_>,
+           has_valid_leaf_traits<_>,
+           is_stable_expression<_>) {
     template <class T>
     auto require(T && x)->valid<decltype(x.value())>;
 };
@@ -141,9 +153,13 @@ using enable_if_unary_t =
 template <typename Derived, typename T = void>
 using enable_if_scalar_t = typename std::enable_if<is_scalar<Derived>{}, T>::type;
 
+template <typename Derived>
+struct is_leaf_or_scalar
+  : tmp::bool_constant<is_leaf_expression<Derived>{} || is_scalar<Derived>{}> {};
+
 template <typename Derived, typename T = void>
 using enable_if_leaf_or_scalar_t =
-  typename std::enable_if<is_leaf_expression<Derived>{} || is_scalar<Derived>{}, T>::type;
+  typename std::enable_if<is_leaf_or_scalar<Derived>{}, T>::type;
 
 /** Empty tag of an expression template for tag dispatching */
 template <template <typename...> class Tmpl, typename... Aux>
@@ -205,13 +221,16 @@ using scalar_t = typename eval_traits<Derived>::Scalar;
 
 /** Helper for tangent type of an expression */
 template <typename Derived>
-using tangent_t =
-  plain_output_t<decltype(std::declval<Derived>() - std::declval<Derived>())>;
+using diff_expr_t = decltype(std::declval<plain_output_t<Derived>>() -
+                             std::declval<plain_output_t<Derived>>());
 
 /** Helper for tangent type of an expression */
 template <typename Derived>
-using plain_tangent_t =
-  plain_eval_t<decltype(std::declval<Derived>() - std::declval<Derived>())>;
+using tangent_t = plain_output_t<diff_expr_t<Derived>>;
+
+/** Helper for tangent type of an expression */
+template <typename Derived>
+using plain_tangent_t = plain_eval_t<diff_expr_t<Derived>>;
 
 /** Helper alias for jacobian of one expression wrt another */
 template <typename Derived, typename WrtDerived>
@@ -280,7 +299,9 @@ struct traits_safe_impl<This, This, Fallback> {
 };
 
 template <typename Target, typename This, typename Fallback>
-using traits_safe_t = typename traits_safe_impl<Target, This, Fallback>::type;
+using traits_safe_t = typename traits_safe_impl<tmp::remove_cr_t<Target>,
+                                                This,
+                                                tmp::remove_cr_t<Fallback>>::type;
 
 /** True if eval function defined for the given expression type and folded rhs */
 template <typename Tag, typename Rhs>

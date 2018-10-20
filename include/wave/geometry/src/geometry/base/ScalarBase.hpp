@@ -53,7 +53,7 @@ template <typename T>
  */
 struct scalar_traits_base : leaf_traits_base<T>, frameable_vector_traits {
     using Scalar = T;
-    static constexpr int TangentSize = 1;
+    enum : int { TangentSize = 1 };
     static constexpr int Size = 1;
 };
 

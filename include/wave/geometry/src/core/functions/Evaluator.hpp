@@ -18,9 +18,16 @@ namespace internal {
 template <typename Derived, typename = void>
 struct Evaluator;
 
+template <typename Derived>
+struct Evaluator<Derived &&> {
+    static_assert(tmp::alwaysFalse<Derived>(),
+                  "Internal error: Evaluator must be instantiated with clean type");
+};
+
 /** Specialization for leaf expression */
 template <typename Derived>
 struct Evaluator<Derived, enable_if_leaf_t<Derived>> {
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     using EvalType = eval_t<Derived>;
 
     WAVE_STRONG_INLINE explicit Evaluator(const Derived &expr)
@@ -31,13 +38,14 @@ struct Evaluator<Derived, enable_if_leaf_t<Derived>> {
     }
 
  public:
-    const wave_ref_sel_t<Derived> expr;
+    const eval_ref_sel_t<Derived> expr;
     const EvalType result;
 };
 
 /** Specialization for scalar type */
 template <typename Derived>
-struct Evaluator<Derived, std::enable_if_t<is_scalar<Derived>{}>> {
+struct Evaluator<Derived, enable_if_scalar_t<Derived>> {
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     using EvalType = Derived;
     WAVE_STRONG_INLINE explicit Evaluator(const Derived &scalar) : expr{scalar} {}
     const EvalType &operator()() const {
@@ -45,14 +53,15 @@ struct Evaluator<Derived, std::enable_if_t<is_scalar<Derived>{}>> {
     }
 
  public:
-    const wave_ref_sel_t<Derived> expr;
+    const eval_ref_sel_t<Derived> expr;
 };
 
 /** Specialization for unary expression */
 template <typename Derived>
 struct Evaluator<Derived, enable_if_unary_t<Derived>> {
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     using EvalType = eval_t<Derived>;
-    using RhsEval = Evaluator<typename Derived::RhsDerived>;
+    using RhsEval = Evaluator<typename traits<Derived>::RhsDerived>;
 
     WAVE_STRONG_INLINE explicit Evaluator(const Derived &expr)
         : expr{expr},
@@ -64,7 +73,7 @@ struct Evaluator<Derived, enable_if_unary_t<Derived>> {
     }
 
  public:
-    const wave_ref_sel_t<Derived> expr;
+    const eval_ref_sel_t<Derived> expr;
     const RhsEval rhs_eval;
     const EvalType result;
 };
@@ -72,9 +81,10 @@ struct Evaluator<Derived, enable_if_unary_t<Derived>> {
 /** Specialization for a binary expression */
 template <typename Derived>
 struct Evaluator<Derived, enable_if_binary_t<Derived>> {
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     using EvalType = eval_t<Derived>;
-    using LhsEval = Evaluator<typename Derived::LhsDerived>;
-    using RhsEval = Evaluator<typename Derived::RhsDerived>;
+    using LhsEval = Evaluator<typename traits<Derived>::LhsDerived>;
+    using RhsEval = Evaluator<typename traits<Derived>::RhsDerived>;
 
     WAVE_STRONG_INLINE explicit Evaluator(const Derived &expr)
         : expr{expr},
@@ -88,7 +98,7 @@ struct Evaluator<Derived, enable_if_binary_t<Derived>> {
     }
 
  public:
-    const wave_ref_sel_t<Derived> expr;
+    const eval_ref_sel_t<Derived> expr;
     const LhsEval lhs_eval;
     const RhsEval rhs_eval;
     const EvalType result;

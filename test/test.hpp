@@ -7,8 +7,8 @@
 #ifndef WAVE_GEOMETRY_TEST_HPP
 #define WAVE_GEOMETRY_TEST_HPP
 
-#include <iomanip>
 #include <gtest/gtest.h>
+#include <iomanip>
 #include "wave/geometry/debug.hpp"
 #include "wave/geometry/src/util/meta/index_sequence.hpp"
 
@@ -103,9 +103,9 @@ bool checkApproxCoeffWise(const Matrix &expected, const Matrix &actual, double p
 /** Compare a numerical and analytical Jacobian, selecting a loose tolerance for the
  * scalar type. */
 template <typename Jacobian>
-int checkJacobian(const Jacobian &numerical,
-                  const Jacobian &analytical,
-                  const std::string &msg) {
+void checkJacobian(const Jacobian &numerical,
+                   const Jacobian &analytical,
+                   const std::string &msg) {
     using Scalar = typename Jacobian::Scalar;
     // Empirically-chosen loose precision
     // ULPs are irrelevant when finite difference method introduces so much error
@@ -115,9 +115,21 @@ int checkJacobian(const Jacobian &numerical,
     // mix of small and non-small numbers. Instead use an elementwise absolute tolerance.
     EXPECT_PRED3(checkApproxCoeffWise<Jacobian>, numerical, analytical, prec) << msg;
     EXPECT_FALSE(analytical.isZero()) << msg;
-
-    return 0;
 }
+
+/** Check that a Jacobian is present and correct in a dynamic Jacobian map */
+template <typename RefJacobian, typename Map>
+void checkDynamicJacobian(const RefJacobian &numerical,
+                          const Map &jac_map,
+                          const void *wrt,
+                          const std::string &msg) {
+    ASSERT_EQ(1u, jac_map.count(wrt)) << msg;
+    const auto &jac = jac_map.at(wrt);
+    ASSERT_EQ(numerical.rows(), jac.rows());
+    ASSERT_EQ(numerical.cols(), jac.cols());
+    checkJacobian(numerical, RefJacobian{jac}, msg);
+}
+
 
 /** Checks that the value (the first element) of all given tuples matches up,
  * and passes the rest to Jacobian checker (which has a looser tolerance).
@@ -128,33 +140,47 @@ int checkJacobian(const Jacobian &numerical,
  * @tparam I the indices of the Jacobians in the tuple, so we can pass them on.
  * See `tmp::index_sequence`.
  */
-template <typename Value, typename... Jacobians, int... I>
+template <typename Value, typename... Jacobians, typename JacobianMap, int... I>
 void checkValueAndJacobians(const std::tuple<Value, Jacobians...> &ref,
+                            const std::tuple<Value, Jacobians...> &forward_dynamic,
                             const std::tuple<Value, Jacobians...> &forward_untyped,
                             const std::tuple<Value, Jacobians...> &forward_typed,
                             const std::tuple<Value, Jacobians...> &reverse,
+                            const std::pair<Value, JacobianMap> &reverse_dynamic,
+                            const std::array<const void *, sizeof...(I)> &wrt,
                             wave::tmp::index_sequence<I...>) {
     // Compare all to the value from .eval(), which is separately checked in unit tests
     const auto &eval_result = std::get<0>(ref);
+    EXPECT_APPROX(eval_result, std::get<0>(forward_dynamic));
     EXPECT_APPROX(eval_result, std::get<0>(forward_untyped));
     EXPECT_APPROX(eval_result, std::get<0>(forward_typed));
     EXPECT_APPROX(eval_result, std::get<0>(reverse));
+    EXPECT_APPROX(eval_result, std::get<0>(reverse_dynamic));
 
     // Compare each of the Jacobian variants to the numerical results
     int foreach[] = {
       (checkJacobian(std::get<I>(ref),
+                     std::get<I>(forward_dynamic),
+                     "Forward Dynamic " + std::to_string(I)),
+       checkJacobian(std::get<I>(ref),
                      std::get<I>(forward_untyped),
                      "Forward Untyped " + std::to_string(I)),
        checkJacobian(std::get<I>(ref),
                      std::get<I>(forward_typed),
                      "Forward Typed " + std::to_string(I)),
        checkJacobian(
-         std::get<I>(ref), std::get<I>(reverse), "Reverse " + std::to_string(I)))...};
+         std::get<I>(ref), std::get<I>(reverse), "Reverse " + std::to_string(I)),
+       checkDynamicJacobian(std::get<I>(ref),
+                            reverse_dynamic.second,
+                            wrt[I - 1],
+                            "Reverse Dynamic " + std::to_string(I)),
+       0)...};
     (void) foreach;
 }
 
 template <typename Value, typename... Jacobians, int... I>
 void checkValueAndJacobiansUntyped(const std::tuple<Value, Jacobians...> &ref,
+                                   const std::tuple<Value, Jacobians...> &forward_dynamic,
                                    const std::tuple<Value, Jacobians...> &forward_untyped,
                                    wave::tmp::index_sequence<I...>) {
     // Compare all to the value from .eval(), which is separately checked in unit tests
@@ -162,9 +188,13 @@ void checkValueAndJacobiansUntyped(const std::tuple<Value, Jacobians...> &ref,
     EXPECT_APPROX(eval_result, std::get<0>(forward_untyped));
 
     // Compare each of the Jacobian variants to the numerical results
-    int foreach[] = {checkJacobian(std::get<I>(ref),
-                                   std::get<I>(forward_untyped),
-                                   "Forward Untyped " + std::to_string(I))...};
+    int foreach[] = {(checkJacobian(std::get<I>(ref),
+                                    std::get<I>(forward_dynamic),
+                                    "Forward Dynamic " + std::to_string(I)),
+                      checkJacobian(std::get<I>(ref),
+                                    std::get<I>(forward_untyped),
+                                    "Forward Untyped " + std::to_string(I)),
+                      0)...};
     (void) foreach;
 }
 
@@ -229,14 +259,24 @@ std::enable_if_t<UniqueExpr> checkJacobians(const Expr &expr, const Wrt &... wrt
 
     const auto &value_and_numerical = std::tuple_cat(
       std::make_tuple(expr.eval()), wave::evaluateNumericalJacobians(expr, wrt...));
-    // Explicitly call typed and untyped evaluators to make sure both work
+    // Explicitly call typed and untyped evaluators to make sure all work
+    const auto &forward_dynamic =
+      wave::internal::evaluateWithDynamicJacobians(expr, wrt...);
     const auto &forward_untyped = wave::internal::evaluateWithJacobians(expr, wrt...);
     const auto &forward_typed = wave::internal::evaluateWithTypedJacobians(expr, wrt...);
     const auto &reverse = expr.evalWithJacobians();
-
+    const auto &reverse_dynamic =
+      wave::internal::evaluateWithDynamicReverseJacobians(expr);
+    const auto wrt_addresses = std::array<const void *, sizeof...(Wrt)>{&wrt...};
     const auto &jac_indices = wave::tmp::make_index_sequence<sizeof...(Wrt), 1>{};
-    checkValueAndJacobians(
-      value_and_numerical, forward_untyped, forward_typed, reverse, jac_indices);
+    checkValueAndJacobians(value_and_numerical,
+                           forward_dynamic,
+                           forward_untyped,
+                           forward_typed,
+                           reverse,
+                           reverse_dynamic,
+                           wrt_addresses,
+                           jac_indices);
 }
 
 // Version for non-unique expressions
@@ -247,10 +287,12 @@ std::enable_if_t<not UniqueExpr> checkJacobians(const Expr &expr, const Wrt &...
 
     const auto &value_and_numerical = std::tuple_cat(
       std::make_tuple(expr.eval()), wave::evaluateNumericalJacobians(expr, wrt...));
+    const auto &forward_dynamic =
+      wave::internal::evaluateWithDynamicJacobians(expr, wrt...);
     const auto &forward_untyped = expr.evalWithJacobians(wrt...);
-
     const auto &jac_indices = wave::tmp::make_index_sequence<sizeof...(Wrt), 1>{};
-    checkValueAndJacobiansUntyped(value_and_numerical, forward_untyped, jac_indices);
+    checkValueAndJacobiansUntyped(
+      value_and_numerical, forward_dynamic, forward_untyped, jac_indices);
 }
 
 /** Helper to call checkJacobian(expr, wrt) with a trace. Requires `Unique` to be a

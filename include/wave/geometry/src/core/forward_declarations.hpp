@@ -30,10 +30,11 @@ struct NotImplemented;
 /** Marker of a disabled call (should be accompanied by static_assert) */
 struct NotAllowed {};
 
-/** Every expression must have an ExpressionImpl with these members:
- * @todo */
+/** Marker of ADL-enabled functions in internal namespace */
+struct adl {};
+
 template <typename Derived, typename Enable = void>
-struct ExpressionImpl;
+struct PrepareExpr;
 
 }  // namespace internal
 

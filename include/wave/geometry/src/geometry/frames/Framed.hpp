@@ -93,7 +93,7 @@ class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Fra
     template <TICK_REQUIRES(internal::is_vector_leaf<WrappedLeaf>{})>
     explicit Framed(Scalar x, Scalar y, Scalar z) : wrapped_leaf{x, y, z} {}
 
-    // Leave default csonstructors and assignment operators
+    // Leave default constructors and assignment operators
     Framed() = default;
     Framed(const Framed &) = default;
     Framed(Framed &&) = default;

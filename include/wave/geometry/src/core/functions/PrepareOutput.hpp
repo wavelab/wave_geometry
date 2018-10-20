@@ -8,6 +8,25 @@
 namespace wave {
 namespace internal {
 
+
+/** Prepare an expression tree with the given Target, and initialize an Evaluator
+ * Internal implementation - does not check whether root needs conversion.
+ */
+template <typename Derived>
+WAVE_STRONG_INLINE auto prepareEvaluator(Derived &&expr) {
+    // First, transform the expression
+    const auto &evaluable_expr =
+      PrepareExpr<tmp::remove_cr_t<Derived>>::run(std::forward<Derived>(expr));
+    using ExprType = tmp::remove_cr_t<decltype(evaluable_expr)>;
+
+    // Construct Evaluator tree
+    return Evaluator<ExprType>{evaluable_expr};
+
+    static_assert(
+      std::is_same<ExprType, tmp::remove_cr_t<typename traits<Derived>::PreparedType>>{},
+      "Internal sanity check");
+}
+
 /** Prepare an expression tree with the given Target, and initialize an Evaluator
  *
  * This function is enabled when the Destination type is already produced by the
@@ -22,18 +41,8 @@ template <
   typename Destination,
   typename Derived,
   std::enable_if_t<std::is_same<Destination, eval_output_t<arg_t<Derived>>>{}, int> = 0>
-WAVE_STRONG_INLINE auto prepareEvaluatorTo(Derived &&expr)
-  -> Evaluator<typename traits<arg_t<Derived>>::PreparedType> {
-    // First, transform the expression
-    const auto &evaluable_expr =
-      PrepareExpr<arg_t<Derived>>::run(std::forward<Derived>(expr));
-    using ExprType = tmp::remove_cr_t<decltype(evaluable_expr)>;
-
-    static_assert(std::is_same<ExprType, typename traits<arg_t<Derived>>::PreparedType>{},
-                  "Internal sanity check");
-
-    // Construct Evaluator tree
-    return internal::Evaluator<ExprType>{evaluable_expr};
+WAVE_STRONG_INLINE auto prepareEvaluatorTo(Derived &&expr) {
+    return prepareEvaluator(std::forward<Derived>(expr));
 }
 
 /** Prepare an expression tree with the given Target, and initialize an Evaluator.
@@ -49,8 +58,7 @@ template <
   typename Destination,
   typename Derived,
   std::enable_if_t<!std::is_same<Destination, eval_output_t<arg_t<Derived>>>{}, int> = 0>
-WAVE_STRONG_INLINE auto prepareEvaluatorTo(Derived &&expr) -> Evaluator<
-  typename traits<Convert<eval_t<Destination>, arg_t<Derived>>>::PreparedType> {
+WAVE_STRONG_INLINE auto prepareEvaluatorTo(Derived &&expr) {
     // Add the needed conversion
     using ConvertedType = Convert<eval_t<Destination>, arg_t<Derived>>;
 
@@ -102,7 +110,6 @@ template <typename Derived>
 auto eval(const ExpressionBase<Derived> &expr) -> internal::plain_output_t<Derived> {
     return expr.derived().eval();
 }
-
 
 }  // namespace wave
 

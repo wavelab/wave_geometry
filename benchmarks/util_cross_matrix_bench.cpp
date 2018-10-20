@@ -237,4 +237,4 @@ BENCHMARK_TEMPLATE(BM_CrossTimesCross, ManualCross)->Arg(reps);
 BENCHMARK_TEMPLATE(BM_CrossTimesCross, WaveCross)->Arg(reps);
 
 
-BENCHMARK_MAIN()
+BENCHMARK_MAIN();

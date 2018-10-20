@@ -18,6 +18,7 @@ wave_geometry
    manifold_operations
    autodiff
    frame_semantics
+   dynamic_expressions
    changelog
    cite
    license

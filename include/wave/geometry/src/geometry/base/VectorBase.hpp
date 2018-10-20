@@ -65,12 +65,10 @@ struct vector_leaf_traits_base<Tmpl<ImplType_>> : leaf_traits_base<Tmpl<ImplType
     template <typename NewImplType>
     using rebind = Tmpl<NewImplType>;
 
-    static constexpr int Size = ImplType::SizeAtCompileTime;
-
     // Overrides of universal leaf traits
     using Scalar = typename ImplType::Scalar;
     using PlainType = Tmpl<typename ImplType::PlainObject>;
-    static constexpr int TangentSize = Size;
+    enum : int { Size = ImplType::SizeAtCompileTime, TangentSize = Size };
 };
 
 /** Helper to construct a vector expression given a leaf of the same kind */
@@ -153,8 +151,8 @@ auto evalImpl(expr<Scale>, const ScalarBase<Lhs> &lhs, const VectorBase<Rhs> &rh
     return makeVectorLike<Rhs>(lhs.derived().value() * rhs.derived().value());
 }
 /** Implementation of right scalar multiplication
-* Defer to the implementation type's arithmetic operators.
-*/
+ * Defer to the implementation type's arithmetic operators.
+ */
 template <typename Lhs, typename Rhs>
 auto evalImpl(expr<ScaleR>, const VectorBase<Lhs> &lhs, const ScalarBase<Rhs> &rhs) {
     return makeVectorLike<Lhs>(lhs.derived().value() * rhs.derived().value());

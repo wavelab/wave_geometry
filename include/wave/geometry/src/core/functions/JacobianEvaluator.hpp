@@ -5,21 +5,30 @@
 #ifndef WAVE_GEOMETRY_JACOBIANEVALUATOR_HPP
 #define WAVE_GEOMETRY_JACOBIANEVALUATOR_HPP
 
-#include <boost/optional.hpp>
-
 namespace wave {
 namespace internal {
 
-/** Functor to evaluate an expression tree with variables identified only by type
- *
- * @warning experimental
+/** Evaluates an expression's Jacobian with respect to one target in forward mode
  */
 template <typename Derived, typename Target, typename = void>
 struct JacobianEvaluator;
 
-/** Specialization for leaf expression of same type */
+/** Gets the target to differentiate w.r.t. for a given type.
+ *
+ * For most types, this is simply a passthrough. Allows special types like Proxy to
+ * differentiate w.r.t. another object.
+ *
+ * @note the unused leaf tag lets us put the function in the internal namespace and still
+ * have ADL
+ */
 template <typename Derived>
-struct JacobianEvaluator<Derived, Derived, enable_if_leaf_or_scalar_t<Derived>> {
+decltype(auto) getWrtTarget(leaf, const ExpressionBase<Derived> &target) {
+    return target.derived();
+}
+
+/** Specialization for expression of same type as the target */
+template <typename Derived>
+struct JacobianEvaluator<Derived, Derived> {
     using Scalar = scalar_t<Derived>;
 
     WAVE_STRONG_INLINE JacobianEvaluator(const Evaluator<Derived> &evaluator,
@@ -51,7 +60,10 @@ struct JacobianEvaluator<Derived, Derived, enable_if_leaf_or_scalar_t<Derived>> 
 
 /** Specialization for leaf expression of different type */
 template <typename Derived, typename Target>
-struct JacobianEvaluator<Derived, Target, enable_if_leaf_or_scalar_t<Derived>> {
+struct JacobianEvaluator<
+  Derived,
+  Target,
+  std::enable_if_t<is_leaf_or_scalar<Derived>{} && !std::is_same<Derived, Target>{}>> {
     WAVE_STRONG_INLINE JacobianEvaluator(const Evaluator<Derived> &, const Target &) {}
 
     /** Finds (trivial) jacobian of the leaf expression
@@ -64,15 +76,18 @@ struct JacobianEvaluator<Derived, Target, enable_if_leaf_or_scalar_t<Derived>> {
 };
 
 
-/** Specialization for unary expression */
+/** Specialization for unary expression of different type */
 template <typename Derived, typename Target>
-struct JacobianEvaluator<Derived, Target, enable_if_unary_t<Derived>> {
+struct JacobianEvaluator<
+  Derived,
+  Target,
+  std::enable_if_t<is_unary_expression<Derived>{} && !std::is_same<Derived, Target>{}>> {
     using Jacobian = jacobian_t<Derived, Target>;
 
  private:
     // Wrapped Evaluator and nested jacobian-evaluators
     const Evaluator<Derived> &evaluator;
-    const JacobianEvaluator<typename Derived::RhsDerived, Target> rhs_eval;
+    const JacobianEvaluator<typename traits<Derived>::RhsDerived, Target> rhs_eval;
 
  public:
     WAVE_STRONG_INLINE JacobianEvaluator(const Evaluator<Derived> &evaluator,
@@ -99,16 +114,18 @@ template <typename Derived, typename Target>
 struct JacobianEvaluator<
   Derived,
   Target,
-  std::enable_if_t<is_binary_expression<Derived>{} &&
-                   contains_same_type<typename Derived::LhsDerived, Target>::value &&
-                   contains_same_type<typename Derived::RhsDerived, Target>::value>> {
+  std::enable_if_t<
+    is_binary_expression<Derived>{} &&
+    contains_same_type<typename traits<Derived>::LhsDerived, Target>::value &&
+    contains_same_type<typename traits<Derived>::RhsDerived, Target>::value &&
+    !std::is_same<Derived, Target>{}>> {
     using Jacobian = jacobian_t<Derived, Target>;
 
  private:
     // Wrapped Evaluator and nested jacobian-evaluators
     const Evaluator<Derived> &evaluator;
-    const JacobianEvaluator<typename Derived::LhsDerived, Target> lhs_eval;
-    const JacobianEvaluator<typename Derived::RhsDerived, Target> rhs_eval;
+    const JacobianEvaluator<typename traits<Derived>::LhsDerived, Target> lhs_eval;
+    const JacobianEvaluator<typename traits<Derived>::RhsDerived, Target> rhs_eval;
 
  public:
     WAVE_STRONG_INLINE JacobianEvaluator(const Evaluator<Derived> &evaluator,
@@ -156,15 +173,16 @@ template <typename Derived, typename Target>
 struct JacobianEvaluator<
   Derived,
   Target,
-  std::enable_if_t<is_binary_expression<Derived>::value &&
-                   contains_same_type<typename Derived::LhsDerived, Target>::value &&
-                   !contains_same_type<typename Derived::RhsDerived, Target>::value>> {
+  std::enable_if_t<
+    is_binary_expression<Derived>::value &&
+    contains_same_type<typename traits<Derived>::LhsDerived, Target>::value &&
+    !contains_same_type<typename traits<Derived>::RhsDerived, Target>::value>> {
     using Jacobian = jacobian_t<Derived, Target>;
 
  private:
     // Wrapped Evaluator and nested jacobian-evaluators
     const Evaluator<Derived> &evaluator;
-    const JacobianEvaluator<typename Derived::LhsDerived, Target> lhs_eval;
+    const JacobianEvaluator<typename traits<Derived>::LhsDerived, Target> lhs_eval;
 
  public:
     WAVE_STRONG_INLINE JacobianEvaluator(const Evaluator<Derived> &evaluator,
@@ -192,15 +210,16 @@ template <typename Derived, typename Target>
 struct JacobianEvaluator<
   Derived,
   Target,
-  std::enable_if_t<is_binary_expression<Derived>{} &&
-                   !contains_same_type<typename Derived::LhsDerived, Target>::value &&
-                   contains_same_type<typename Derived::RhsDerived, Target>::value>> {
+  std::enable_if_t<
+    is_binary_expression<Derived>{} &&
+    !contains_same_type<typename traits<Derived>::LhsDerived, Target>::value &&
+    contains_same_type<typename traits<Derived>::RhsDerived, Target>::value>> {
     using Jacobian = jacobian_t<Derived, Target>;
 
  private:
     // Wrapped Evaluator and nested jacobian-evaluators
     const Evaluator<Derived> &evaluator;
-    const JacobianEvaluator<typename Derived::RhsDerived, Target> rhs_eval;
+    const JacobianEvaluator<typename traits<Derived>::RhsDerived, Target> rhs_eval;
 
  public:
     WAVE_STRONG_INLINE JacobianEvaluator(const Evaluator<Derived> &evaluator,
@@ -228,7 +247,7 @@ struct JacobianEvaluator<
 template <typename Derived, typename Target>
 inline auto evaluateOneJacobian(const Evaluator<Derived> &v_eval, const Target &target)
   -> jacobian_t<Derived, Target> {
-    internal::JacobianEvaluator<Derived, Target> j_eval{v_eval, target};
+    const auto j_eval = internal::JacobianEvaluator<Derived, Target>{v_eval, target};
     const auto &result = j_eval.jacobian();
     if (result) {
         return *result;
@@ -248,7 +267,7 @@ auto evaluateJacobian(const ExpressionBase<Derived> &expr, const Target &target)
     // Note since we don't return the value, we don't need the user-facing OutputType
     using OutType = eval_output_t<Derived>;
     const auto &v_eval = prepareEvaluatorTo<OutType>(expr.derived());
-    return evaluateOneJacobian(v_eval, target);
+    return evaluateOneJacobian(v_eval, getWrtTarget(leaf{}, target));
 }
 
 /** Evaluate the result of an expression tree and any number of jacobians
@@ -265,7 +284,7 @@ auto evaluateWithJacobians(const ExpressionBase<Derived> &expr,
     const auto &v_eval = prepareEvaluatorTo<plain_output_t<Derived>>(expr.derived());
 
     return std::make_tuple(prepareOutput(v_eval),
-                           evaluateOneJacobian(v_eval, targets)...);
+                           evaluateOneJacobian(v_eval, getWrtTarget(leaf{}, targets))...);
 }
 
 }  // namespace internal

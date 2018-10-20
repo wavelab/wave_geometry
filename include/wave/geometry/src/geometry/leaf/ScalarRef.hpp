@@ -49,7 +49,7 @@ struct traits<ScalarRef<ScalarType>> : unary_traits_base<ScalarRef<ScalarType>>,
     using PlainType = ::wave::Scalar<ScalarType>;
     using Scalar = ScalarType;
     static constexpr int Size = 1;
-    static constexpr int TangentSize = 1;
+    enum : int { TangentSize = 1 };
 };
 
 // Convert to a leaf expression during evaluation

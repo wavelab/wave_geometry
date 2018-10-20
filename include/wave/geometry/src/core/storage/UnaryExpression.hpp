@@ -11,11 +11,10 @@ template <typename Derived_, typename RhsDerived_>
 struct UnaryExpressionBase {
     using Derived = Derived_;
     using RhsDerived = tmp::remove_cr_t<RhsDerived_>;
-    using RhsDerivedOrig = RhsDerived_;
 
     // Hold a reference to leaf expressions to avoid copies, but a copy of other
     // expressions to avoid references to temporaries.
-    using RhsStore = internal::wave_ref_sel_t<RhsDerived_>;
+    using RhsStore = internal::ref_sel_t<RhsDerived_>;
 
     // Forward args to rhs (version for one argument)
     // Disable if copy ctor would apply - https://stackoverflow.com/a/39646176

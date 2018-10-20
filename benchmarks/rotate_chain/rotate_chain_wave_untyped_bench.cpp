@@ -9,7 +9,7 @@ using EigenVector = std::vector<T, Eigen::aligned_allocator<T>>;
 
 class RotateChain : public benchmark::Fixture {
  protected:
-    const int N = 1000;
+    const int N = 1;
     const EigenVector<wave::RotationMd> R1 = randomMatrices<wave::RotationMd>(N);
     const EigenVector<wave::RotationMd> R2 = randomMatrices<wave::RotationMd>(N);
     const EigenVector<wave::RotationMd> R3 = randomMatrices<wave::RotationMd>(N);

@@ -34,9 +34,9 @@ auto makeTangent(const Vector &v) {
 /** Evaluate an expression adding an offset along one dimension if expr === target
  * This helper requires the expression to already have been evaluated, yielding `value`
  */
-template <typename Derived, typename TargetDerived, typename Scalar>
+template <typename Derived, typename Scalar>
 inline auto evaluateWithDeltaImpl(const Derived &expr,
-                                  const TargetDerived &target,
+                                  const void *target,
                                   const plain_eval_t<Derived> &value,
                                   int coeff,
                                   Scalar delta) -> plain_eval_t<Derived> {
@@ -55,56 +55,56 @@ inline auto evaluateWithDeltaImpl(const Derived &expr,
 }
 
 /** Evaluates an an expression tree, adding a small offset in one dimension to the target
+ * with the given address.
  *
  * Recurses down an existing Evaluator tree to save work.
  *
  * @note This implementation fully evaluates Eigen expressions at each step, in order for
  * the returned type to be the same whether or not expr === target. It is not as the
  * regular Evaluator, and is intended for testing only.
- *
- * Specialization for leaf expression
  */
-template <typename Derived, typename TargetDerived, typename Enable = void>
+template <typename Derived, typename Enable = void>
 struct EvaluatorWithDelta;
 
-/** Specialization for leaf expression */
-template <typename Derived, typename TargetDerived>
-struct EvaluatorWithDelta<Derived, TargetDerived, enable_if_leaf_t<Derived>> {
+/**Specialization for leaf expression
+*/
+template <typename Derived>
+struct EvaluatorWithDelta<Derived, enable_if_leaf_t<Derived>> {
     using Scalar = scalar_t<Derived>;
     using PlainType = plain_eval_t<Derived>;
 
     PlainType operator()(const Derived &expr,
-                         const TargetDerived &target,
+                         const void *target,
                          int coeff,
                          Scalar delta) const {
         const auto &value = evalImpl(get_expr_tag_t<Derived>{}, expr);
         return evaluateWithDeltaImpl(expr, target, PlainType{value}, coeff, delta);
-    };
+    }
 };
 
 /** Specialization for scalar type */
-template <typename Scalar, typename TargetDerived>
-struct EvaluatorWithDelta<Scalar, TargetDerived, enable_if_scalar_t<Scalar>> {
+template <typename Scalar>
+struct EvaluatorWithDelta<Scalar, enable_if_scalar_t<Scalar>> {
     using PlainType = plain_eval_t<Scalar>;
     PlainType operator()(const Scalar &value,
-                         const TargetDerived &target,
+                         const void *target,
                          int coeff,
                          Scalar delta) const {
         return evaluateWithDeltaImpl(value, target, PlainType{value}, coeff, delta);
-    };
+    }
 };
 
 /** Specialization for unary expression */
-template <typename Derived, typename TargetDerived>
-struct EvaluatorWithDelta<Derived, TargetDerived, enable_if_unary_t<Derived>> {
+template <typename Derived>
+struct EvaluatorWithDelta<Derived, enable_if_unary_t<Derived>> {
     using Scalar = scalar_t<Derived>;
-    using RhsEval = EvaluatorWithDelta<typename Derived::RhsDerived, TargetDerived>;
+    using RhsEval = EvaluatorWithDelta<typename traits<Derived>::RhsDerived>;
     using RhsValue = typename RhsEval::PlainType;
     using PlainExpr = typename traits<Derived>::template rebind<RhsValue>;
     using PlainType = plain_eval_t<PlainExpr>;
 
     PlainType operator()(const Derived &expr,
-                         const TargetDerived &target,
+                         const void *target,
                          int coeff,
                          Scalar delta) const {
         const auto &rhs_eval = RhsEval{};
@@ -116,17 +116,17 @@ struct EvaluatorWithDelta<Derived, TargetDerived, enable_if_unary_t<Derived>> {
         using ExprType = tmp::remove_cr_t<decltype(evaluable_expr)>;
         const auto value = PlainType{Evaluator<ExprType>{evaluable_expr}()};
 
-        return evaluateWithDeltaImpl(evaluable_expr, target, value, coeff, delta);
+        return evaluateWithDeltaImpl(expr, target, value, coeff, delta);
     }
 };
 
 /** Specialization for binary expression */
-template <typename Derived, typename TargetDerived>
-struct EvaluatorWithDelta<Derived, TargetDerived, enable_if_binary_t<Derived>> {
+template <typename Derived>
+struct EvaluatorWithDelta<Derived, enable_if_binary_t<Derived>> {
     using Scalar = scalar_t<Derived>;
 
-    using LhsEval = EvaluatorWithDelta<typename Derived::LhsDerived, TargetDerived>;
-    using RhsEval = EvaluatorWithDelta<typename Derived::RhsDerived, TargetDerived>;
+    using LhsEval = EvaluatorWithDelta<typename traits<Derived>::LhsDerived>;
+    using RhsEval = EvaluatorWithDelta<typename traits<Derived>::RhsDerived>;
     using LhsValue = typename LhsEval::PlainType;
     using RhsValue = typename RhsEval::PlainType;
     using PlainExpr = typename traits<Derived>::template rebind<LhsValue, RhsValue>;
@@ -134,7 +134,7 @@ struct EvaluatorWithDelta<Derived, TargetDerived, enable_if_binary_t<Derived>> {
 
 
     PlainType operator()(const Derived &expr,
-                         const TargetDerived &target,
+                         const void *target,
                          int coeff,
                          Scalar delta) const {
         const auto &lhs_eval = LhsEval{};
@@ -152,7 +152,7 @@ struct EvaluatorWithDelta<Derived, TargetDerived, enable_if_binary_t<Derived>> {
         using ExprType = tmp::remove_cr_t<decltype(evaluable_expr)>;
         const auto value = PlainType{Evaluator<ExprType>{evaluable_expr}()};
 
-        return evaluateWithDeltaImpl(evaluable_expr, target, value, coeff, delta);
+        return evaluateWithDeltaImpl(expr, target, value, coeff, delta);
     }
 };
 
@@ -167,6 +167,7 @@ auto evaluateNumericalJacobianImpl(const Evaluator<Derived> &evaluator,
     auto jacobian = internal::jacobian_t<Derived, TargetDerived>{};
 
     const auto &expr = evaluator.expr;
+    using ExprType = tmp::remove_cr_t<decltype(expr)>;
     const auto &value = prepareOutput(evaluator);
 
     // @todo pick appropriate delta. Machine epsilon is not obviously appropriate since
@@ -176,7 +177,7 @@ auto evaluateNumericalJacobianImpl(const Evaluator<Derived> &evaluator,
 
     for (int i = 0; i < jacobian.cols(); ++i) {
         const auto forward_eval =
-          internal::EvaluatorWithDelta<Derived, TargetDerived>{}(expr, target, i, delta);
+          internal::EvaluatorWithDelta<ExprType>{}(expr, &target, i, delta);
 
         // Apply output functor (e.g. wrap in Framed)
         const auto forward_value = internal::prepareLeafForOutput<Derived>(forward_eval);
@@ -190,7 +191,6 @@ auto evaluateNumericalJacobianImpl(const Evaluator<Derived> &evaluator,
 
 }  // namespace internal
 
-
 /** Numerically evaluate a jacobian of an expression tree.
  *
  * @warning This function is intended only for testing analytic Jacobians. It may be
@@ -203,7 +203,8 @@ auto evaluateNumericalJacobian(const ExpressionBase<Derived> &expr,
     using OutputType = internal::plain_output_t<Derived>;
     const auto &v_eval = internal::prepareEvaluatorTo<OutputType>(expr.derived());
 
-    return internal::evaluateNumericalJacobianImpl(v_eval, target);
+    return internal::evaluateNumericalJacobianImpl(
+      v_eval, getWrtTarget(internal::leaf{}, target));
 }
 
 /** Numerically evaluate multiple Jacobians of am expression tree.
@@ -222,7 +223,8 @@ auto evaluateNumericalJacobians(const ExpressionBase<Derived> &expr,
     using OutputType = internal::plain_output_t<Derived>;
     const auto &v_eval = internal::prepareEvaluatorTo<OutputType>(expr.derived());
 
-    return std::make_tuple(internal::evaluateNumericalJacobianImpl(v_eval, targets)...);
+    return std::make_tuple(internal::evaluateNumericalJacobianImpl(
+      v_eval, getWrtTarget(internal::leaf{}, targets))...);
 }
 
 }  // namespace wave

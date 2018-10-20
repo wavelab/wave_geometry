@@ -46,7 +46,7 @@ struct rt_leaf_traits_base<Tmpl<ImplType_>> : leaf_traits_base<Tmpl<ImplType_>>,
     using ImplType = ImplType_;
     using Scalar = typename ImplType::Scalar;
     using TangentType = Twist<Eigen::Matrix<Scalar, 6, 1>>;
-    static constexpr int TangentSize = 6;
+    enum : int { TangentSize = 6 };
 
     // Each leaf must define its own PlainType. There is no consistent place to get it
     // because Eigen matrices have PlainObject in the class, Quaternion in traits, and

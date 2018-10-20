@@ -54,8 +54,7 @@ TYPED_TEST(IdentityExprTest, multiplyFloat) {
     EXPECT_APPROX(expected, TypeParam{} * f);
     EXPECT_APPROX(expected, f * TypeParam{});
 }
-template <class T>
-struct Debug;
+
 // Compile-time tests only
 TYPED_TEST(IdentityExprTest, staticTests) {
     // Make sure Identity is properly being removed

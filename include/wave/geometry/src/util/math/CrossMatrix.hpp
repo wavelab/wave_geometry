@@ -158,9 +158,11 @@ EIGEN_DEVICE_FUNC inline auto operator*(
  *
  * Only enabled for static matrices
  */
-template <typename OtherType,
-          typename VecType,
-          std::enable_if_t<OtherType::ColsAtCompileTime == 3, int> = 0>
+template <
+  typename OtherType,
+  typename VecType,
+  std::enable_if_t<OtherType::ColsAtCompileTime == 3 && OtherType::RowsAtCompileTime != 1,
+                   int> = 0>
 EIGEN_DEVICE_FUNC inline auto operator*(const Eigen::MatrixBase<OtherType> &lhs,
                                         const wave::CrossMatrix<VecType> &crossMat) {
     return lhs.rowwise().cross(crossMat.vec);

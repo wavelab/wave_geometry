@@ -42,7 +42,7 @@ struct nullary_traits_base<Tmpl<Wrapped>> : traits<Wrapped> {
  public:
     // A tag for calling evalImpl()
     using Tag = internal::expr<Tmpl, eval_t<Wrapped>>;
-    using PreparedType = Derived;
+    using PreparedType = Derived &;
     using EvalType = eval_t_unary<Tag, eval_t<Wrapped>>;
     using UniqueLeaves = has_unique_leaves_leaf<Derived>;
 };
@@ -50,12 +50,13 @@ struct nullary_traits_base<Tmpl<Wrapped>> : traits<Wrapped> {
 template <typename T>
 struct leaf_traits_base {
     using Tag = leaf;
-    using PreparedType = T;
+    using PreparedType = T &;
     using EvalType = T;
     using OutputFunctor = IdentityFunctor;
     using PlainType = T;
     using UniqueLeaves = has_unique_leaves_leaf<T>;
     using ConvertTo = tmp::type_list<>;
+    static constexpr bool StoreByRef = true;
 };
 
 template <template <typename, typename> class Tmpl,
@@ -103,7 +104,7 @@ struct binary_traits_base<Tmpl<LhsDerived_, RhsDerived_>> {
     using ConvertedRhs = typename ConvertedTraits::RhsDerived;
 
  public:
-    using PreparedType = ConvertedType;
+    using PreparedType = ConvertedType &&;
     /** The (leaf) result of evaluating PreparedType */
     using EvalType = eval_t_binary<Tag,
                                    typename traits<ConvertedLhs>::EvalType,
@@ -111,6 +112,7 @@ struct binary_traits_base<Tmpl<LhsDerived_, RhsDerived_>> {
 
     using OutputFunctor = IdentityFunctor;
     using UniqueLeaves = has_unique_leaves_binary<LhsDerived, RhsDerived>;
+    static constexpr bool StoreByRef = true;
 };
 
 // Specialization for regular unary expression with one template parameter (such as
@@ -136,6 +138,7 @@ struct unary_traits_base<Tmpl<RhsDerived_>> {
     using RhsEval = clean_eval_t<RhsDerived>;
     // Type of the Rhs after applying its PreparedType (before evaluation)
     using RhsPrepared = typename traits<RhsDerived>::PreparedType;
+
     // Type of this expression template rebound to the prepared rhs
     using AdaptedType = rebind<RhsPrepared>;
 
@@ -152,13 +155,13 @@ struct unary_traits_base<Tmpl<RhsDerived_>> {
       typename traits_safe_t<ConvertedType, This, unary_traits_base>::RhsDerived;
 
  public:
-    using PreparedType = ConvertedType;
+    using PreparedType = ConvertedType &&;
     /** The (leaf) result of evaluating PreparedType */
     using EvalType = eval_t_unary<Tag, typename traits<ConvertedRhs>::EvalType>;
 
     using OutputFunctor = IdentityFunctor;
-
     using UniqueLeaves = has_unique_leaves_unary<RhsDerived>;
+    static constexpr bool StoreByRef = true;
 };
 
 // Specialization for unary expression with an extra parameter (such as Convert),
@@ -180,6 +183,7 @@ struct unary_traits_base_tag<Tmpl<Aux, RhsDerived_>, Tag_> {
     using RhsEval = clean_eval_t<RhsDerived>;
     // Type of the Rhs after applying its PreparedType (before evaluation)
     using RhsPrepared = typename traits<RhsDerived>::PreparedType;
+
     // Type of this expression template rebound to the prepared rhs
     using AdaptedType = rebind<RhsPrepared>;
 
@@ -196,12 +200,13 @@ struct unary_traits_base_tag<Tmpl<Aux, RhsDerived_>, Tag_> {
       typename traits_safe_t<ConvertedType, This, unary_traits_base_tag>::RhsDerived;
 
  public:
-    using PreparedType = ConvertedType;
+    using PreparedType = ConvertedType &&;
     /** The (leaf) result of evaluating PreparedType */
     using EvalType = eval_t_unary<Tag, typename traits<ConvertedRhs>::EvalType>;
 
     using OutputFunctor = IdentityFunctor;
     using UniqueLeaves = has_unique_leaves_unary<RhsDerived>;
+    static constexpr bool StoreByRef = true;
 };
 
 // Specialization for unary expression with an extra parameter (such as Convert)
@@ -227,7 +232,7 @@ auto evalImpl(leaf, Derived &&l) -> Derived && {
     return std::forward<Derived>(l);
 }
 
-/** Identity Jacobain for identity expressions using the `leaf` tag */
+/** Identity Jacobian for identity expressions using the `leaf` tag */
 template <typename T>
 auto jacobianImpl(leaf, const T &, const T &) -> identity_t<T> {
     return identity_t<T>{};

@@ -62,8 +62,9 @@ class RotationTest : public testing::Test {
 };
 
 // The list of implementation types to run each test case on
-using LeafTypes = test_types_list<wave::RotationMd, wave::RotationQd, wave::RotationAd>;
-
+// using LeafTypes = test_types_list<wave::RotationMd, wave::RotationQd,
+// wave::RotationAd>;
+using LeafTypes = testing::Types<UnframedParams<wave::RotationMd>>;
 // The following tests will be built for each type in LeafTypes
 TYPED_TEST_CASE(RotationTest, LeafTypes);
 

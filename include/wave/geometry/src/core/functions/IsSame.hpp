@@ -7,17 +7,17 @@
 
 namespace wave {
 
-// Not in internal namespace due to some ADL(?) problem with recursive function templates
+// Not in internal namespace due to ADL
 // @todo figure this out and move to internal namespace
 
-/** Attempt to determine whether `a` and `b` are identical expressions.
+/** Determines whether `a` and `b` are the same expression, for the purposes of autodiff.
  *
  * The criteria are
  *  - `a` and `b` have the same derived type
  *  - leaf expressions in `a` and `b` have the same storage address
  *
  *  @warning This checks for identity in terms of C++ objects, not mathematical equality
- *  or equality of contents. Expressions which evaluate to the same result may not be
+ *  or equality of contents. Expressions which evaluate to the same result might not be
  *  considered identical by isSame.
  */
 template <typename A, typename B>
@@ -61,6 +61,12 @@ inline constexpr bool isSame(const ExpressionBase<Derived> &a,
                              const ExpressionBase<Derived> &b) noexcept {
     return isSame(a.derived().lhs(), b.derived().lhs()) &&
            isSame(a.derived().rhs(), b.derived().rhs());
+}
+
+// Version for unknown target type (used by dynamic evaluators)
+template <typename A>
+inline constexpr bool isSame(const ExpressionBase<A> &a, const void *b) noexcept {
+    return static_cast<const void *>(&getWrtTarget(internal::leaf{}, a.derived())) == b;
 }
 
 /** Attempt to determine whether `a` contains an expression identical to `b`

@@ -64,7 +64,7 @@ struct traits<Scalar<ScalarType>> : leaf_traits_base<Scalar<ScalarType>>,
     using PlainType = ::wave::Scalar<ScalarType>;
     using Scalar = ScalarType;
     static constexpr int Size = 1;
-    static constexpr int TangentSize = 1;
+    enum : int { TangentSize = 1 };
 };
 
 }  // namespace internal

@@ -30,7 +30,7 @@ RMFd<I, J> randomRMFd() {
 
 class RotateChain : public benchmark::Fixture {
  protected:
-    const int N = 1000;
+    const int N = 1;
     const RMFdVector<0, 1> R1 = randomMatrices<RMFd<0, 1>>(N);
     const RMFdVector<1, 2> R2 = randomMatrices<RMFd<1, 2>>(N);
     const RMFdVector<2, 3> R3 = randomMatrices<RMFd<2, 3>>(N);

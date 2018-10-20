@@ -97,16 +97,17 @@ struct frame_cast_traits_base {
     // Needed for unary expression concept
     template <typename NewRhs>
     using rebind = FrameCast<Frames..., NewRhs>;
-    using RhsDerived = Rhs;
+    using RhsDerived = tmp::remove_cr_t<Rhs>;
 
     // We need no change in eval or conversions
     using Tag = leaf;  // leaf tag means we use identity eval and jacobianImpl
-    using PreparedType = Derived;
+    using PreparedType = Derived &&;
     using EvalType = eval_t<Rhs>;
     using UniqueLeaves = has_unique_leaves_unary<Rhs>;
 
     // We do override the output with new frames
     using OutputFunctor = WrapWithFrames<Frames...>;
+    static constexpr bool StoreByRef = true;
 };
 
 
