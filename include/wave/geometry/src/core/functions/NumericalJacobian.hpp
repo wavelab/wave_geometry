@@ -101,7 +101,8 @@ struct EvaluatorWithDelta<Derived, enable_if_unary_t<Derived>> {
     using RhsEval = EvaluatorWithDelta<typename traits<Derived>::RhsDerived>;
     using RhsValue = typename RhsEval::PlainType;
     using PlainExpr = typename traits<Derived>::template rebind<RhsValue>;
-    using PlainType = plain_eval_t<PlainExpr>;
+    using OutputType = plain_output_t<Derived>;
+    using PlainType = plain_eval_t<Derived>;
 
     PlainType operator()(const Derived &expr,
                          const void *target,
@@ -112,9 +113,8 @@ struct EvaluatorWithDelta<Derived, enable_if_unary_t<Derived>> {
 
         // Can't simply call evalImpl here - see comment in binary specialization
         // We copy part of what internal::prepareEvaluatorTo() does @todo simplify
-        const auto &evaluable_expr = PrepareExpr<PlainExpr>::run(PlainExpr{rhs_value});
-        using ExprType = tmp::remove_cr_t<decltype(evaluable_expr)>;
-        const auto value = PlainType{Evaluator<ExprType>{evaluable_expr}()};
+        auto v_eval = prepareEvaluatorTo<OutputType>(PlainExpr{rhs_value});
+        const auto value = v_eval();
 
         return evaluateWithDeltaImpl(expr, target, value, coeff, delta);
     }
@@ -130,7 +130,8 @@ struct EvaluatorWithDelta<Derived, enable_if_binary_t<Derived>> {
     using LhsValue = typename LhsEval::PlainType;
     using RhsValue = typename RhsEval::PlainType;
     using PlainExpr = typename traits<Derived>::template rebind<LhsValue, RhsValue>;
-    using PlainType = plain_eval_t<PlainExpr>;
+    using OutputType = plain_output_t<Derived>;
+    using PlainType = plain_eval_t<Derived>;
 
 
     PlainType operator()(const Derived &expr,
@@ -147,10 +148,8 @@ struct EvaluatorWithDelta<Derived, enable_if_binary_t<Derived>> {
         // which needs no conversion. Here by converting to PlainType we might ask for
         // Compose(AngleAxisRotation, MatrixRotation), which does need a conversion.
         // Therefore, fully evaluate the expression we have.
-        const auto &evaluable_expr =
-          PrepareExpr<PlainExpr>::run(PlainExpr{lhs_value, rhs_value});
-        using ExprType = tmp::remove_cr_t<decltype(evaluable_expr)>;
-        const auto value = PlainType{Evaluator<ExprType>{evaluable_expr}()};
+        auto v_eval = prepareEvaluatorTo<OutputType>(PlainExpr{lhs_value, rhs_value});
+        const auto value = v_eval();
 
         return evaluateWithDeltaImpl(expr, target, value, coeff, delta);
     }

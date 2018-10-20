@@ -40,7 +40,7 @@ WAVE_STRONG_INLINE auto prepareEvaluator(Derived &&expr) {
 template <
   typename Destination,
   typename Derived,
-  std::enable_if_t<std::is_same<Destination, eval_output_t<arg_t<Derived>>>{}, int> = 0>
+  std::enable_if_t<std::is_same<eval_t<Destination>, eval_t<arg_t<Derived>>>{}, int> = 0>
 WAVE_STRONG_INLINE auto prepareEvaluatorTo(Derived &&expr) {
     return prepareEvaluator(std::forward<Derived>(expr));
 }
@@ -57,7 +57,7 @@ WAVE_STRONG_INLINE auto prepareEvaluatorTo(Derived &&expr) {
 template <
   typename Destination,
   typename Derived,
-  std::enable_if_t<!std::is_same<Destination, eval_output_t<arg_t<Derived>>>{}, int> = 0>
+  std::enable_if_t<!std::is_same<eval_t<Destination>, eval_t<arg_t<Derived>>>{}, int> = 0>
 WAVE_STRONG_INLINE auto prepareEvaluatorTo(Derived &&expr) {
     // Add the needed conversion
     using ConvertedType = Convert<eval_t<Destination>, arg_t<Derived>>;
@@ -65,7 +65,7 @@ WAVE_STRONG_INLINE auto prepareEvaluatorTo(Derived &&expr) {
     auto converted_expr = ConvertedType{std::forward<Derived>(expr)};
 
     // Assert we will call the other version of prepareEvaluatorTo() now:
-    static_assert(std::is_same<Destination, eval_output_t<ConvertedType>>{},
+    static_assert(std::is_same<eval_t<Destination>, eval_t<ConvertedType>>{},
                   "Internal sanity check");
 
     return prepareEvaluatorTo<Destination>(std::move(converted_expr));

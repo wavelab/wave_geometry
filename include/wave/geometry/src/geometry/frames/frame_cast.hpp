@@ -88,22 +88,29 @@ auto frame_cast(ExpressionBase<Rhs> &&rhs) -> TICK_FUNCTION_REQUIRES(
 namespace internal {
 
 // Traits shared by two- and three-framed variants
-template <typename Rhs, typename... Frames>
+template <typename RhsDerived_, typename... Frames>
 struct frame_cast_traits_base {
  private:
-    using Derived = FrameCast<Frames..., Rhs>;
+    using Derived = FrameCast<Frames..., RhsDerived_>;
 
  public:
     // Needed for unary expression concept
     template <typename NewRhs>
     using rebind = FrameCast<Frames..., NewRhs>;
-    using RhsDerived = tmp::remove_cr_t<Rhs>;
+    using RhsDerived = tmp::remove_cr_t<RhsDerived_>;
 
+ private:
+    // Type of the Rhs after applying its PreparedType (before evaluation)
+    using RhsPrepared = typename traits<RhsDerived>::PreparedType;
+    // Type of this expression template rebound to the prepared rhs
+    using AdaptedType = rebind<RhsPrepared>;
+
+ public:
     // We need no change in eval or conversions
     using Tag = leaf;  // leaf tag means we use identity eval and jacobianImpl
-    using PreparedType = Derived &&;
-    using EvalType = eval_t<Rhs>;
-    using UniqueLeaves = has_unique_leaves_unary<Rhs>;
+    using PreparedType = AdaptedType &&;
+    using EvalType = eval_t<RhsDerived>;
+    using UniqueLeaves = has_unique_leaves_unary<RhsDerived>;
 
     // We do override the output with new frames
     using OutputFunctor = WrapWithFrames<Frames...>;
