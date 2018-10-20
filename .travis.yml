@@ -63,7 +63,7 @@ jobs:
       python: "3.6"
       env: DOCS_BUILD_DIR=build_docs
       install:
-        - pip install sphinx sphinx_rtd_theme recommonmark sphinx-markdown-tables git+git://github.com/leokoppel/sphinxcontrib-versioning
+        - pip install sphinx==1.7.9 sphinx_rtd_theme recommonmark sphinx-markdown-tables git+git://github.com/leokoppel/sphinxcontrib-versioning
       script:
         - ./scripts/ci/ci_make_docs.bash
       deploy:
