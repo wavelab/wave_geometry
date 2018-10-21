@@ -33,7 +33,11 @@ class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Fra
     // Helper to determine whether to evaluate an Expression argument as Framed.
     // In the special case that we are Framed<T, NoFrame, NoFrame...>, we want to evaluate
     // the argument as Framed even if is_unframed<Arg> is true.
-    static constexpr bool WeHaveFrames = !internal::is_unframed<Framed>::value;
+    enum : bool {
+        WeHaveFrames = !internal::is_unframed<Framed>::value,
+        WeArePlain = std::is_same<std::remove_reference_t<WrappedLeaf>,
+                                  internal::plain_output_t<WrappedLeaf>>::value
+    };
 
     // Helper to determine whether we have a vector leaf and should enable the special
     // Scalar constructors. These constructors are needed to avoid "narrowing conversion"
@@ -52,10 +56,13 @@ class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Fra
     WrappedLeaf wrapped_leaf;
 
  public:
-    /** Construct from an expression */
-    template <
-      typename OtherDerived,
-      TICK_REQUIRES(WeHaveFrames and internal::same_frames<Framed, OtherDerived>{})>
+    /** Construct from an expression.
+     *
+     * Allowed only if our leaf is plain (e.g. a Vector3d, not a Sum expression)
+     */
+    template <typename OtherDerived,
+              TICK_REQUIRES(WeArePlain and WeHaveFrames
+                              and internal::same_frames<Framed, OtherDerived>{})>
     Framed(const ExpressionBase<OtherDerived> &other)
         // Evaluate to Framed and delegate to our copy or move constructor
         : Framed{wave::internal::evaluateTo<Framed>(other.derived())} {}
@@ -64,7 +71,7 @@ class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Fra
     // The above constructor won't work in this case since evaluateTo will return an
     // unframed expression.
     template <typename OtherDerived,
-              TICK_REQUIRES(!WeHaveFrames and
+              TICK_REQUIRES(WeArePlain and !WeHaveFrames and
                             internal::same_frames<Framed, OtherDerived>{})>
     Framed(const ExpressionBase<OtherDerived> &other)
         // Evaluate to Framed and delegate to our copy or move constructor
