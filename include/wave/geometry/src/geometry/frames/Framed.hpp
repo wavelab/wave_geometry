@@ -23,7 +23,7 @@ class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Fra
     TICK_TRAIT_CHECK(internal::is_unframed<WrappedLeaf>);
 
     // Framed is a leaf expression which wraps another leaf expression. It is implemented
-    // similarly to a UnaryExpressionBase holding WrappedLeaf by value, except with
+    // similarly to a UnaryStorage holding WrappedLeaf by value, except with
     // different constructors
 
     // Store the wrapped leaf by value

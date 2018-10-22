@@ -27,9 +27,9 @@ namespace wave {
  */
 template <typename Lhs, typename Rhs>
 struct BoxPlus : internal::base_tmpl_t<Lhs, BoxPlus<Lhs, Rhs>>,
-                 BinaryExpression<ComposeFlipped<Lhs, ExpMap<Rhs> &&>> {
+                 BinaryStorage<ComposeFlipped<Lhs, ExpMap<Rhs> &&>> {
  private:
-    using Storage = BinaryExpression<ComposeFlipped<Lhs, ExpMap<Rhs> &&>>;
+    using Storage = BinaryStorage<ComposeFlipped<Lhs, ExpMap<Rhs> &&>>;
 
  public:
     using Storage::Storage;

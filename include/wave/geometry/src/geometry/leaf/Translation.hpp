@@ -16,15 +16,15 @@ namespace wave {
  */
 template <typename ImplType>
 class Translation : public TranslationBase<Translation<ImplType>>,
-                    public LeafExpression<ImplType, Translation<ImplType>> {
+                    public LeafStorage<ImplType, Translation<ImplType>> {
     static_assert(internal::is_eigen_vector<3, ImplType>::value,
                   "ImplType must be an Eigen 3-vector type.");
     using Scalar = typename ImplType::Scalar;
     using Real = typename Eigen::NumTraits<Scalar>::Real;
-    using Storage = LeafExpression<ImplType, Translation<ImplType>>;
+    using Storage = LeafStorage<ImplType, Translation<ImplType>>;
 
  public:
-    // Inherit constructors from LeafExpression
+    // Inherit constructors from LeafStorage
     using Storage::Storage;
     using Storage::operator=;
 

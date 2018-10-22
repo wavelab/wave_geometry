@@ -45,9 +45,9 @@
 #include "src/core/functions/NumericalJacobian.hpp"
 
 // Storage and traits bases
-#include "src/core/storage/UnaryExpression.hpp"
-#include "src/core/storage/BinaryExpression.hpp"
-#include "src/core/storage/LeafExpression.hpp"
+#include "wave/geometry/src/core/storage/UnaryStorage.hpp"
+#include "wave/geometry/src/core/storage/BinaryStorage.hpp"
+#include "wave/geometry/src/core/storage/LeafStorage.hpp"
 #include "src/core/traits/traits_bases.hpp"
 
 // Expressions

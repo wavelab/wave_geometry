@@ -11,9 +11,9 @@ namespace wave {
  */
 template <typename Lhs, typename Rhs>
 struct Divide : internal::base_tmpl_t<Lhs, Rhs, Divide<Lhs, Rhs>>,
-                BinaryExpression<Divide<Lhs, Rhs>> {
-    // Inherit constructor from BinaryExpression
-    using BinaryExpression<Divide<Lhs, Rhs>>::BinaryExpression;
+                BinaryStorage<Divide<Lhs, Rhs>> {
+    // Inherit constructor from BinaryStorage
+    using BinaryStorage<Divide<Lhs, Rhs>>::BinaryStorage;
 };
 
 

@@ -15,16 +15,16 @@ namespace wave {
  */
 template <typename ImplType>
 class AngleAxisRotation : public RotationBase<AngleAxisRotation<ImplType>>,
-                          public LeafExpression<ImplType, AngleAxisRotation<ImplType>> {
+                          public LeafStorage<ImplType, AngleAxisRotation<ImplType>> {
     static_assert(internal::is_eigen_angleaxis<ImplType>::value,
                   "ImplType must be an Eigen AngleAxis type.");
     using Scalar = typename Eigen::internal::traits<ImplType>::Scalar;
     using Real = typename Eigen::NumTraits<Scalar>::Real;
     using TangentType = RelativeRotation<Eigen::Matrix<Scalar, 3, 1>>;
-    using Storage = LeafExpression<ImplType, AngleAxisRotation<ImplType>>;
+    using Storage = LeafStorage<ImplType, AngleAxisRotation<ImplType>>;
 
  public:
-    // Inherit constructors from LeafExpression
+    // Inherit constructors from LeafStorage
     using Storage::Storage;
     using Storage::operator=;
 

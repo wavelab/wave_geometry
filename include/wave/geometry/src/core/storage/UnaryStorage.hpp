@@ -2,13 +2,13 @@
  * @file
  */
 
-#ifndef WAVE_GEOMETRY_UNARYEXPRESSION_HPP
-#define WAVE_GEOMETRY_UNARYEXPRESSION_HPP
+#ifndef WAVE_GEOMETRY_UNARYSTORAGE_HPP
+#define WAVE_GEOMETRY_UNARYSTORAGE_HPP
 
 namespace wave {
 
 template <typename Derived_, typename RhsDerived_>
-struct UnaryExpressionBase {
+struct UnaryStorage {
     using Derived = Derived_;
     using RhsDerived = tmp::remove_cr_t<RhsDerived_>;
 
@@ -22,24 +22,24 @@ struct UnaryExpressionBase {
               std::enable_if_t<!std::is_same<std::decay_t<Arg>, Derived>{} &&
                                  std::is_constructible<RhsDerived, Arg &&>{},
                                int> = 0>
-    explicit UnaryExpressionBase(Arg &&arg) : rhs_{std::forward<Arg>(arg)} {}
+    explicit UnaryStorage(Arg &&arg) : rhs_{std::forward<Arg>(arg)} {}
 
     // Forward args to rhs (version for 0 or more than 1 argument)
     template <class... Args,
               std::enable_if_t<(sizeof...(Args) != 1) &&
                                  std::is_constructible<RhsStore, Args...>::value,
                                int> = 0>
-    explicit UnaryExpressionBase(Args &&... args) : rhs_{std::forward<Args>(args)...} {}
+    explicit UnaryStorage(Args &&... args) : rhs_{std::forward<Args>(args)...} {}
 
-    UnaryExpressionBase() = delete;
+    UnaryStorage() = delete;
     /** Copy constructor */
-    UnaryExpressionBase(const UnaryExpressionBase &) = default;
+    UnaryStorage(const UnaryStorage &) = default;
     /** Move constructor */
-    UnaryExpressionBase(UnaryExpressionBase &&) = default;
+    UnaryStorage(UnaryStorage &&) = default;
     /** Copy assignment operator */
-    UnaryExpressionBase &operator=(const UnaryExpressionBase &) = default;
+    UnaryStorage &operator=(const UnaryStorage &) = default;
     /** Move assignment operator */
-    UnaryExpressionBase &operator=(UnaryExpressionBase &&) = default;
+    UnaryStorage &operator=(UnaryStorage &&) = default;
 
 
     const RhsStore &rhs() const & {
@@ -61,18 +61,17 @@ struct UnaryExpressionBase {
 // Specialization for regular unary expression with one template parameter (such as
 // Inverse)
 template <template <typename> class Tmpl, typename RhsDerived>
-struct UnaryExpression<Tmpl<RhsDerived>>
-    : UnaryExpressionBase<Tmpl<RhsDerived>, RhsDerived> {
-    using UnaryExpressionBase<Tmpl<RhsDerived>, RhsDerived>::UnaryExpressionBase;
+struct UnaryStorageFor<Tmpl<RhsDerived>> : UnaryStorage<Tmpl<RhsDerived>, RhsDerived> {
+    using UnaryStorage<Tmpl<RhsDerived>, RhsDerived>::UnaryStorage;
 };
 
 // Specialization for unary expression with an extra parameter (such as Convert)
 template <template <typename, typename> class Tmpl, typename Aux, typename RhsDerived>
-struct UnaryExpression<Tmpl<Aux, RhsDerived>>
-    : UnaryExpressionBase<Tmpl<Aux, RhsDerived>, RhsDerived> {
-    using UnaryExpressionBase<Tmpl<Aux, RhsDerived>, RhsDerived>::UnaryExpressionBase;
+struct UnaryStorageFor<Tmpl<Aux, RhsDerived>>
+    : UnaryStorage<Tmpl<Aux, RhsDerived>, RhsDerived> {
+    using UnaryStorage<Tmpl<Aux, RhsDerived>, RhsDerived>::UnaryStorage;
 };
 
 }  // namespace wave
 
-#endif  // WAVE_GEOMETRY_UNARYEXPRESSION_HPP
+#endif  // WAVE_GEOMETRY_UNARYSTORAGE_HPP

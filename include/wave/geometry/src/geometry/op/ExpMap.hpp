@@ -14,12 +14,12 @@ namespace wave {
 template <typename Rhs>
 struct ExpMap
     : internal::base_tmpl_t<typename internal::eval_traits<Rhs>::ExpType, ExpMap<Rhs>>,
-      UnaryExpression<ExpMap<Rhs>> {
+      UnaryStorageFor<ExpMap<Rhs>> {
  private:
-    using Storage = UnaryExpression<ExpMap<Rhs>>;
+    using Storage = UnaryStorageFor<ExpMap<Rhs>>;
 
  public:
-    // Inherit constructors from UnaryExpression
+    // Inherit constructors from UnaryStorage
     using Storage::Storage;
 };
 

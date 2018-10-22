@@ -22,18 +22,18 @@ namespace wave {
  */
 template <typename ImplType>
 class Twist : public TwistBase<Twist<ImplType>>,
-              public LeafExpression<ImplType, Twist<ImplType>> {
+              public LeafStorage<ImplType, Twist<ImplType>> {
     static_assert(internal::is_eigen_vector<6, ImplType>::value,
                   "ImplType must be an Eigen 6-vector type.");
     using Scalar = typename ImplType::Scalar;
-    using Storage = LeafExpression<ImplType, Twist<ImplType>>;
+    using Storage = LeafStorage<ImplType, Twist<ImplType>>;
 
     using Block = Eigen::Block<ImplType, 3, 1>;
     using ConstBlock = Eigen::Block<const ImplType, 3, 1>;
 
 
  public:
-    // Inherit constructors from LeafExpression
+    // Inherit constructors from LeafStorage
     using Storage::Storage;
     using Storage::operator=;
 

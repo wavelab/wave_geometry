@@ -11,12 +11,12 @@ namespace wave {
  * It can apply to Rotations in SO(3) or RigidTransforms in SE(3) */
 template <typename Lhs, typename Rhs>
 struct Compose : internal::base_tmpl_t<Lhs, Rhs, Compose<Lhs, Rhs>>,
-                 BinaryExpression<Compose<Lhs, Rhs>> {
+                 BinaryStorage<Compose<Lhs, Rhs>> {
  private:
-    using Storage = BinaryExpression<Compose<Lhs, Rhs>>;
+    using Storage = BinaryStorage<Compose<Lhs, Rhs>>;
 
  public:
-    // Inherit constructors from BinaryExpression
+    // Inherit constructors from BinaryStorage
     using Storage::Storage;
 
     static_assert(std::is_same<RightFrameOf<Lhs>, LeftFrameOf<Rhs>>(),
@@ -29,12 +29,12 @@ struct Compose : internal::base_tmpl_t<Lhs, Rhs, Compose<Lhs, Rhs>>,
  */
 template <typename Lhs, typename Rhs>
 struct ComposeFlipped : internal::base_tmpl_t<Lhs, Rhs, ComposeFlipped<Lhs, Rhs>>,
-                        BinaryExpression<ComposeFlipped<Lhs, Rhs>> {
+                        BinaryStorage<ComposeFlipped<Lhs, Rhs>> {
  private:
-    using Storage = BinaryExpression<ComposeFlipped<Lhs, Rhs>>;
+    using Storage = BinaryStorage<ComposeFlipped<Lhs, Rhs>>;
 
  public:
-    // Inherit constructors from BinaryExpression
+    // Inherit constructors from BinaryStorage
     using Storage::Storage;
 
     static_assert(std::is_same<RightFrameOf<Rhs>, LeftFrameOf<Lhs>>(),

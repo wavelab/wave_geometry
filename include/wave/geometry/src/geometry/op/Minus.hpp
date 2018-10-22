@@ -13,9 +13,10 @@ namespace wave {
  */
 template <typename Rhs>
 struct Minus : internal::base_tmpl_t<Rhs, Minus<Rhs>>,
-               public UnaryExpression<Minus<Rhs>> {
-    // Inherit storage and constructors from UnaryExpression
-    using UnaryExpression<Minus<Rhs>>::UnaryExpression;
+               public UnaryStorageFor<Minus<Rhs>> {
+    // Inherit storage and constructors from UnaryStorage
+    using Storage = UnaryStorageFor<Minus<Rhs>>;
+    using Storage::Storage;
 };
 
 namespace internal {

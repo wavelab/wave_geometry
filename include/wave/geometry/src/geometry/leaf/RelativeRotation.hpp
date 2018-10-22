@@ -34,14 +34,14 @@ namespace wave {
  */
 template <typename ImplType>
 class RelativeRotation : public RelativeRotationBase<RelativeRotation<ImplType>>,
-                         public LeafExpression<ImplType, RelativeRotation<ImplType>> {
+                         public LeafStorage<ImplType, RelativeRotation<ImplType>> {
     static_assert(internal::is_eigen_vector<3, ImplType>::value,
                   "ImplType must be an Eigen 3-vector type.");
     using Scalar = typename ImplType::Scalar;
-    using Storage = LeafExpression<ImplType, RelativeRotation<ImplType>>;
+    using Storage = LeafStorage<ImplType, RelativeRotation<ImplType>>;
 
  public:
-    // Inherit constructors from LeafExpression
+    // Inherit constructors from LeafStorage
     using Storage::Storage;
     using Storage::operator=;
 

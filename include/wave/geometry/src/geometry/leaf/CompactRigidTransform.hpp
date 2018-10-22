@@ -20,11 +20,11 @@ namespace wave {
 template <typename ImplType>
 class CompactRigidTransform
     : public RigidTransformBase<CompactRigidTransform<ImplType>>,
-      public LeafExpression<ImplType, CompactRigidTransform<ImplType>> {
+      public LeafStorage<ImplType, CompactRigidTransform<ImplType>> {
     static_assert(internal::is_eigen_vector<7, ImplType>::value,
                   "ImplType must be an Eigen 7-vector type.");
 
-    using Storage = LeafExpression<ImplType, CompactRigidTransform<ImplType>>;
+    using Storage = LeafStorage<ImplType, CompactRigidTransform<ImplType>>;
     using Scalar = typename Eigen::internal::traits<ImplType>::Scalar;
 
     // Eigen Blocks for nested rotation and translation
@@ -35,7 +35,7 @@ class CompactRigidTransform
 
 
  public:
-    // Inherit constructors from LeafExpression
+    // Inherit constructors from LeafStorage
     using Storage::Storage;
     using Storage::operator=;
 

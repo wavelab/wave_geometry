@@ -14,9 +14,9 @@ namespace wave {
  * */
 template <typename Lhs, typename Rhs>
 struct Transform : internal::base_tmpl_t<Rhs, Transform<Lhs, Rhs>>,
-                   BinaryExpression<Transform<Lhs, Rhs>> {
-    // Inherit constructors from BinaryExpression
-    using BinaryExpression<Transform<Lhs, Rhs>>::BinaryExpression;
+                   BinaryStorage<Transform<Lhs, Rhs>> {
+    // Inherit constructors from BinaryStorage
+    using BinaryStorage<Transform<Lhs, Rhs>>::BinaryStorage;
 
     static_assert(std::is_same<RightFrameOf<Lhs>, LeftFrameOf<Rhs>>(),
                   "Mismatching frames");

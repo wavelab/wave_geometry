@@ -11,9 +11,9 @@ namespace wave {
  */
 template <typename Lhs, typename Rhs>
 struct Scale : internal::base_tmpl_t<Rhs, Scale<Lhs, Rhs>>,
-               BinaryExpression<Scale<Lhs, Rhs>> {
-    // Inherit constructor from BinaryExpression
-    using BinaryExpression<Scale<Lhs, Rhs>>::BinaryExpression;
+               BinaryStorage<Scale<Lhs, Rhs>> {
+    // Inherit constructor from BinaryStorage
+    using BinaryStorage<Scale<Lhs, Rhs>>::BinaryStorage;
 };
 
 
@@ -21,9 +21,9 @@ struct Scale : internal::base_tmpl_t<Rhs, Scale<Lhs, Rhs>>,
  */
 template <typename Lhs, typename Rhs>
 struct ScaleR : internal::base_tmpl_t<Lhs, ScaleR<Lhs, Rhs>>,
-                BinaryExpression<ScaleR<Lhs, Rhs>> {
-    // Inherit constructor from BinaryExpression
-    using BinaryExpression<ScaleR<Lhs, Rhs>>::BinaryExpression;
+                BinaryStorage<ScaleR<Lhs, Rhs>> {
+    // Inherit constructor from BinaryStorage
+    using BinaryStorage<ScaleR<Lhs, Rhs>>::BinaryStorage;
 };
 
 /** An expression representing the division of a vector (Lhs) by a scalar (Rhs).
@@ -31,9 +31,9 @@ struct ScaleR : internal::base_tmpl_t<Lhs, ScaleR<Lhs, Rhs>>,
  */
 template <typename Lhs, typename Rhs>
 struct ScaleDiv : internal::base_tmpl_t<Lhs, ScaleDiv<Lhs, Rhs>>,
-                  BinaryExpression<ScaleDiv<Lhs, Rhs>> {
-    // Inherit constructor from BinaryExpression
-    using BinaryExpression<ScaleDiv<Lhs, Rhs>>::BinaryExpression;
+                  BinaryStorage<ScaleDiv<Lhs, Rhs>> {
+    // Inherit constructor from BinaryStorage
+    using BinaryStorage<ScaleDiv<Lhs, Rhs>>::BinaryStorage;
 };
 
 

@@ -39,13 +39,13 @@ struct PrepareExpr;
 }  // namespace internal
 
 template <typename StorageType, typename Derived>
-struct LeafExpression;
+struct LeafStorage;
 
 template <typename Derived>
-struct UnaryExpression;
+struct UnaryStorageFor;
 
 template <typename Derived>
-struct BinaryExpression;
+struct BinaryStorage;
 
 template <typename Derived>
 class ExpressionBase;

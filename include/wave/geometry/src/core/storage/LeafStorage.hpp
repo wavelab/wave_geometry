@@ -2,14 +2,14 @@
  * @file
  */
 
-#ifndef WAVE_GEOMETRY_LEAFEXPRESSION_HPP
-#define WAVE_GEOMETRY_LEAFEXPRESSION_HPP
+#ifndef WAVE_GEOMETRY_LEAFSTORAGE_HPP
+#define WAVE_GEOMETRY_LEAFSTORAGE_HPP
 
 namespace wave {
 
 /** Mixin providing storage and constructors to satisfy the LeafExpression concept */
 template <typename StorageType, typename Derived>
-struct LeafExpression {
+struct LeafStorage {
  protected:
     struct init_storage {};
 
@@ -25,22 +25,22 @@ struct LeafExpression {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     /** Default constructor: leaves value uninitialized */
-    LeafExpression() = default;
+    LeafStorage() = default;
     /** Copy constructor */
-    LeafExpression(const LeafExpression &) = default;
+    LeafStorage(const LeafStorage &) = default;
     /** Copy assignment operator */
-    LeafExpression &operator=(const LeafExpression &) = default;
+    LeafStorage &operator=(const LeafStorage &) = default;
     /** Move assignment operator */
-    LeafExpression &operator=(LeafExpression &&) = default;
+    LeafStorage &operator=(LeafStorage &&) = default;
 
     // @todo add noexcept where possible
     // e.g. Eigen 3.3's Matrix has a nothrow move constructor but Quaternion does not
-    LeafExpression(LeafExpression &&) = default;
+    LeafStorage(LeafStorage &&) = default;
 
     /** Construct from another expression */
     template <typename OtherDerived>
-    explicit LeafExpression(const ExpressionBase<OtherDerived> &rhs)
-        : LeafExpression{wave::internal::evaluateTo<Derived>(rhs.derived())} {}
+    explicit LeafStorage(const ExpressionBase<OtherDerived> &rhs)
+        : LeafStorage{wave::internal::evaluateTo<Derived>(rhs.derived())} {}
 
     /** Assign from another expression */
     template <typename OtherDerived>
@@ -53,7 +53,7 @@ struct LeafExpression {
 
     /** Construct */
     template <typename... Args>
-    explicit LeafExpression(init_storage, Args &&... args)
+    explicit LeafStorage(init_storage, Args &&... args)
         : storage{std::forward<Args>(args)...} {}
 
     /** Returns const reference to stored value */
@@ -83,4 +83,4 @@ auto makeLeaf(ImplType &&arg) {
 }
 }  // namespace internal
 }  // namespace wave
-#endif  // WAVE_GEOMETRY_LEAFEXPRESSION_HPP
+#endif  // WAVE_GEOMETRY_LEAFSTORAGE_HPP

@@ -16,17 +16,15 @@ namespace wave {
  * Inverse<Rhs>>>`.
  */
 template <typename Lhs, typename Rhs>
-struct BoxMinus
-    : internal::base_tmpl_t<typename internal::eval_traits<Lhs>::TangentType,
-                            typename internal::eval_traits<Rhs>::TangentType,
-                            BoxMinus<Lhs, Rhs>>,
-      UnaryExpressionBase<BoxMinus<Lhs, Rhs>, Compose<Lhs, Inverse<Rhs> &&> &&> {
+struct BoxMinus : internal::base_tmpl_t<typename internal::eval_traits<Lhs>::TangentType,
+                                        typename internal::eval_traits<Rhs>::TangentType,
+                                        BoxMinus<Lhs, Rhs>>,
+                  UnaryStorage<BoxMinus<Lhs, Rhs>, Compose<Lhs, Inverse<Rhs> &&> &&> {
  private:
-    using Storage =
-      UnaryExpressionBase<BoxMinus<Lhs, Rhs>, Compose<Lhs, Inverse<Rhs> &&> &&>;
+    using Storage = UnaryStorage<BoxMinus<Lhs, Rhs>, Compose<Lhs, Inverse<Rhs> &&> &&>;
 
  public:
-    // Inherit constructors from BinaryExpression
+    // Inherit constructors from BinaryStorage
     using Storage::Storage;
 
     static_assert(std::is_same<LeftFrameOf<Lhs>, LeftFrameOf<Rhs>>(), "Frame mismatch");

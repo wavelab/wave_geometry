@@ -16,16 +16,16 @@ namespace wave {
  */
 template <typename ImplType>
 class QuaternionRotation : public RotationBase<QuaternionRotation<ImplType>>,
-                           public LeafExpression<ImplType, QuaternionRotation<ImplType>> {
+                           public LeafStorage<ImplType, QuaternionRotation<ImplType>> {
     static_assert(internal::is_eigen_quaternion<ImplType>::value,
                   "ImplType must be an Eigen quaternion type.");
     using Scalar = typename Eigen::internal::traits<ImplType>::Scalar;
     using Real = typename Eigen::NumTraits<Scalar>::Real;
     using TangentType = RelativeRotation<Eigen::Matrix<Scalar, 3, 1>>;
-    using Storage = LeafExpression<ImplType, QuaternionRotation<ImplType>>;
+    using Storage = LeafStorage<ImplType, QuaternionRotation<ImplType>>;
 
  public:
-    // Inherit constructors from LeafExpression
+    // Inherit constructors from LeafStorage
     using Storage::Storage;
     using Storage::operator=;
 

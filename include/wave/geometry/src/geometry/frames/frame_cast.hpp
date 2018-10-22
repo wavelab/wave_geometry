@@ -20,9 +20,9 @@ struct FrameCast;
 
 template <typename F1, typename F2, typename Rhs>
 struct FrameCast<F1, F2, Rhs> : internal::base_tmpl_t<Rhs, FrameCast<F1, F2, Rhs>>,
-                                UnaryExpressionBase<FrameCast<F1, F2, Rhs>, Rhs> {
+                                UnaryStorage<FrameCast<F1, F2, Rhs>, Rhs> {
  private:
-    using Storage = UnaryExpressionBase<FrameCast<F1, F2, Rhs>, Rhs>;
+    using Storage = UnaryStorage<FrameCast<F1, F2, Rhs>, Rhs>;
 
  public:
     using Storage::Storage;
@@ -31,9 +31,9 @@ struct FrameCast<F1, F2, Rhs> : internal::base_tmpl_t<Rhs, FrameCast<F1, F2, Rhs
 template <typename F1, typename F2, typename F3, typename Rhs>
 struct FrameCast<F1, F2, F3, Rhs>
     : internal::base_tmpl_t<Rhs, FrameCast<F1, F2, F3, Rhs>>,
-      UnaryExpressionBase<FrameCast<F1, F2, F3, Rhs>, Rhs> {
+      UnaryStorage<FrameCast<F1, F2, F3, Rhs>, Rhs> {
  private:
-    using Storage = UnaryExpressionBase<FrameCast<F1, F2, F3, Rhs>, Rhs>;
+    using Storage = UnaryStorage<FrameCast<F1, F2, F3, Rhs>, Rhs>;
 
  public:
     using Storage::Storage;
