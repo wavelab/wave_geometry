@@ -14,9 +14,10 @@ namespace wave {
  */
 template <typename Lhs, typename Rhs>
 struct Rotate : public internal::base_tmpl_t<Rhs, Rotate<Lhs, Rhs>>,
-                public BinaryStorage<Rotate<Lhs, Rhs>> {
+                public internal::binary_storage_for<Rotate<Lhs, Rhs>> {
     // Inherit constructors from BinaryStorage
-    using BinaryStorage<Rotate<Lhs, Rhs>>::BinaryStorage;
+    using Storage = internal::binary_storage_for<Rotate<Lhs, Rhs>>;
+    using Storage::Storage;
 
     static_assert(std::is_same<RightFrameOf<Lhs>, LeftFrameOf<Rhs>>(),
                   "Mismatching frames");

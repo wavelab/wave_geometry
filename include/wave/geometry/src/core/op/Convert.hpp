@@ -13,8 +13,8 @@ namespace wave {
  */
 template <typename ToDerived, typename FromDerived>
 struct Convert : internal::base_tmpl_t<FromDerived, Convert<ToDerived, FromDerived>>,
-                 UnaryStorageFor<Convert<ToDerived, FromDerived>> {
-    using Storage = UnaryStorageFor<Convert<ToDerived, FromDerived>>;
+                 internal::unary_storage_for<Convert<ToDerived, FromDerived>> {
+    using Storage = internal::unary_storage_for<Convert<ToDerived, FromDerived>>;
     using Storage::Storage;
 };
 

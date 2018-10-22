@@ -12,9 +12,10 @@ namespace wave {
  * */
 template <typename Lhs, typename Rhs>
 struct Sum : internal::base_tmpl_t<Lhs, Rhs, Sum<Lhs, Rhs>>,
-             BinaryStorage<Sum<Lhs, Rhs>> {
+             internal::binary_storage_for<Sum<Lhs, Rhs>> {
     // Inherit constructor from BinaryStorage
-    using BinaryStorage<Sum<Lhs, Rhs>>::BinaryStorage;
+    using Storage = internal::binary_storage_for<Sum<Lhs, Rhs>>;
+    using Storage::Storage;
 
     // clang-format off
     // keep static_assert on one line for compiler output

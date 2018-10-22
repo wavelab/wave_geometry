@@ -11,9 +11,10 @@ namespace wave {
  */
 template <typename Lhs, typename Rhs>
 struct Divide : internal::base_tmpl_t<Lhs, Rhs, Divide<Lhs, Rhs>>,
-                BinaryStorage<Divide<Lhs, Rhs>> {
+                internal::binary_storage_for<Divide<Lhs, Rhs>> {
     // Inherit constructor from BinaryStorage
-    using BinaryStorage<Divide<Lhs, Rhs>>::BinaryStorage;
+    using Storage = internal::binary_storage_for<Divide<Lhs, Rhs>>;
+    using Storage::Storage;
 };
 
 

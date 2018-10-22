@@ -16,12 +16,12 @@ namespace wave {
  */
 template <typename ImplType>
 class MatrixRotation : public RotationBase<MatrixRotation<ImplType>>,
-                       public LeafStorage<ImplType, MatrixRotation<ImplType>> {
+                       public LeafStorage<MatrixRotation<ImplType>, ImplType> {
     static_assert(internal::is_eigen_matrix<3, ImplType>::value,
                   "ImplType must be an Eigen 3*3 matrix type.");
     using Scalar = typename Eigen::internal::traits<ImplType>::Scalar;
     using TangentType = RelativeRotation<Eigen::Matrix<Scalar, 3, 1>>;
-    using Storage = LeafStorage<ImplType, MatrixRotation<ImplType>>;
+    using Storage = LeafStorage<MatrixRotation<ImplType>, ImplType>;
 
  public:
     // Inherit constructors from LeafStorage

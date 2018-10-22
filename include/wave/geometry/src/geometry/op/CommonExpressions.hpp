@@ -22,9 +22,10 @@ struct Random : internal::base_tmpl_t<Derived, Random<Derived>> {
 /** Scalar expression representing the square of the L2 norm of a vector value
  */
 template <typename Rhs>
-struct SquaredNorm : ScalarBase<SquaredNorm<Rhs>>, UnaryStorageFor<SquaredNorm<Rhs>> {
+struct SquaredNorm : ScalarBase<SquaredNorm<Rhs>>,
+                     internal::unary_storage_for<SquaredNorm<Rhs>> {
  private:
-    using Storage = UnaryStorageFor<SquaredNorm<Rhs>>;
+    using Storage = internal::unary_storage_for<SquaredNorm<Rhs>>;
 
  public:
     // Inherit constructors
@@ -34,9 +35,9 @@ struct SquaredNorm : ScalarBase<SquaredNorm<Rhs>>, UnaryStorageFor<SquaredNorm<R
 /** Scalar expression representing the L2 norm of a vector value
  */
 template <typename Rhs>
-struct Norm : ScalarBase<Norm<Rhs>>, UnaryStorageFor<Norm<Rhs>> {
+struct Norm : ScalarBase<Norm<Rhs>>, internal::unary_storage_for<Norm<Rhs>> {
  private:
-    using Storage = UnaryStorageFor<Norm<Rhs>>;
+    using Storage = internal::unary_storage_for<Norm<Rhs>>;
 
  public:
     // Inherit constructors

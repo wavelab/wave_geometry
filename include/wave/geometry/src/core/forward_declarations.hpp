@@ -38,13 +38,13 @@ struct PrepareExpr;
 
 }  // namespace internal
 
-template <typename StorageType, typename Derived>
+template <typename Derived, typename StorageType>
 struct LeafStorage;
 
-template <typename Derived>
-struct UnaryStorageFor;
+template <typename Derived, typename RhsDerived>
+struct UnaryStorage;
 
-template <typename Derived>
+template <typename Derived, typename LhsDerived, typename RhsDerived>
 struct BinaryStorage;
 
 template <typename Derived>

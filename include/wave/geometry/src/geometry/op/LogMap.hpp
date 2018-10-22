@@ -14,9 +14,9 @@ namespace wave {
 template <typename ExtraFrame, typename Rhs>
 struct LogMap : internal::base_tmpl_t<typename internal::eval_traits<Rhs>::TangentType,
                                       LogMap<ExtraFrame, Rhs>>,
-                UnaryStorageFor<LogMap<ExtraFrame, Rhs>> {
+                internal::unary_storage_for<LogMap<ExtraFrame, Rhs>> {
  private:
-    using Storage = UnaryStorageFor<LogMap<ExtraFrame, Rhs>>;
+    using Storage = internal::unary_storage_for<LogMap<ExtraFrame, Rhs>>;
 
  public:
     // Inherit constructors from UnaryStorage

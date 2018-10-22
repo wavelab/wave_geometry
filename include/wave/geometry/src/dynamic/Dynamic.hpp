@@ -18,12 +18,12 @@ namespace wave {
 template <typename RhsDerived>
 struct Dynamic final : internal::base_tmpl_t<RhsDerived, Dynamic<RhsDerived>>,
                        DynamicBase<internal::plain_output_t<RhsDerived>>,
-                       UnaryStorageFor<Dynamic<RhsDerived>> {
+                       internal::unary_storage_for<Dynamic<RhsDerived>> {
  private:
     using Base = DynamicBase<internal::plain_output_t<RhsDerived>>;
     using CleanType = tmp::remove_cr_t<RhsDerived>;
     using OutputType = internal::plain_output_t<CleanType>;
-    using Storage = UnaryStorageFor<Dynamic<RhsDerived>>;
+    using Storage = internal::unary_storage_for<Dynamic<RhsDerived>>;
     using Scalar = internal::scalar_t<CleanType>;
     using MatrixType = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
     using EvalType = internal::eval_t<OutputType>;

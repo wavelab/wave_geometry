@@ -7,15 +7,16 @@
 
 namespace wave {
 
-template <typename Derived_, typename RhsDerived_>
+/** Mixin providing storage and constructors to satisfy the unary expression concept */
+template <typename Derived, typename RhsDerived_>
 struct UnaryStorage {
-    using Derived = Derived_;
+ private:
     using RhsDerived = tmp::remove_cr_t<RhsDerived_>;
-
     // Hold a reference to leaf expressions to avoid copies, but a copy of other
     // expressions to avoid references to temporaries.
     using RhsStore = internal::ref_sel_t<RhsDerived_>;
 
+ public:
     // Forward args to rhs (version for one argument)
     // Disable if copy ctor would apply - https://stackoverflow.com/a/39646176
     template <class Arg,
@@ -58,20 +59,32 @@ struct UnaryStorage {
     RhsStore rhs_;
 };
 
+
+namespace internal {
+// Helper to get UnaryStorage type for common unary expression templates
+template <typename Derived>
+struct unary_storage_selector;
+
 // Specialization for regular unary expression with one template parameter (such as
 // Inverse)
-template <template <typename> class Tmpl, typename RhsDerived>
-struct UnaryStorageFor<Tmpl<RhsDerived>> : UnaryStorage<Tmpl<RhsDerived>, RhsDerived> {
-    using UnaryStorage<Tmpl<RhsDerived>, RhsDerived>::UnaryStorage;
+template <template <typename> class Tmpl, typename Rhs>
+struct unary_storage_selector<Tmpl<Rhs>> {
+    using type = UnaryStorage<Tmpl<Rhs>, Rhs>;
 };
+
 
 // Specialization for unary expression with an extra parameter (such as Convert)
-template <template <typename, typename> class Tmpl, typename Aux, typename RhsDerived>
-struct UnaryStorageFor<Tmpl<Aux, RhsDerived>>
-    : UnaryStorage<Tmpl<Aux, RhsDerived>, RhsDerived> {
-    using UnaryStorage<Tmpl<Aux, RhsDerived>, RhsDerived>::UnaryStorage;
+template <template <typename, typename> class Tmpl, typename Aux, typename Rhs>
+struct unary_storage_selector<Tmpl<Aux, Rhs>> {
+    using type = UnaryStorage<Tmpl<Aux, Rhs>, Rhs>;
 };
 
+
+// Gets BinaryStorage type for common binary expression templates (saves characters)
+template <typename Derived>
+using unary_storage_for = typename unary_storage_selector<Derived>::type;
+
+}  // namespace internal
 }  // namespace wave
 
 #endif  // WAVE_GEOMETRY_UNARYSTORAGE_HPP

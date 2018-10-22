@@ -7,13 +7,14 @@
 
 namespace wave {
 
-/** Mixin providing storage and constructors to satisfy the LeafExpression concept */
-template <typename StorageType, typename Derived>
+/** Mixin providing storage and constructors to satisfy the leaf expression concept */
+template <typename Derived, typename StorageType>
 struct LeafStorage {
  protected:
+    // Tag used to invoke storage constructor
     struct init_storage {};
 
-
+ private:
     using ValueType = std::decay_t<StorageType>;
     using RefType =
       std::conditional_t<std::is_array<StorageType>{}, ValueType, ValueType &>;

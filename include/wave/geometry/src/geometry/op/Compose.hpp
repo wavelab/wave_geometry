@@ -11,9 +11,9 @@ namespace wave {
  * It can apply to Rotations in SO(3) or RigidTransforms in SE(3) */
 template <typename Lhs, typename Rhs>
 struct Compose : internal::base_tmpl_t<Lhs, Rhs, Compose<Lhs, Rhs>>,
-                 BinaryStorage<Compose<Lhs, Rhs>> {
+                 internal::binary_storage_for<Compose<Lhs, Rhs>> {
  private:
-    using Storage = BinaryStorage<Compose<Lhs, Rhs>>;
+    using Storage = internal::binary_storage_for<Compose<Lhs, Rhs>>;
 
  public:
     // Inherit constructors from BinaryStorage
@@ -29,9 +29,9 @@ struct Compose : internal::base_tmpl_t<Lhs, Rhs, Compose<Lhs, Rhs>>,
  */
 template <typename Lhs, typename Rhs>
 struct ComposeFlipped : internal::base_tmpl_t<Lhs, Rhs, ComposeFlipped<Lhs, Rhs>>,
-                        BinaryStorage<ComposeFlipped<Lhs, Rhs>> {
+                        internal::binary_storage_for<ComposeFlipped<Lhs, Rhs>> {
  private:
-    using Storage = BinaryStorage<ComposeFlipped<Lhs, Rhs>>;
+    using Storage = internal::binary_storage_for<ComposeFlipped<Lhs, Rhs>>;
 
  public:
     // Inherit constructors from BinaryStorage

@@ -17,11 +17,11 @@ namespace wave {
 template <typename ImplType>
 class MatrixRigidTransform
     : public RigidTransformBase<MatrixRigidTransform<ImplType>>,
-      public LeafStorage<ImplType, MatrixRigidTransform<ImplType>> {
+      public LeafStorage<MatrixRigidTransform<ImplType>, ImplType> {
     static_assert(internal::is_eigen_matrix<4, ImplType>::value,
                   "ImplType must be an Eigen 4x4 matrix type.");
 
-    using Storage = LeafStorage<ImplType, MatrixRigidTransform<ImplType>>;
+    using Storage = LeafStorage<MatrixRigidTransform<ImplType>, ImplType>;
     using Scalar = typename Eigen::internal::traits<ImplType>::Scalar;
 
     // Eigen Blocks for nested rotation and translation
