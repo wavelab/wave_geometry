@@ -29,10 +29,6 @@ template <typename Leaf>
 class Proxy final : public internal::base_tmpl_t<Leaf, Proxy<Leaf>> {
     TICK_TRAIT_CHECK(internal::is_leaf_expression<Leaf>);
 
-    // Convenience typedef for allocating a Dynamic expression in constructor
-    template <typename Derived>
-    using DynamicType = Dynamic<internal::arg_t<Derived>>;
-
  public:
     Proxy() = delete;
     Proxy(const Proxy &) noexcept = default;
@@ -43,9 +39,9 @@ class Proxy final : public internal::base_tmpl_t<Leaf, Proxy<Leaf>> {
     /** Construct by making an rvalue expression Dynamic and moving it to the heap */
     template <typename Derived>
     Proxy(ExpressionBase<Derived> &&expr)
-        : storage{std::allocate_shared<DynamicType<Derived>>(
-            Eigen::aligned_allocator<DynamicType<Derived>>{},
-            DynamicType<Derived>{expr.derived()})} {}
+        : storage{std::allocate_shared<Dynamic<Derived &&>>(
+            Eigen::aligned_allocator<Dynamic<Derived &&>>{},
+            Dynamic<Derived &&>{expr.derived()})} {}
 
     /** Get a copy of the wrapped smart pointer
      */
@@ -228,10 +224,11 @@ struct traits<Proxy<Leaf>> {
     // We don't know the contained leaves at compile time
     using UniqueLeaves = std::false_type;
     using ConvertTo = typename traits<Leaf>::ConvertTo;
-
-    // Store by value in expressions using the proxy, because proxies are rebindable
-    static constexpr bool StoreByRef = false;
 };
+
+// Store by value in expressions using the proxy, because proxies are rebindable
+template <typename Leaf>
+struct arg_selector<Proxy<Leaf> &> : arg_selector<Proxy<Leaf>> {};
 
 template <typename Leaf>
 decltype(auto) getWrtTarget(adl, const ExpressionBase<Proxy<Leaf>> &proxy) {

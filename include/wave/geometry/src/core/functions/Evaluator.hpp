@@ -38,7 +38,7 @@ struct Evaluator<Derived, enable_if_leaf_t<Derived>> {
     }
 
  public:
-    const eval_ref_sel_t<Derived> expr;
+    const eval_storage_t<Derived> expr;
     const EvalType result;
 };
 
@@ -53,7 +53,7 @@ struct Evaluator<Derived, enable_if_scalar_t<Derived>> {
     }
 
  public:
-    const eval_ref_sel_t<Derived> expr;
+    const eval_storage_t<Derived> expr;
 };
 
 /** Specialization for unary expression */
@@ -73,7 +73,7 @@ struct Evaluator<Derived, enable_if_unary_t<Derived>> {
     }
 
  public:
-    const eval_ref_sel_t<Derived> expr;
+    const eval_storage_t<Derived> expr;
     const RhsEval rhs_eval;
     const EvalType result;
 };
@@ -98,7 +98,7 @@ struct Evaluator<Derived, enable_if_binary_t<Derived>> {
     }
 
  public:
-    const eval_ref_sel_t<Derived> expr;
+    const eval_storage_t<Derived> expr;
     const LhsEval lhs_eval;
     const RhsEval rhs_eval;
     const EvalType result;

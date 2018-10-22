@@ -23,8 +23,8 @@ struct RelativeRotationBase : public VectorBase<Derived> {
 
 /** Takes exponential map of an so(3) element */
 template <typename Rhs>
-auto exp(const RelativeRotationBase<Rhs> &rhs) -> ExpMap<Rhs> {
-    return ExpMap<Rhs>{rhs.derived()};
+auto exp(const RelativeRotationBase<Rhs> &rhs) -> ExpMap<Rhs &> {
+    return ExpMap<Rhs &>{rhs.derived()};
 }
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUE(exp, ExpMap, RelativeRotationBase)
 

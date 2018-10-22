@@ -7,40 +7,54 @@
 
 namespace wave {
 namespace internal {
+
 /** Chooses storage type (reference or value) for expressions.
  *
- * The input T is expected to be the type parameter to a unary or binary expression
- * template. It should be a wave_geometry expression or scalar type D with some ref
- * qualifier. It is usually chosen by arg_t, below.
+ * Unlike Eigen, we store even lightweight expressions by reference if the storing
+ * expression's template arguments specify a reference.
  *
- * If T is an D&& (denoting an expression passed as a temporary), we want to
- * store it by value. If T is D& we store it by lvalue reference. If T is clean (denoting
- * an expression passed by lvalue reference), we store it according to its StoreByRef
- * trait.
+ * The input T is expected to be the type argument to a unary or binary expression
+ * template. It should be a wave_geometry expression or scalar type D with some
+ * ref-qualifier. It is usually chosen by arg_selector, below.
  *
- * Unlike Eigen, we store even lightweight expressions by reference (unless they set
- * StoreByRef false (indicated by Prox below).
+ * For most expressions, storage_selector uses the straightforward mapping below.
+ * An argument of the form D& is stored by lvalue reference, and of form D by value.
+ * Arguments of the form D&& are also stored by value; this form is used only to draw
+ * attention to leaves being stored by value.
  *
- * | input   | output       |
+ * | input T | output type  |
  * |---------|--------------|
- * | Expr    | const Expr&  |
+ * | Expr    | Expr         |
  * | Expr&   | const Expr&  |
  * | Expr&&  | Expr         |
- * | Prox    | const Prox&  |
- * | Prox&   | Prox         |
- * | Prox&&  | Prox         |
+ *
+ * This selector may be specialized for types with unusual storage requirements (though no
+ * such type currently exists).
  */
 template <typename T>
-using ref_sel_t =
-  std::conditional_t<std::is_rvalue_reference<T>{} ||
-                       !(std::is_lvalue_reference<T>{} || traits<T>::StoreByRef),
-                     std::remove_reference_t<T>,
-                     const std::remove_reference_t<T> &>;
+struct storage_selector {
+    using type = T;
+};
+
+template <typename T>
+struct storage_selector<T &> {
+    using type = const T &;
+};
+
+template <typename T>
+struct storage_selector<T &&> {
+    using type = T;
+};
+
+template <typename T>
+using storage_t = typename storage_selector<T>::type;
+
 
 /** Chooses storage type (reference or value) for expressions in evaluators.
  *
- * This choice differs from ref_sel_t because expressions being evaluated may have been
- * transformed (e.g., conversions added). Only expressions which are unchanged after
+ * This choice differs from storage_t because expressions being evaluated may have been
+ * transformed (e.g., conversions added). The ref-qualifiers of T are ignored; instead,
+ * its PreparedType traits matters here. Only expressions which are unchanged after
  * transformation, including leaves, are stored by reference.
  *
  * | input  | output      |
@@ -51,29 +65,58 @@ using ref_sel_t =
  * | Leaf&& | Leaf        |
  */
 template <typename T>
-using eval_ref_sel_t =
+using eval_storage_t =
   std::conditional_t<std::is_rvalue_reference<typename traits<T>::PreparedType>{},
                      std::remove_reference_t<T>,
                      const T &>;
+
 
 /** Chooses template argument for an expression template when an expression is
  * passed into a function with a forwaring reference.
  *
  * For example, template <typename T> auto inverse(T&& expr) -> Inverse<arg_t<T>>
  *
- * | input  | output      |
- * |--------|-------------|
- * | Expr&  | const Expr& |
- * | Expr   | Expr&&      |
- *
- * It has the same goal as ref_sel_t, but is meant to be used in a user-facing function,
+ * arg_t is meant to be used in a user-facing function,
  * e.g. operator+(lhs, rhs). It should either give an non-ref non-const type or an rvalue
- * reference, to be used later by ref_sel_t.
- */
-template <typename T>
-using arg_t = std::conditional_t<std::is_reference<T>{}, tmp::remove_cr_t<T>, T &&>;
+ * reference, to be used later by storage_selector. Its output is usually later used by
+ * storage_selector to choose a storage type.
 
-/** Chooses cache storage type (reference or value) for Jacobian evaluators.
+ * The default behaviour is:
+ *
+ * |    input T     | output type |
+ * |----------------|-------------|
+ * | (const) Expr&  | Expr&       |
+ * |         Expr   | Expr        |
+ * | (const) Leaf&  | Leaf&       |
+ * |         Leaf   | Leaf&&      |
+ *
+ * There is currently no difference in how storage_selector treats T and T&&. We use
+ * T&& here for leaves to be more obvious that things are not like Eigen.
+ *
+ * This selector may be specialized for types with unusual storage requirements. For
+ * example, proxy types are always stored by value in other expressions, and have a
+ * specialization of arg_selector.
+ */
+
+template <typename T, typename Enable = void>
+struct arg_selector;
+
+template <typename T>
+struct arg_selector<T &> {
+    using type = std::remove_const_t<T> &;
+};
+
+template <typename T>
+struct arg_selector<T> {
+    using type = std::conditional_t<is_leaf_expression<T>{}, T &&, T>;
+};
+
+template <typename T>
+using arg_t = typename arg_selector<T>::type;
+
+
+/** Chooses cache storage type (reference or value) for Eigen matrix expressions in
+ * Jacobian evaluators.
  *
  * We pass the result of decltype() to this template. T should be an Eigen matrix
  * expression.

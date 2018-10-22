@@ -48,9 +48,9 @@ class RotationBase : public TransformBase<Derived> {
  * @f[ SO(3) \times R^3 \to R^3 @f]
  */
 template <typename L, typename R>
-auto operator*(const RotationBase<L> &lhs, const TranslationBase<R> &rhs)
-  -> Rotate<L, R> {
-    return Rotate<L, R>{lhs.derived(), rhs.derived()};
+auto operator*(const RotationBase<L> &lhs, const TranslationBase<R> &rhs) {
+    return Rotate<internal::arg_t<L &>, internal::arg_t<R &>>{lhs.derived(),
+                                                              rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*, Rotate, RotationBase, TranslationBase)

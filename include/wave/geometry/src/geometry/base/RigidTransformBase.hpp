@@ -21,9 +21,9 @@ class RigidTransformBase : public TransformBase<Derived> {
  * @f[ SO(3) \times R^3 \to R^3 @f]
  */
 template <typename L, typename R>
-auto operator*(const RigidTransformBase<L> &lhs, const TranslationBase<R> &rhs)
-  -> Transform<L, R> {
-    return Transform<L, R>{lhs.derived(), rhs.derived()};
+auto operator*(const RigidTransformBase<L> &lhs, const TranslationBase<R> &rhs) {
+    return Transform<internal::arg_t<L &>, internal::arg_t<R &>>{lhs.derived(),
+                                                                 rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*,

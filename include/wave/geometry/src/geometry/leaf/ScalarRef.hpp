@@ -34,7 +34,7 @@ struct ScalarRef : public ScalarBase<ScalarRef<ScalarType>> {
     }
 
  private:
-    const internal::ref_sel_t<ScalarType> rhs_;
+    const internal::storage_t<ScalarType> rhs_;
 };
 
 namespace internal {

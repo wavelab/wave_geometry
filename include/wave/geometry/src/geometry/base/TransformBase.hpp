@@ -46,9 +46,9 @@ class TransformBase : public ExpressionBase<Derived> {
 };
 
 /** Gets inverse of a transform */
-template <typename Derived>
-auto inverse(const TransformBase<Derived> &rhs) -> Inverse<Derived> {
-    return Inverse<Derived>{rhs.derived()};
+template <typename R>
+auto inverse(const TransformBase<R> &rhs) {
+    return Inverse<internal::arg_t<R &>>{rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUE(inverse, Inverse, TransformBase)
@@ -58,12 +58,12 @@ WAVE_OVERLOAD_FUNCTION_FOR_RVALUE(inverse, Inverse, TransformBase)
  * @f[ SO(3) \to \mathbb{R}^3 @f]
  */
 template <typename R>
-auto log(const TransformBase<R> &rhs) -> LogMap<RightFrameOf<R>, R> {
-    return LogMap<RightFrameOf<R>, R>{rhs.derived()};
+auto log(const TransformBase<R> &rhs) {
+    return LogMap<RightFrameOf<R>, internal::arg_t<R &>>{rhs.derived()};
 }
 // Overload for rvalue
 template <typename R>
-auto log(TransformBase<R> &&rhs) -> LogMap<RightFrameOf<R>, internal::arg_t<R>> {
+auto log(TransformBase<R> &&rhs) {
     return LogMap<RightFrameOf<R>, internal::arg_t<R>>{std::move(rhs).derived()};
 }
 
@@ -72,12 +72,12 @@ auto log(TransformBase<R> &&rhs) -> LogMap<RightFrameOf<R>, internal::arg_t<R>> 
  * @f[ SO(3) \to \mathbb{R}^3 @f]
  */
 template <typename ExtraFrame, typename R>
-auto logFramed(const TransformBase<R> &rhs) -> LogMap<ExtraFrame, R> {
-    return LogMap<ExtraFrame, R>{rhs.derived()};
+auto logFramed(const TransformBase<R> &rhs) {
+    return LogMap<ExtraFrame, internal::arg_t<R &>>{rhs.derived()};
 }
 // Overload for rvalue
 template <typename ExtraFrame, typename R>
-auto logFramed(TransformBase<R> &&rhs) -> LogMap<ExtraFrame, internal::arg_t<R>> {
+auto logFramed(TransformBase<R> &&rhs) {
     return LogMap<ExtraFrame, internal::arg_t<R>>{std::move(rhs).derived()};
 }
 
@@ -86,9 +86,9 @@ auto logFramed(TransformBase<R> &&rhs) -> LogMap<ExtraFrame, internal::arg_t<R>>
  * @f[ SO(3) \times SO(3) \to SO(3) @f]
  */
 template <typename L, typename R>
-auto operator*(const TransformBase<L> &lhs, const TransformBase<R> &rhs)
-  -> Compose<L, R> {
-    return Compose<L, R>{lhs.derived(), rhs.derived()};
+auto operator*(const TransformBase<L> &lhs, const TransformBase<R> &rhs) {
+    return Compose<internal::arg_t<L &>, internal::arg_t<R &>>{lhs.derived(),
+                                                               rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*, Compose, TransformBase, TransformBase)
@@ -98,9 +98,9 @@ WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*, Compose, TransformBase, TransformB
  * @f[ SO(3) \times SO(3) \to so(3) @f]
  */
 template <typename L, typename R>
-auto operator-(const TransformBase<L> &lhs, const TransformBase<R> &rhs)
-  -> BoxMinus<L, R> {
-    return BoxMinus<L, R>{lhs.derived(), rhs.derived()};
+auto operator-(const TransformBase<L> &lhs, const TransformBase<R> &rhs) {
+    return BoxMinus<internal::arg_t<L &>, internal::arg_t<R &>>{lhs.derived(),
+                                                                rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator-, BoxMinus, TransformBase, TransformBase)
@@ -110,8 +110,9 @@ WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator-, BoxMinus, TransformBase, Transform
  * @f[ SO(3) \times so(3) \to SO(3) @f]
  */
 template <typename L, typename R, TICK_REQUIRES(internal::rhs_is_tangent_of_lhs<L, R>{})>
-auto operator+(const TransformBase<L> &lhs, const VectorBase<R> &rhs) -> BoxPlus<L, R> {
-    return BoxPlus<L, R>{lhs.derived(), rhs.derived()};
+auto operator+(const TransformBase<L> &lhs, const VectorBase<R> &rhs) {
+    return BoxPlus<internal::arg_t<L &>, internal::arg_t<R &>>{lhs.derived(),
+                                                               rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES_REQ(operator+,

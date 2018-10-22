@@ -13,8 +13,8 @@ struct BinaryStorage {
  private:
     // Hold a reference to each expression, unless the type is given as T&& -- then
     // store it by value
-    using LhsStore = internal::ref_sel_t<LhsDerived>;
-    using RhsStore = internal::ref_sel_t<RhsDerived>;
+    using LhsStore = internal::storage_t<LhsDerived>;
+    using RhsStore = internal::storage_t<RhsDerived>;
 
  public:
     template <typename LhsArg, typename RhsArg>

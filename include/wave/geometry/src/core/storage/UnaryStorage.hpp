@@ -14,7 +14,7 @@ struct UnaryStorage {
     using RhsDerived = tmp::remove_cr_t<RhsDerived_>;
     // Hold a reference to leaf expressions to avoid copies, but a copy of other
     // expressions to avoid references to temporaries.
-    using RhsStore = internal::ref_sel_t<RhsDerived_>;
+    using RhsStore = internal::storage_t<RhsDerived_>;
 
  public:
     // Forward args to rhs (version for one argument)

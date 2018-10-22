@@ -19,9 +19,9 @@ template <typename Lhs, typename Rhs>
 struct BoxMinus : internal::base_tmpl_t<typename internal::eval_traits<Lhs>::TangentType,
                                         typename internal::eval_traits<Rhs>::TangentType,
                                         BoxMinus<Lhs, Rhs>>,
-                  UnaryStorage<BoxMinus<Lhs, Rhs>, Compose<Lhs, Inverse<Rhs> &&> &&> {
+                  UnaryStorage<BoxMinus<Lhs, Rhs>, Compose<Lhs, Inverse<Rhs>>> {
  private:
-    using Storage = UnaryStorage<BoxMinus<Lhs, Rhs>, Compose<Lhs, Inverse<Rhs> &&> &&>;
+    using Storage = UnaryStorage<BoxMinus<Lhs, Rhs>, Compose<Lhs, Inverse<Rhs>>>;
 
  public:
     // Inherit constructors from BinaryStorage
@@ -38,7 +38,7 @@ namespace internal {
  */
 template <typename Lhs, typename Rhs>
 struct traits<BoxMinus<Lhs, Rhs>>
-    : traits<LogMap<RightFrameOf<Rhs>, Compose<Lhs, Inverse<Rhs> &&> &&>> {};
+    : traits<LogMap<RightFrameOf<Rhs>, Compose<Lhs, Inverse<Rhs>>>> {};
 
 }  // namespace internal
 }  // namespace wave

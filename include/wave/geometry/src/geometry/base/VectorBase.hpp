@@ -27,14 +27,18 @@ struct VectorBase : ExpressionBase<Derived> {
     }
 
     /** Returns a differentiable expression for the vector's L2 norm */
-    auto norm() const -> Norm<Derived> {
-        return Norm<Derived>{this->derived()};
+    auto norm() const & {
+        return Norm<internal::arg_t<Derived &>>{this->derived()};
     }
 
+    WAVE_OVERLOAD_SELF_METHOD_FOR_RVALUE(norm, Norm, Derived)
+
     /** Returns a differentiable expression for the vector's squared L2 norm */
-    auto squaredNorm() const -> SquaredNorm<Derived> {
-        return SquaredNorm<Derived>{this->derived()};
+    auto squaredNorm() const & {
+        return SquaredNorm<internal::arg_t<Derived &>>{this->derived()};
     }
+
+    WAVE_OVERLOAD_SELF_METHOD_FOR_RVALUE(squaredNorm, SquaredNorm, Derived)
 
     /** Fuzzy comparison - see Eigen::DenseBase::isApprox() */
     template <typename R, TICK_REQUIRES(internal::same_base_tmpl_i<Derived, R>{})>
@@ -224,8 +228,8 @@ auto rightJacobianImpl(expr<ScaleDiv>,
  * @f[ \mathbb{R}^n \times \mathbb{R}^n \to \mathbb{R}^n @f]
  */
 template <typename L, typename R>
-auto operator+(const VectorBase<L> &lhs, const VectorBase<R> &rhs) -> Sum<L, R> {
-    return Sum<L, R>{lhs.derived(), rhs.derived()};
+auto operator+(const VectorBase<L> &lhs, const VectorBase<R> &rhs) {
+    return Sum<internal::arg_t<L &>, internal::arg_t<R &>>{lhs.derived(), rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator+, Sum, VectorBase, VectorBase)
@@ -258,8 +262,8 @@ auto operator-(VectorBase<L> &&lhs, VectorBase<R> &&rhs) {
  * @f[ \mathbb{R}^n \to \mathbb{R}^n @f]
  */
 template <typename R>
-auto operator-(const VectorBase<R> &rhs) -> Minus<R> {
-    return Minus<R>{rhs.derived()};
+auto operator-(const VectorBase<R> &rhs) {
+    return Minus<internal::arg_t<R &>>{rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUE(operator-, Minus, VectorBase)
@@ -269,8 +273,9 @@ WAVE_OVERLOAD_FUNCTION_FOR_RVALUE(operator-, Minus, VectorBase)
  * @f[ \mathbb{R} \times \mathbb{R}^n \to \mathbb{R}^n @f]
  */
 template <typename L, typename R>
-auto operator*(const ScalarBase<L> &lhs, const VectorBase<R> &rhs) -> Scale<L, R> {
-    return Scale<L, R>{lhs.derived(), rhs.derived()};
+auto operator*(const ScalarBase<L> &lhs, const VectorBase<R> &rhs) {
+    return Scale<internal::arg_t<L &>, internal::arg_t<R &>>{lhs.derived(),
+                                                             rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*, Scale, ScalarBase, VectorBase)
@@ -281,8 +286,9 @@ WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_LEFT(*, VectorBase)
  * @f[ \mathbb{R}^n \times \mathbb{R} \to \mathbb{R}^n @f]
  */
 template <typename L, typename R>
-auto operator*(const VectorBase<L> &lhs, const ScalarBase<R> &rhs) -> ScaleR<L, R> {
-    return ScaleR<L, R>{lhs.derived(), rhs.derived()};
+auto operator*(const VectorBase<L> &lhs, const ScalarBase<R> &rhs) {
+    return ScaleR<internal::arg_t<L &>, internal::arg_t<R &>>{lhs.derived(),
+                                                              rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*, ScaleR, VectorBase, ScalarBase)
@@ -293,8 +299,9 @@ WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_RIGHT(*, VectorBase)
  * @f[ \mathbb{R}^n \times \mathbb{R} \to \mathbb{R}^n @f]
  */
 template <typename L, typename R>
-auto operator/(const VectorBase<L> &lhs, const ScalarBase<R> &rhs) -> ScaleDiv<L, R> {
-    return ScaleDiv<L, R>{lhs.derived(), rhs.derived()};
+auto operator/(const VectorBase<L> &lhs, const ScalarBase<R> &rhs) {
+    return ScaleDiv<internal::arg_t<L &>, internal::arg_t<R &>>{lhs.derived(),
+                                                                rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator/, ScaleDiv, VectorBase, ScalarBase)

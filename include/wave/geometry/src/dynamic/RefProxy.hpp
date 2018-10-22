@@ -95,6 +95,10 @@ struct traits<RefProxy<Leaf>> {
     static constexpr bool StoreByRef = false;
 };
 
+// Store by value in expressions using the proxy, because proxies are rebindable
+template <typename Leaf>
+struct arg_selector<RefProxy<Leaf> &> : arg_selector<RefProxy<Leaf>> {};
+
 template <typename Leaf>
 decltype(auto) getWrtTarget(adl, const ExpressionBase<RefProxy<Leaf>> &proxy) {
     return proxy.derived().follow();

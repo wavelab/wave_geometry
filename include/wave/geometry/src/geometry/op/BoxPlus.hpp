@@ -27,9 +27,9 @@ namespace wave {
  */
 template <typename Lhs, typename Rhs>
 struct BoxPlus : internal::base_tmpl_t<Lhs, BoxPlus<Lhs, Rhs>>,
-                 internal::binary_storage_for<ComposeFlipped<Lhs, ExpMap<Rhs> &&>> {
+                 internal::binary_storage_for<ComposeFlipped<Lhs, ExpMap<Rhs>>> {
  private:
-    using Storage = internal::binary_storage_for<ComposeFlipped<Lhs, ExpMap<Rhs> &&>>;
+    using Storage = internal::binary_storage_for<ComposeFlipped<Lhs, ExpMap<Rhs>>>;
 
  public:
     using Storage::Storage;
@@ -60,7 +60,7 @@ namespace internal {
  *  The traits are therefore identical to `ComposeFlipped<Lhs, ExpMap<Rhs>>`.
  */
 template <typename Lhs, typename Rhs>
-struct traits<BoxPlus<Lhs, Rhs>> : traits<ComposeFlipped<Lhs, ExpMap<Rhs> &&>> {};
+struct traits<BoxPlus<Lhs, Rhs>> : traits<ComposeFlipped<Lhs, ExpMap<Rhs>>> {};
 
 
 }  // namespace internal

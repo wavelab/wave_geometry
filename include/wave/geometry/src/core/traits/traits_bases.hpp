@@ -56,7 +56,6 @@ struct leaf_traits_base {
     using PlainType = T;
     using UniqueLeaves = has_unique_leaves_leaf<T>;
     using ConvertTo = tmp::type_list<>;
-    static constexpr bool StoreByRef = true;
 };
 
 template <template <typename, typename> class Tmpl,
@@ -112,7 +111,6 @@ struct binary_traits_base<Tmpl<LhsDerived_, RhsDerived_>> {
 
     using OutputFunctor = IdentityFunctor;
     using UniqueLeaves = has_unique_leaves_binary<LhsDerived, RhsDerived>;
-    static constexpr bool StoreByRef = true;
 };
 
 // Specialization for regular unary expression with one template parameter (such as
@@ -161,7 +159,6 @@ struct unary_traits_base<Tmpl<RhsDerived_>> {
 
     using OutputFunctor = IdentityFunctor;
     using UniqueLeaves = has_unique_leaves_unary<RhsDerived>;
-    static constexpr bool StoreByRef = true;
 };
 
 // Specialization for unary expression with an extra parameter (such as Convert),
@@ -206,7 +203,6 @@ struct unary_traits_base_tag<Tmpl<Aux, RhsDerived_>, Tag_> {
 
     using OutputFunctor = IdentityFunctor;
     using UniqueLeaves = has_unique_leaves_unary<RhsDerived>;
-    static constexpr bool StoreByRef = true;
 };
 
 // Specialization for unary expression with an extra parameter (such as Convert)

@@ -166,8 +166,9 @@ WAVE_OVERLOAD_OPERATORS_FOR_SCALAR(-, ScalarBase)
  * @f[ \mathbb{R} \times \mathbb{R} \to \mathbb{R} @f]
  */
 template <typename L, typename R>
-auto operator*(const ScalarBase<L> &lhs, const ScalarBase<R> &rhs) -> Product<L, R> {
-    return Product<L, R>{lhs.derived(), rhs.derived()};
+auto operator*(const ScalarBase<L> &lhs, const ScalarBase<R> &rhs) {
+    return Product<internal::arg_t<L &>, internal::arg_t<R &>>{lhs.derived(),
+                                                               rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*, Product, ScalarBase, ScalarBase)
@@ -178,8 +179,9 @@ WAVE_OVERLOAD_OPERATORS_FOR_SCALAR(*, ScalarBase)
  * @f[ \mathbb{R} \times \mathbb{R} \to \mathbb{R} @f]
  */
 template <typename L, typename R>
-auto operator/(const ScalarBase<L> &lhs, const ScalarBase<R> &rhs) -> Divide<L, R> {
-    return Divide<L, R>{lhs.derived(), rhs.derived()};
+auto operator/(const ScalarBase<L> &lhs, const ScalarBase<R> &rhs) {
+    return Divide<internal::arg_t<L &>, internal::arg_t<R &>>{lhs.derived(),
+                                                              rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator/, Divide, ScalarBase, ScalarBase)

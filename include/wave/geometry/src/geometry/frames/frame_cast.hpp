@@ -114,7 +114,6 @@ struct frame_cast_traits_base {
 
     // We do override the output with new frames
     using OutputFunctor = WrapWithFrames<Frames...>;
-    static constexpr bool StoreByRef = true;
 };
 
 

@@ -37,20 +37,22 @@
  * The first definition (both lvalues) is not included here as it is more clear to readers
  * (and greppable) if at least one definition is fully written out.
  */
-#define WAVE_OVERLOAD_FUNCTION_FOR_RVALUES_IMPL(                                         \
-  FuncName, ExprName, LhsBase, RhsBase, ...)                                             \
-    template <__VA_ARGS__>                                                               \
-    auto FuncName(LhsBase<L> &&lhs, const RhsBase<R> &rhs) {                             \
-        return ExprName<internal::arg_t<L>, R>{std::move(lhs).derived(), rhs.derived()}; \
-    }                                                                                    \
-    template <__VA_ARGS__>                                                               \
-    auto FuncName(const LhsBase<L> &lhs, RhsBase<R> &&rhs) {                             \
-        return ExprName<L, internal::arg_t<R>>{lhs.derived(), std::move(rhs).derived()}; \
-    }                                                                                    \
-    template <__VA_ARGS__>                                                               \
-    auto FuncName(LhsBase<L> &&lhs, RhsBase<R> &&rhs) {                                  \
-        return ExprName<internal::arg_t<L>, internal::arg_t<R>>{                         \
-          std::move(lhs).derived(), std::move(rhs).derived()};                           \
+#define WAVE_OVERLOAD_FUNCTION_FOR_RVALUES_IMPL(                            \
+  FuncName, ExprName, LhsBase, RhsBase, ...)                                \
+    template <__VA_ARGS__>                                                  \
+    auto FuncName(LhsBase<L> &&lhs, const RhsBase<R> &rhs) {                \
+        return ExprName<internal::arg_t<L>, R &>{std::move(lhs).derived(),  \
+                                                 rhs.derived()};            \
+    }                                                                       \
+    template <__VA_ARGS__>                                                  \
+    auto FuncName(const LhsBase<L> &lhs, RhsBase<R> &&rhs) {                \
+        return ExprName<L &, internal::arg_t<R>>{lhs.derived(),             \
+                                                 std::move(rhs).derived()}; \
+    }                                                                       \
+    template <__VA_ARGS__>                                                  \
+    auto FuncName(LhsBase<L> &&lhs, RhsBase<R> &&rhs) {                     \
+        return ExprName<internal::arg_t<L>, internal::arg_t<R>>{            \
+          std::move(lhs).derived(), std::move(rhs).derived()};              \
     }
 
 #define WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(FuncName, ExprName, LhsBase, RhsBase) \
@@ -69,10 +71,18 @@
  */
 #define WAVE_OVERLOAD_FUNCTION_FOR_RVALUE(FuncName, ExprName, RhsBase) \
     template <typename R>                                              \
-    auto FuncName(RhsBase<R> &&rhs)->ExprName<internal::arg_t<R>> {    \
+    auto FuncName(RhsBase<R> &&rhs) {                                  \
         return ExprName<internal::arg_t<R>>{std::move(rhs).derived()}; \
     }
 
+/** Generate overloaded method for an rvalue *this. The first definition
+ * (lvalue *this) is not included here as it is more clear to readers (and greppable)
+ * if at least one definition is fully written out.
+ */
+#define WAVE_OVERLOAD_SELF_METHOD_FOR_RVALUE(FuncName, ExprName, DerivedType) \
+    auto FuncName() && {                                                      \
+        return ExprName<internal::arg_t<DerivedType>>{this->derived()};       \
+    }
 
 /** Generate overloaded binary functions where one side is a plain scalar to be wrapped */
 #define WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_LEFT(OpSymbol, RhsBase)                     \
