@@ -8,7 +8,7 @@ TYPED_TEST_CASE(RefScalarTest, ScalarTypes);
 // Direct construct a reference wrapper
 TYPED_TEST(RefScalarTest, constructFromRef) {
     auto a = this->a();
-    auto s = wave::ScalarRef<TypeParam>{a};
+    auto s = wave::Scalar<TypeParam &>{a};
     EXPECT_EQ(a, s);
     EXPECT_APPROX(a, s);
 
@@ -19,8 +19,8 @@ TYPED_TEST(RefScalarTest, constructFromRef) {
 
 TYPED_TEST(RefScalarTest, copyConstructBraces) {
     auto a = this->a();
-    const auto s0 = wave::ScalarRef<TypeParam>{a};
-    const auto s = wave::ScalarRef<TypeParam>{s0};
+    const auto s0 = wave::Scalar<TypeParam &>{a};
+    const auto s = wave::Scalar<TypeParam &>{s0};
     EXPECT_EQ(a, s);
     EXPECT_APPROX(a, s);
 
@@ -31,8 +31,8 @@ TYPED_TEST(RefScalarTest, copyConstructBraces) {
 
 TYPED_TEST(RefScalarTest, copyConstructEquals) {
     auto a = this->a();
-    const auto s0 = wave::ScalarRef<TypeParam>{a};
-    const wave::ScalarRef<TypeParam> s{s0};
+    const auto s0 = wave::Scalar<TypeParam &>{a};
+    const wave::Scalar<TypeParam &> s{s0};
     EXPECT_EQ(a, s);
     EXPECT_APPROX(a, s);
 
@@ -43,14 +43,14 @@ TYPED_TEST(RefScalarTest, copyConstructEquals) {
 
 TYPED_TEST(RefScalarTest, noCopyAssign) {
     // We can't copy-assign a ref-wrapper Scalar
-    using R = wave::ScalarRef<TypeParam>;
+    using R = wave::Scalar<TypeParam &>;
     static_assert(!std::is_copy_assignable<R>{}, "");
     static_assert(!std::is_move_assignable<R>{}, "");
 }
 
 TYPED_TEST(RefScalarTest, constructRegFromRef) {
     const auto a = this->a();
-    const auto r = wave::ScalarRef<TypeParam>{a};
+    const auto r = wave::Scalar<TypeParam &>{a};
     const auto s = wave::Scalar<TypeParam>{r};
 
     EXPECT_EQ(a, s);
@@ -58,7 +58,7 @@ TYPED_TEST(RefScalarTest, constructRegFromRef) {
 
 TYPED_TEST(RefScalarTest, assignRegFromRef) {
     const auto a = this->a();
-    const auto r = wave::ScalarRef<TypeParam>{a};
+    const auto r = wave::Scalar<TypeParam &>{a};
     auto s = wave::Scalar<TypeParam>{};
     s = r;
 

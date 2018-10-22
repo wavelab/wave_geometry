@@ -27,10 +27,6 @@ struct unary_traits_base;
 template <typename, typename>
 struct unary_traits_base_tag;
 
-/** Traits for scalar types (which are not Expressions) */
-template <typename>
-struct scalar_traits_base;
-
 /** Traits for nullary with one auxilliary type template parameter
  * For example, Random<Translationd>
  */

@@ -89,15 +89,15 @@ TEST(IsSame, rvalueCopy) {
 TEST(IsSame, scalarRef) {
     double a{};
     wave::Scalar<double> s0{a};
-    wave::ScalarRef<double> s1{a};
-    wave::ScalarRef<double> s2{a};
+    wave::Scalar<double &> s1{a};
+    wave::Scalar<double &> s2{a};
 
     EXPECT_TRUE(wave::isSame(s1, s2));
     EXPECT_FALSE(wave::isSame(s0, s1));
 }
 
 TEST(IsSame, contains_same_type) {
-    using Sum = wave::Sum<wave::Scalar<double>, wave::ScalarRef<double>>;
-    static_assert(wave::internal::contains_same_type<Sum, wave::ScalarRef<double>>{}, "");
+    using Sum = wave::Sum<wave::Scalar<double>, wave::Scalar<double &>>;
+    static_assert(wave::internal::contains_same_type<Sum, wave::Scalar<double &>>{}, "");
     static_assert(wave::internal::contains_same_type<Sum, double>{}, "");
 }

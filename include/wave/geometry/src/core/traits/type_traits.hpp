@@ -129,10 +129,9 @@ TICK_TRAIT(is_unary_expression, is_derived_expression<_>, has_valid_unary_traits
 /** True if type is a scalar (non-expression arithmetic type)
  * Note a scalar is separate from a size-1 vector.
  */
-TICK_TRAIT(is_scalar) {
+TICK_TRAIT(is_scalar, std::is_arithmetic<_>) {
     template <class T>
-    auto require(T && x)
-      ->valid<is_true<std::is_same<tmp::remove_cr_t<T>, typename traits<T>::Scalar>>>;
+    auto require(T && x)->valid<>;
 };
 
 //

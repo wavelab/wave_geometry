@@ -119,9 +119,6 @@ class Identity;
 template <typename ScalarType>
 class Scalar;
 
-template <typename ScalarType>
-struct ScalarRef;
-
 namespace internal {
 template <typename Derived, typename Enable = void>
 struct FramedLeafAccess;

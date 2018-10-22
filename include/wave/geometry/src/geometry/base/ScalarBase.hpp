@@ -48,8 +48,9 @@ template <typename T>
 
 /** Traits for non-expression scalar types (such as double).
  *
- * These are used for output-checking by some expressions such as Sum, which were
- * designed for vector expressions and now also serve scalars.
+ * These are used for output-checking by some expressions such as Sum (which were
+ * designed for vector expressions and now also serve scalars) and so we can differentiate
+ * with respect to a scalar in expressions such as scalar multiplication.
  */
 struct scalar_traits_base : leaf_traits_base<T>, frameable_vector_traits {
     using Scalar = T;
@@ -63,32 +64,12 @@ struct scalar_traits_base : leaf_traits_base<T>, frameable_vector_traits {
  * are accepted by std::is_arithmetic but we strip the const in `traits<const T>`.
  */
 template <typename T>
-struct traits<T,
-              std::enable_if_t<std::is_arithmetic<T>::value && !std::is_const<T>::value>>
-    : scalar_traits_base<T> {};
+struct traits<T, enable_if_scalar_t<T>> : scalar_traits_base<T> {};
 
 /** Helper to produce a scalar wrapping the input type */
 template <typename Arg>
 auto makeScalarResult(Arg &&arg) -> Scalar<Arg> {
     return Scalar<Arg>{std::forward<Arg>(arg)};
-}
-
-/** Helper to produce a ScalarRef wrapping the input, if needed
- *
- * For a reference to scalar, use ScalarRef
- */
-template <typename T>
-auto wrapInputScalar(const T &arg) -> ScalarRef<T> {
-    return ScalarRef<T>{arg};
-}
-
-/** Helper to produce a ScalarRef wrapping the input, if needed
- *
- * For an rvalue input, use Scalar
- */
-template <typename T>
-auto wrapInputScalar(const T &&arg) -> Scalar<T> {
-    return Scalar<T>{std::move(arg)};
 }
 
 /** Trivial implementation of scalar * scalar product

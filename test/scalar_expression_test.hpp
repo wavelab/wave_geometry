@@ -24,7 +24,8 @@ class ScalarTest : public testing::Test {
     // Static traits checks
     TICK_TRAIT_CHECK(wave::internal::is_scalar<ScalarType>);
     TICK_TRAIT_CHECK(wave::internal::is_leaf_expression<Leaf>);
-    TICK_TRAIT_CHECK(wave::internal::is_unary_expression<wave::ScalarRef<ScalarType>>);
+    TICK_TRAIT_CHECK(wave::internal::is_leaf_expression<wave::Scalar<ScalarType>>);
+    TICK_TRAIT_CHECK(wave::internal::is_unary_expression<wave::Scalar<ScalarType &>>);
 
     // Make some semi-random values, different for each test
     // (too big or small can ruin numerical diff accuracy for some functions, e.g. if

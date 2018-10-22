@@ -26,7 +26,6 @@
 #include "src/geometry/base/TransformBase.hpp"
 #include "src/geometry/base/RotationBase.hpp"
 #include "src/geometry/leaf/Scalar.hpp"
-#include "src/geometry/leaf/ScalarRef.hpp"
 #include "src/geometry/leaf/MatrixRotation.hpp"
 #include "src/geometry/leaf/QuaternionRotation.hpp"
 #include "src/geometry/leaf/AngleAxisRotation.hpp"
