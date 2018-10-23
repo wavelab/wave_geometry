@@ -19,6 +19,7 @@ wave_geometry
    autodiff
    frame_semantics
    dynamic_expressions
+   storage
    changelog
    cite
    license

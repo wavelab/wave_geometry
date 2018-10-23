@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [Unreleased](https://github.com/wavelab/wave_geometry/compare/0.3.0..HEAD)
 ### New features
 - New `dynamic` module for heap-allocated, dynamically-composable `Proxy` expressions
 - New documentation built with Sphinx
@@ -8,16 +8,19 @@
 ### Backward-incompatible API changes
 - C++14 is now required
 - Boost 1.58 is now required
+- Change selection of storage types from expression types.
+  (Described in docs under "Storage and auto")
 
 ### Fixes and minor changes
 - Fix finding googletest source package on Ubuntu bionic
 - Fix (trivial) reverse-mode AD on a single leaf
 - Move numerical Jacobian evaluator into `core` module
+- Reorganize and rename storage base classes
 
 ## [0.3.0](https://github.com/wavelab/wave_geometry/compare/0.2.0...0.3.0) (2018-08-19)
 ### New features
 - Scalar multiplication (scalar\*vector, vector\*scalar, and vector\/scalar)
-- Differentiable arithmetic operations on scalar expressions (e.g. `v1.norm() + v2.norm()`)
+- Differentiable arithmetic operations on scalar expressions (e.g. ```v1.norm() + v2.norm()`)
 - The library can be installed and used via CMake
 - The library can be built as a submodule of libwave
 - Automated CI builds
