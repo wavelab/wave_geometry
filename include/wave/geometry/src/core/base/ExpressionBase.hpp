@@ -39,8 +39,16 @@ class ExpressionBase {
      * makes it hard to find the correct result type, since Derived is incomplete. The
      * workaround is redundant, error-prone definitions in traits<> classes.
      */
-    OutputType eval() const {
+    OutputType eval() const & {
         return internal::evaluateTo<OutputType>(this->derived());
+    }
+
+    OutputType eval() & {
+        return internal::evaluateTo<OutputType>(this->derived());
+    }
+
+    OutputType eval() && {
+        return internal::evaluateTo<OutputType>(std::move(this->derived()));
     }
 
     /** Evaluate the jacobian w.r.t. the target */

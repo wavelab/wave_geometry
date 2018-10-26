@@ -4,6 +4,7 @@
 ### New features
 - New `dynamic` module for heap-allocated, dynamically-composable `Proxy` expressions
 - New documentation built with Sphinx
+- New n-ary expressions
 
 ### Backward-incompatible API changes
 - C++14 is now required
@@ -16,6 +17,7 @@
 - Fix (trivial) reverse-mode AD on a single leaf
 - Move numerical Jacobian evaluator into `core` module
 - Reorganize and rename storage base classes
+- .translation() and .rotation() methods work on all transform expressions (not just leaves)
 
 ## [0.3.0](https://github.com/wavelab/wave_geometry/compare/0.2.0...0.3.0) (2018-08-19)
 ### New features

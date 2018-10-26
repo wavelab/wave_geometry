@@ -8,15 +8,70 @@
 
 namespace wave {
 
+/** Auxilliary struct for .rotation() member function */
+template <typename Derived>
+struct RotationGetter {
+    using Frames = internal::WrapWithFrames<LeftFrameOf<Derived>, RightFrameOf<Derived>>;
+
+    template <typename BareTf>
+    static auto get(BareTf &&leaf) {
+        return std::forward<BareTf>(leaf).rotation();
+    }
+};
+
+/** Auxilliary struct for .translation() member function */
+template <typename Derived>
+struct TranslationGetter {
+    using Frames = internal::
+      WrapWithFrames<LeftFrameOf<Derived>, LeftFrameOf<Derived>, RightFrameOf<Derived>>;
+
+    template <typename BareTf>
+    static auto get(BareTf &&leaf) {
+        return std::forward<BareTf>(leaf).translation();
+    }
+};
+
 /** Base class for transform-like expressions including SO(3) (RotationBase) and SE(3)
  * (RigidTransformBase)
  */
 template <typename Derived>
 class TransformBase : public ExpressionBase<Derived> {
+ public:
+    // The blocks are stored in this order:
+    enum : int { Rotation, Translation };
+
+ private:
     using Scalar = internal::scalar_t<Derived>;
     using OutputType = internal::plain_output_t<Derived>;
 
  public:
+    /** Gets an expression representing the translation part of the transform */
+    auto translation() const & {
+        return internal::memberAccess<TranslationGetter<Derived>>(this->derived());
+    }
+
+    auto translation() & {
+        return internal::memberAccess<TranslationGetter<Derived>>(this->derived());
+    }
+
+    auto translation() && {
+        return internal::memberAccess<TranslationGetter<Derived>>(
+          std::move(*this)->derived());
+    }
+
+    /** Gets an expression representing the rotation part of the transform */
+    auto rotation() const & {
+        return internal::memberAccess<RotationGetter<Derived>>(this->derived());
+    }
+
+    auto rotation() & {
+        return internal::memberAccess<RotationGetter<Derived>>(this->derived());
+    }
+
+    auto rotation() && {
+        return internal::memberAccess<RotationGetter>(std::move(*this)->derived());
+    }
+
     /** Produce a random element */
     static auto Random() -> OutputType {
         return ::wave::Random<OutputType>{}.eval();
@@ -48,7 +103,7 @@ class TransformBase : public ExpressionBase<Derived> {
 /** Gets inverse of a transform */
 template <typename R>
 auto inverse(const TransformBase<R> &rhs) {
-    return Inverse<internal::arg_t<R &>>{rhs.derived()};
+    return Inverse<internal::cr_arg_t<R>>{rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUE(inverse, Inverse, TransformBase)
@@ -59,7 +114,7 @@ WAVE_OVERLOAD_FUNCTION_FOR_RVALUE(inverse, Inverse, TransformBase)
  */
 template <typename R>
 auto log(const TransformBase<R> &rhs) {
-    return LogMap<RightFrameOf<R>, internal::arg_t<R &>>{rhs.derived()};
+    return LogMap<RightFrameOf<R>, internal::cr_arg_t<R>>{rhs.derived()};
 }
 // Overload for rvalue
 template <typename R>
@@ -73,7 +128,7 @@ auto log(TransformBase<R> &&rhs) {
  */
 template <typename ExtraFrame, typename R>
 auto logFramed(const TransformBase<R> &rhs) {
-    return LogMap<ExtraFrame, internal::arg_t<R &>>{rhs.derived()};
+    return LogMap<ExtraFrame, internal::cr_arg_t<R>>{rhs.derived()};
 }
 // Overload for rvalue
 template <typename ExtraFrame, typename R>
@@ -87,8 +142,8 @@ auto logFramed(TransformBase<R> &&rhs) {
  */
 template <typename L, typename R>
 auto operator*(const TransformBase<L> &lhs, const TransformBase<R> &rhs) {
-    return Compose<internal::arg_t<L &>, internal::arg_t<R &>>{lhs.derived(),
-                                                               rhs.derived()};
+    return Compose<internal::cr_arg_t<L>, internal::cr_arg_t<R>>{lhs.derived(),
+                                                                 rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*, Compose, TransformBase, TransformBase)
@@ -99,8 +154,8 @@ WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*, Compose, TransformBase, TransformB
  */
 template <typename L, typename R>
 auto operator-(const TransformBase<L> &lhs, const TransformBase<R> &rhs) {
-    return BoxMinus<internal::arg_t<L &>, internal::arg_t<R &>>{lhs.derived(),
-                                                                rhs.derived()};
+    return BoxMinus<internal::cr_arg_t<L>, internal::cr_arg_t<R>>{lhs.derived(),
+                                                                  rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator-, BoxMinus, TransformBase, TransformBase)
@@ -111,8 +166,8 @@ WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator-, BoxMinus, TransformBase, Transform
  */
 template <typename L, typename R, TICK_REQUIRES(internal::rhs_is_tangent_of_lhs<L, R>{})>
 auto operator+(const TransformBase<L> &lhs, const VectorBase<R> &rhs) {
-    return BoxPlus<internal::arg_t<L &>, internal::arg_t<R &>>{lhs.derived(),
-                                                               rhs.derived()};
+    return BoxPlus<internal::cr_arg_t<L>, internal::cr_arg_t<R>>{lhs.derived(),
+                                                                 rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES_REQ(operator+,

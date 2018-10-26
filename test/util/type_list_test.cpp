@@ -98,6 +98,27 @@ void test_concat_if_unique() {
 
     static_assert(std::is_same<typename concat_if_unique<E, E>::type, E>{}, "");
     static_assert(concat_if_unique<E, E>{}, "");
+}
+
+template <typename T>
+using test_list_t = typename internal::has_unique_leaves_leaf<T>::type;
+
+void test_concat_if_unique_many() {
+    using A = concat_if_unique<test_list_t<int>, test_list_t<bool>>;
+    using B = concat_if_unique<test_list_t<float>, test_list_t<double>>;
+    using D = concat_if_unique<test_list_t<void *>, test_list_t<char>>;
+
+    static_assert(std::is_same<typename concat_if_unique_many<A, B>::type,
+                               type_list<int, bool, float, double>>{},
+                  "");
+    static_assert(concat_if_unique_many<A, B>{}, "");
+
+    static_assert(std::is_same<typename concat_if_unique_many<A, B, D>::type,
+                               type_list<int, bool, float, double, void *, char>>{},
+                  "");
+    static_assert(concat_if_unique_many<A, B, D>{}, "");
+
+    static_assert(concat_if_unique_many<A, B, D, A>{} == false, "");
 };
 
 void test_has_unique_leaves() {
@@ -118,6 +139,46 @@ void test_has_unique_leaves() {
     static_assert(!unique_leaves_t<N1>{}, "");
     static_assert(!unique_leaves_t<N2>{}, "");
     static_assert(!unique_leaves_t<N3>{}, "");
+};
+
+void test_cumulative_index_sequence() {
+    static_assert(std::is_same<cumulative_index_sequence<>, std::index_sequence<>>{},
+                  "empty in = empty out");
+    static_assert(std::is_same<cumulative_index_sequence<42>, std::index_sequence<0>>{},
+                  "single size = single zero index");
+    static_assert(
+      std::is_same<cumulative_index_sequence<2, 3, 42>, std::index_sequence<0, 2, 5>>{},
+      "always starts at zero, last input ignored");
+    static_assert(std::is_same<cumulative_index_sequence<2, 3, 0, 1, 12>,
+                               std::index_sequence<0, 2, 5, 5, 6>>{},
+                  "impossible input");
+};
+
+void test_accumulate_index_sequence() {
+    using SeqA = std::index_sequence<42>;
+    using SeqB = std::index_sequence<2, 3, 42>;
+    using SeqC = std::index_sequence<2, 3, 0, 1, 12>;
+
+    static_assert(std::is_same<accumulate_index_sequence<std::index_sequence<>>,
+                               std::index_sequence<>>{},
+                  "empty in = empty out");
+    static_assert(std::is_same<accumulate_index_sequence<SeqA>, std::index_sequence<0>>{},
+                  "single size = single zero index");
+    static_assert(
+      std::is_same<accumulate_index_sequence<SeqB>, std::index_sequence<0, 2, 5>>{},
+      "always starts at zero, last input ignored");
+    static_assert(
+      std::is_same<accumulate_index_sequence<SeqC>, std::index_sequence<0, 2, 5, 5, 6>>{},
+      "impossible input");
+};
+
+
+void test_integer_sequence_element() {
+    using Seq = std::index_sequence<21, 42, 63, 84>;
+
+    static_assert(integer_sequence_element<0, Seq>::value == 21, "");
+    static_assert(integer_sequence_element<1, Seq>::value == 42, "");
+    static_assert(integer_sequence_element<3, Seq>::value == 84, "");
 };
 
 }  // namespace tmp

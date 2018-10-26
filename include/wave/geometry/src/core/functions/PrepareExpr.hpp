@@ -12,36 +12,36 @@ namespace internal {
  * Transforms the expression tree: keeps leaves intact, but converts unary and binary
  * expressions to their traits::PreparedType
  */
-template <typename Derived>
-struct PrepareExpr<Derived, enable_if_leaf_or_scalar_t<tmp::remove_cr_t<Derived>>> {
-    using Leaf = tmp::remove_cr_t<Derived>;
+template <typename Derived,
+          enable_if_leaf_or_scalar_t<tmp::remove_cr_t<Derived>, bool> = true>
+static auto prepareExpr(adl, const Derived &leaf) -> const Derived & {
+    return leaf;
+}
 
-    static auto run(const Leaf &leaf) -> const Leaf & {
-        return leaf;
-    }
-};
-
-template <typename Derived>
-struct PrepareExpr<Derived, enable_if_unary_t<tmp::remove_cr_t<Derived>>> {
+template <typename Derived, enable_if_unary_t<tmp::remove_cr_t<Derived>, bool> = true>
+static auto prepareExpr(adl, const Derived &unary) {
     using OutType = tmp::remove_cr_t<typename traits<Derived>::PreparedType>;
-    using Rhs = typename traits<Derived>::RhsDerived;
+    return OutType{prepareExpr(adl{}, unary.rhs())};
+}
 
-    static auto run(const Derived &unary) {
-        return OutType{PrepareExpr<Rhs>::run(unary.derived().rhs())};
-    }
-};
-
-template <typename Derived>
-struct PrepareExpr<Derived, enable_if_binary_t<tmp::remove_cr_t<Derived>>> {
+template <typename Derived, enable_if_binary_t<tmp::remove_cr_t<Derived>, bool> = true>
+static auto prepareExpr(adl, const Derived &binary) {
     using OutType = tmp::remove_cr_t<typename traits<Derived>::PreparedType>;
-    using Lhs = typename traits<Derived>::LhsDerived;
-    using Rhs = typename traits<Derived>::RhsDerived;
+    return OutType{prepareExpr(adl{}, binary.lhs()), prepareExpr(adl{}, binary.rhs())};
+}
 
-    static auto run(const Derived &binary) {
-        return OutType{PrepareExpr<Lhs>::run(binary.derived().lhs()),
-                       PrepareExpr<Rhs>::run(binary.derived().rhs())};
-    }
-};
+
+template <typename Derived, size_t... Is>
+static auto prepareExprExpand(const Derived &nary, std::index_sequence<Is...>) {
+    using OutType = tmp::remove_cr_t<typename traits<Derived>::PreparedType>;
+    return OutType{prepareExpr(adl{}, nary.template get<Is>())...};
+}
+
+template <typename Derived, enable_if_nary_t<tmp::remove_cr_t<Derived>, bool> = true>
+static auto prepareExpr(adl, const Derived &nary) {
+    using Indices = std::make_index_sequence<traits<Derived>::CompoundSize>;
+    return prepareExprExpand(nary, Indices{});
+}
 
 /** Functor which returns the given argument
  * To be used an OutputFunctor */

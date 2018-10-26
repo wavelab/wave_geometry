@@ -33,9 +33,6 @@ struct NotAllowed {};
 /** Marker of ADL-enabled functions in internal namespace */
 struct adl {};
 
-template <typename Derived, typename Enable = void>
-struct PrepareExpr;
-
 }  // namespace internal
 
 template <typename Derived, typename StorageType>
@@ -47,11 +44,17 @@ struct UnaryStorage;
 template <typename Derived, typename LhsDerived, typename RhsDerived>
 struct BinaryStorage;
 
+template <typename Derived, typename... Primitives>
+struct NaryStorage;
+
 template <typename Derived>
 class ExpressionBase;
 
 template <typename ToDerived, typename FromDerived>
 struct Convert;
+
+template <typename Fn, typename RhsDerived>
+struct MemberAccess;
 
 }  // namespace wave
 

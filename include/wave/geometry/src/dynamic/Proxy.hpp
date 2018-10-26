@@ -82,16 +82,15 @@ struct is_proxy<Proxy<Leaf>> : std::true_type {};
 template <typename Derived, typename T = void>
 using enable_if_proxy_t = typename std::enable_if<is_proxy<Derived>{}, T>::type;
 
-/* Proxy<L> is a special class that gets an instantiation of Evaluator, PrepareExpr, etc.
+/* Proxy<L> is a special class that gets an instantiation of Evaluator, prepareExpr, etc.
  * despite not being a leaf, unary, or binary expression. We provide those partial
  * specializations here.
  */
-template <typename Derived>
-struct PrepareExpr<Derived, std::enable_if_t<is_proxy<Derived>{}>> {
-    static auto run(const Derived &proxy) -> const Derived & {
-        return proxy;
-    }
-};
+template <typename Derived,
+          std::enable_if_t<is_proxy<tmp::remove_cr_t<Derived>>{}, bool> = true>
+static auto prepareExpr(adl, const Derived &proxy) -> const Derived & {
+    return proxy;
+}
 
 template <typename Derived>
 struct Evaluator<Derived, std::enable_if_t<is_proxy<Derived>{}>> {
@@ -216,7 +215,7 @@ struct EvaluatorWithDelta<DynamicBase<Leaf>> {
 template <typename Leaf>
 struct traits<Proxy<Leaf>> {
     using Tag = expr<Proxy>;
-    using PreparedType = Proxy<Leaf> &;
+    using PreparedType = const Proxy<Leaf> &;
     using EvalType = eval_t<Leaf>;
     using OutputFunctor = typename traits<Leaf>::OutputFunctor;
     using PlainType = Leaf;
@@ -229,6 +228,9 @@ struct traits<Proxy<Leaf>> {
 // Store by value in expressions using the proxy, because proxies are rebindable
 template <typename Leaf>
 struct arg_selector<Proxy<Leaf> &> : arg_selector<Proxy<Leaf>> {};
+
+template <typename Leaf>
+struct arg_selector<const Proxy<Leaf> &> : arg_selector<Proxy<Leaf>> {};
 
 template <typename Leaf>
 decltype(auto) getWrtTarget(adl, const ExpressionBase<Proxy<Leaf>> &proxy) {

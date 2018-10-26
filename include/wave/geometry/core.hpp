@@ -5,8 +5,11 @@
 #ifndef WAVE_GEOMETRY_CORE_HPP
 #define WAVE_GEOMETRY_CORE_HPP
 
-// For shared_ptr, used by Proxy
+#include <utility>
+#include <tuple>
 #include <memory>
+#include <type_traits>
+
 // For optional, used by JacobianEvaluator
 #include <boost/optional.hpp>
 // Used by DynamicReverseJacobianEvaluator
@@ -45,13 +48,18 @@
 #include "src/core/functions/NumericalJacobian.hpp"
 
 // Storage and traits bases
-#include "wave/geometry/src/core/storage/UnaryStorage.hpp"
-#include "wave/geometry/src/core/storage/BinaryStorage.hpp"
-#include "wave/geometry/src/core/storage/LeafStorage.hpp"
+#include "src/core/storage/UnaryStorage.hpp"
+#include "src/core/storage/BinaryStorage.hpp"
+#include "src/core/storage/LeafStorage.hpp"
+#include "src/core/storage/CompoundLeafStorage.hpp"
+#include "src/core/storage/NaryStorage.hpp"
 #include "src/core/traits/traits_bases.hpp"
+#include "src/core/storage/BlockMatrix.hpp"
+
 
 // Expressions
 #include "src/core/base/ExpressionBase.hpp"
 #include "src/core/op/Convert.hpp"
+#include "src/core/op/MemberAccess.hpp"
 
 #endif  // WAVE_GEOMETRY_CORE_HPP

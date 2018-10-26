@@ -319,21 +319,22 @@ std::enable_if_t<not UniqueExpr> checkJacobians(const Expr &expr, const Wrt &...
 namespace Eigen {
 
 // Let gtest print Eigen Quaternion and AngleAxis values
-template <typename Scalar>
-inline ::std::ostream &operator<<(::std::ostream &os, const Quaternion<Scalar> &q) {
+template <typename Scalar, int Options>
+inline ::std::ostream &operator<<(::std::ostream &os,
+                                  const Quaternion<Scalar, Options> &q) {
     IOFormat fmt{StreamPrecision, DontAlignCols, ", ", ", "};
     return os << q.w() << ", " << q.vec().format(fmt) << " (wxyz)";
 }
 
-template <typename Scalar>
+template <typename Scalar, int Options>
 inline ::std::ostream &operator<<(::std::ostream &os,
-                                  const Eigen::Map<Quaternion<Scalar>> &q) {
+                                  const Eigen::Map<Quaternion<Scalar, Options>> &q) {
     return os << Quaternion<Scalar>{q};
 }
 
-template <typename Scalar>
-inline ::std::ostream &operator<<(::std::ostream &os,
-                                  const Eigen::Map<const Quaternion<Scalar>> &q) {
+template <typename Scalar, int Options>
+inline ::std::ostream &operator<<(
+  ::std::ostream &os, const Eigen::Map<const Quaternion<Scalar, Options>> &q) {
     return os << Quaternion<Scalar>{q};
 }
 
@@ -348,10 +349,10 @@ inline ::std::ostream &operator<<(::std::ostream &os, const AngleAxis<Scalar> &a
 
 namespace wave {
 
-// Let gtest print leaf expressions, using their internal values
-template <typename Derived, internal::enable_if_leaf_t<Derived, int> = 0>
+// Let gtest print wave expressions, using their internal values
+template <typename Derived>
 std::ostream &operator<<(std::ostream &os, const ExpressionBase<Derived> &expr) {
-    return os << expr.derived().value();
+    return os << ::testing::PrintToString(expr.derived().eval().value());
 }
 
 }  // namespace wave

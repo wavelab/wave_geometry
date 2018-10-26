@@ -28,3 +28,7 @@ WAVE_GEOMETRY_ADD_TEST(identity_matrix_test util/identity_matrix_test.cpp)
 
 #dynamic
 WAVE_GEOMETRY_ADD_TEST(dynamic_expression_test.cpp dynamic_expression_test.cpp)
+
+#compound
+WAVE_GEOMETRY_ADD_TEST(compound_test compound_test.cpp)
+

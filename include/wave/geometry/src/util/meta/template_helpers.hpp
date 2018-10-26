@@ -214,6 +214,16 @@ struct function_traits<Return (*)(Args...)> : function_traits<Return(Args...)> {
 template <typename F>
 using return_t = typename function_traits<F>::ReturnType;
 
+/** Wrapper for a template */
+template <template <typename...> class Tmpl>
+struct tmpl {
+    template <typename... Ts>
+    using rebind = Tmpl<Ts...>;
+};
+
+/** Convenience alias for integer wrapper */
+template <int I>
+using Int = std::integral_constant<int, I>;
 
 }  // namespace tmp
 }  // namespace wave

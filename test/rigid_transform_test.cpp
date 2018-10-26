@@ -6,14 +6,12 @@
  * This test covers only RT-specific functions such as constructors. Lie group operations
  * are tested in transform_test.cpp
  */
-template <typename Params>
-struct D;
+
 template <typename Params>
 class RigidTransformTest : public testing::Test {
  protected:
     using Scalar = typename Params::Scalar;
     using Leaf = typename Params::Leaf;
-    using ImplType = typename wave::internal::traits<Leaf>::ImplType;
 
     // Used for CHECK_JACOBIANS macro
     static constexpr bool IsFramed = Params::IsFramed;
@@ -31,6 +29,7 @@ class RigidTransformTest : public testing::Test {
     using TransformQ = wave::CompactRigidTransform<Eigen::Matrix<Scalar, 7, 1>>;
     using RelativeRotation = wave::RelativeRotation<Vector3>;
     using Translation = wave::Translation<Vector3>;
+    using RotationM = wave::MatrixRotation<Matrix3>;
 
     // Convenience framed types
     template <typename T, typename... F>
@@ -41,7 +40,9 @@ class RigidTransformTest : public testing::Test {
     using LeafBA = Framed<Leaf, FrameB, FrameA>;
     using LeafBC = Framed<Leaf, FrameB, FrameC>;
     using LeafAC = Framed<Leaf, FrameA, FrameC>;
+    using RotMAB = Framed<RotationM, FrameA, FrameB>;
     using RelAAB = Framed<RelativeRotation, FrameA, FrameA, FrameB>;
+    using PointAAB = Framed<Translation, FrameA, FrameA, FrameB>;
     using PointAAC = Framed<Translation, FrameA, FrameA, FrameC>;
     using PointBBC = Framed<Translation, FrameB, FrameB, FrameC>;
     using TransformM_BC = Framed<TransformM, FrameB, FrameC>;
@@ -52,7 +53,7 @@ class RigidTransformTest : public testing::Test {
     const Vector3 t1{Vector3::Random()};
 
     // Static traits checks
-    //    TICK_TRAIT_CHECK(wave::internal::is_rt_leaf<LeafAB>);
+    TICK_TRAIT_CHECK(wave::internal::is_leaf_expression<LeafAB>);
 };
 
 // The list of implementation types to run each test case on
@@ -64,18 +65,37 @@ TYPED_TEST_CASE(RigidTransformTest, LeafTypes);
 TYPED_TEST(RigidTransformTest, constructFromMatrixAndVector) {
     auto rt = typename TestFixture::LeafAB{this->R1, this->t1};
 
-    EXPECT_APPROX(this->R1, typename TestFixture::Matrix3{rt.rotation().value()});
-    EXPECT_APPROX(this->t1, rt.translation().value());
+    EXPECT_APPROX(this->R1, typename TestFixture::Matrix3{rt.rotation().eval().value()});
+    EXPECT_APPROX(this->t1, rt.translation().eval().value());
 }
 
 TYPED_TEST(RigidTransformTest, getters) {
     const auto rt = typename TestFixture::LeafAB{this->R1, this->t1};
 
-    const auto &R = rt.rotation().value();
-    const auto &t = rt.translation().value();
+    const auto &R = rt.rotation().eval().value();
+    const auto &t = rt.translation().eval().value();
 
     EXPECT_APPROX(this->R1, typename TestFixture::Matrix3{R});
     EXPECT_APPROX(this->t1, t);
+}
+
+TYPED_TEST(RigidTransformTest, assignViaSubobject) {
+    auto rt = typename TestFixture::LeafAB{this->R1, this->t1};
+
+    rt.translation() = typename TestFixture::PointAAB{1., 2., 3.};
+    rt.rotation() = TestFixture::RotMAB::Random();
+    EXPECT_APPROX(typename TestFixture::PointAAB(1., 2., 3.), rt.translation());
+}
+
+TYPED_TEST(RigidTransformTest, assignViaSubobjectNoFrame) {
+    // Special case where the object is Framed but has NoFrame descriptors - should be
+    // assignable from unframed
+    auto rt = wave::Framed<typename TestFixture::Leaf, wave::NoFrame, wave::NoFrame>{
+      this->R1, this->t1};
+
+    rt.translation() = typename TestFixture::Translation{1., 2., 3.};
+    rt.rotation() = TestFixture::RotationM::Random();
+    EXPECT_APPROX(typename TestFixture::Translation(1., 2., 3.), rt.translation());
 }
 
 // These tests ensure there are no problems with invalid references to temporaries, etc
@@ -84,7 +104,8 @@ TYPED_TEST(RigidTransformTest, sumOfProductOfSubobjects) {
     const auto rt2 = TestFixture::LeafBC::Random();
 
     const auto eigen_result =
-      (rt1.rotation().value() * rt2.translation().value() + rt1.translation().value())
+      (rt1.rotation().eval().value() * rt2.translation().eval().value() +
+       rt1.translation().eval().value())
         .eval();
     const auto result = (rt1.rotation() * rt2.translation() + rt1.translation()).eval();
 
@@ -105,16 +126,17 @@ TYPED_TEST(RigidTransformTest, identity) {
     const auto rt = TestFixture::LeafAB::Identity();
 
     EXPECT_TRUE(typename TestFixture::Matrix3{rt.rotation().value()}.isIdentity());
-    EXPECT_TRUE(rt.translation().value().isZero());
+    EXPECT_TRUE(rt.translation().eval().value().isZero());
 }
 
 TYPED_TEST(RigidTransformTest, inverse) {
     const auto r1 = TestFixture::LeafAB::Random();
     const auto r2 = typename TestFixture::LeafBA{inverse(r1)};
 
-    const auto eigen_rotation = typename TestFixture::Matrix3{r1.rotation().value()};
+    const auto eigen_rotation =
+      typename TestFixture::Matrix3{r1.rotation().eval().value()};
     const auto eigen_translation =
-      typename TestFixture::Vector3{r1.translation().value()};
+      typename TestFixture::Vector3{r1.translation().eval().value()};
 
     const auto expected = typename TestFixture::LeafBA{
       eigen_rotation.inverse(), -eigen_rotation.inverse() * eigen_translation};
@@ -130,9 +152,8 @@ TYPED_TEST(RigidTransformTest, composeWithM) {
     const auto result = typename TestFixture::LeafAC{lhs * rhs};
 
     auto expected = typename TestFixture::LeafAC{};
-    expected.rotation().value() = lhs.rotation().value() * rhs.rotation().value();
-    expected.translation().value() =
-      lhs.rotation().value() * rhs.translation().value() + lhs.translation().value();
+    expected.rotation() = lhs.rotation() * rhs.rotation();
+    expected.translation() = lhs.rotation() * rhs.translation() + lhs.translation();
 
     EXPECT_APPROX(expected, result);
     const bool expected_unique =
@@ -148,9 +169,8 @@ TYPED_TEST(RigidTransformTest, composeWithQ) {
     const auto result = typename TestFixture::LeafAC{lhs * rhs};
 
     auto expected = typename TestFixture::LeafAC{};
-    expected.rotation().value() = lhs.rotation().value() * rhs.rotation().value();
-    expected.translation().value() =
-      lhs.rotation().value() * rhs.translation().value() + lhs.translation().value();
+    expected.rotation() = lhs.rotation() * rhs.rotation();
+    expected.translation() = lhs.rotation() * rhs.translation() + lhs.translation();
 
     EXPECT_APPROX(expected, result);
     const bool expected_unique =
@@ -166,8 +186,9 @@ TYPED_TEST(RigidTransformTest, transformVector) {
 
 
     const auto eigen_result =
-      (rt.rotation().value() * p1.value() + rt.translation().value()).eval();
-    EXPECT_APPROX(eigen_result, p2.value());
+      (rt.rotation().eval().value() * p1.eval().value() + rt.translation().eval().value())
+        .eval();
+    EXPECT_APPROX(eigen_result, p2.eval().value());
 
     CHECK_JACOBIANS(true, rt * p1, rt, p1);
 }

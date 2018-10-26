@@ -64,6 +64,16 @@ TICK_TRAIT(valid_binary_traits, valid_expression_traits<_>) {
               typename T::RhsDerived>;
 };
 
+TICK_TRAIT(valid_nary_traits, valid_expression_traits<_>) {
+    template <class T>
+    auto require(T &&)
+      ->valid<has_template<T::template rebind>,
+              typename T::template StorageType<0>,
+              typename T::template ElementType<0>,
+              typename T::UniqueLeaves,
+              is_true_c<(T::CompoundSize > 0)>>;
+};
+
 TICK_TRAIT(has_valid_traits) {
     template <class T>
     auto require(T &&)
@@ -86,6 +96,12 @@ TICK_TRAIT(has_valid_binary_traits) {
     template <class T>
     auto require(T &&)
       ->valid<is_true<valid_binary_traits<typename ::wave::internal::traits<T>>>>;
+};
+
+TICK_TRAIT(has_valid_nary_traits) {
+    template <class T>
+    auto require(T &&)
+      ->valid<is_true<valid_nary_traits<typename ::wave::internal::traits<T>>>>;
 };
 
 TICK_TRAIT(is_expression, is_derived_expression<_>, has_valid_traits<_>) {
@@ -126,6 +142,11 @@ TICK_TRAIT(is_unary_expression, is_derived_expression<_>, has_valid_unary_traits
     auto require(T && x)->valid<decltype(x.rhs()), is_false<is_binary_expression<T>>>;
 };
 
+TICK_TRAIT(is_nary_expression, is_derived_expression<_>, has_valid_nary_traits<_>) {
+    template <class T>
+    auto require(T && x)->valid<decltype(x.template get<0>())>;
+};
+
 /** True if type is a scalar (non-expression arithmetic type)
  * Note a scalar is separate from a size-1 vector.
  */
@@ -150,6 +171,9 @@ using enable_if_unary_t =
   typename std::enable_if<is_unary_expression<Derived>{}, T>::type;
 
 template <typename Derived, typename T = void>
+using enable_if_nary_t = typename std::enable_if<is_nary_expression<Derived>{}, T>::type;
+
+template <typename Derived, typename T = void>
 using enable_if_scalar_t = typename std::enable_if<is_scalar<Derived>{}, T>::type;
 
 template <typename Derived>
@@ -167,13 +191,17 @@ struct expr {};
 /** Empty tag of a leaf for tag dispatching */
 struct leaf {};
 
+/** Wraps an index for tag dispatching */
+template <std::size_t I>
+struct index_tag : std::integral_constant<std::size_t, I> {};
+
 /** Get a tag type given an instance of a class template */
 template <typename T>
-using get_expr_tag_t = typename traits<std::decay_t<T>>::Tag;
+using get_expr_tag_t = typename traits<tmp::remove_cr_t<T>>::Tag;
 
 /** Helper for template rebind */
 template <typename T, typename... Us>
-using rebind_t = typename traits<std::decay_t<T>>::template rebind<Us...>;
+using rebind_t = typename traits<tmp::remove_cr_t<T>>::template rebind<Us...>;
 
 //
 // Convenience trait getters
@@ -181,7 +209,7 @@ using rebind_t = typename traits<std::decay_t<T>>::template rebind<Us...>;
 
 /** Gets leaf result type of an expression's evalImpl() call */
 template <typename Derived>
-using eval_t = typename traits<Derived>::EvalType;
+using eval_t = typename traits<tmp::remove_cr_t<Derived>>::EvalType;
 
 template <typename Derived>
 using clean_eval_t = tmp::remove_cr_t<typename traits<Derived>::EvalType>;
@@ -217,6 +245,12 @@ using eval_traits = traits<plain_output_t<Derived>>;
 /** Gets the scalar type of the result of an expression */
 template <typename Derived>
 using scalar_t = typename eval_traits<Derived>::Scalar;
+
+/** Gets the common scalar type of multiple expressions
+ * @todo implement and test scalar mixing. This alias is a placeholder.
+ * */
+template <typename... Ts>
+using common_scalar_t = std::common_type_t<typename eval_traits<Ts>::Scalar...>;
 
 /** Helper for tangent type of an expression */
 template <typename Derived>
@@ -262,7 +296,7 @@ inline auto evalOrNotImplemented(...) -> NotImplemented;
 }  // namespace impl
 
 template <typename Tag, typename FoldedRhs>
-using eval_t_unary = decltype(evalImpl(Tag(), std::declval<FoldedRhs>()));
+using eval_t_unary = decltype(evalImpl(Tag(), std::declval<const FoldedRhs &>()));
 
 // Avoid recusing inside type traits, and instantiating non-existent traits
 template <typename Derived, typename Target, typename RhsEval, typename = void>
@@ -310,8 +344,8 @@ struct is_directly_evaluable_unary
                      NotImplemented>> {};
 
 template <typename Tag, typename FoldedLhs, typename FoldedRhs>
-using eval_t_binary =
-  decltype(evalImpl(Tag(), std::declval<FoldedLhs>(), std::declval<FoldedRhs>()));
+using eval_t_binary = decltype(
+  evalImpl(Tag(), std::declval<const FoldedLhs &>(), std::declval<const FoldedRhs &>()));
 
 /** True if eval function defined for the given expression type and folded rhs */
 template <typename Tag, typename Lhs, typename Rhs>
@@ -319,6 +353,10 @@ struct is_directly_evaluable_binary
     : tmp::negation<std::is_same<decltype(impl::evalOrNotImplemented(
                                    Tag(), std::declval<Lhs>(), std::declval<Rhs>())),
                                  NotImplemented>> {};
+
+template <typename Tag, typename... FoldedChildren>
+using eval_t_nary = decltype(evalImpl(Tag(), std::declval<FoldedChildren>()...));
+
 
 // previous eval_type, needs a complete type
 // @todo clean up

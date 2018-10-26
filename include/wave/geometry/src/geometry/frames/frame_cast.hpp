@@ -98,6 +98,7 @@ struct frame_cast_traits_base {
     template <typename NewRhs>
     using rebind = FrameCast<Frames..., NewRhs>;
     using RhsDerived = tmp::remove_cr_t<RhsDerived_>;
+    using RhsDerivedRef = RhsDerived_;
 
  private:
     // Type of the Rhs after applying its PreparedType (before evaluation)

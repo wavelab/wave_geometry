@@ -17,6 +17,10 @@ struct nullary_traits_base;
 template <typename T>
 struct leaf_traits_base;
 
+/** Traits to be inherited by traits of compound leaf types **/
+template <typename Derived, typename... Primitives>
+struct compound_leaf_traits_base;
+
 /** Traits to be inherited by binary types **/
 template <typename>
 struct binary_traits_base;
@@ -46,7 +50,7 @@ struct nullary_traits_base<Tmpl<Wrapped>> : traits<Wrapped> {
 template <typename T>
 struct leaf_traits_base {
     using Tag = leaf;
-    using PreparedType = T &;
+    using PreparedType = const T &;
     using EvalType = T;
     using OutputFunctor = IdentityFunctor;
     using PlainType = T;
@@ -54,17 +58,46 @@ struct leaf_traits_base {
     using ConvertTo = tmp::type_list<>;
 };
 
+template <template <typename...> class Tmpl, typename... Ts, typename... Primitives>
+struct compound_leaf_traits_base<Tmpl<Ts...>, Primitives...>
+    : leaf_traits_base<Tmpl<Ts...>> {
+    using Derived = Tmpl<Ts...>;
+    using StorageTuple = std::tuple<internal::storage_t<Primitives>...>;
+    using ElementTuple = std::tuple<tmp::remove_cr_t<Primitives>...>;
+    using Scalar = std::common_type_t<typename traits<Primitives>::Scalar...>;
+
+    template <typename... NewTs>
+    using rebind = Tmpl<NewTs...>;
+
+    template <size_t I>
+    using StorageType = std::tuple_element_t<I, StorageTuple>;
+
+    template <size_t I>
+    using ElementType = std::tuple_element_t<I, ElementTuple>;
+
+    using TangentSizes = std::integer_sequence<int, traits<Primitives>::TangentSize...>;
+    using TangentBlocks = std::tuple<typename traits<Primitives>::TangentType...>;
+
+    enum : int {
+        CompoundSize = sizeof...(Primitives),
+        TangentSize = tmp::sum_sequence<TangentSizes>::value
+    };
+};
+
+
 template <template <typename, typename> class Tmpl,
           typename LhsDerived_,
           typename RhsDerived_>
 struct binary_traits_base<Tmpl<LhsDerived_, RhsDerived_>> {
     using LhsDerived = tmp::remove_cr_t<LhsDerived_>;
     using RhsDerived = tmp::remove_cr_t<RhsDerived_>;
+    using LhsDerivedRef = LhsDerived_;
+    using RhsDerivedRef = RhsDerived_;
 
     /** The type of the derived template instantiated with a different parameter.
      *
-     * This pattern is known as "rebind", "policy clone", "meta-function wrapper idiom".
-     * Needed for UnaryExpression.
+     * This pattern is known as "rebind", "policy clone", "meta-function wrapper
+     * idiom". Needed for UnaryExpression.
      */
     template <typename NewLhs, typename NewRhs>
     using rebind = Tmpl<NewLhs, NewRhs>;
@@ -83,8 +116,8 @@ struct binary_traits_base<Tmpl<LhsDerived_, RhsDerived_>> {
     // Type of this expression template rebound to the prepared operands
     using AdaptedType = rebind<LhsPrepared, RhsPrepared>;
 
-    // We want our Prepare step to apply one conversion to each operand, if needed. Find
-    // the conversions
+    // We want our Prepare step to apply one conversion to each operand, if needed.
+    // Find the conversions
     using ConvertedType = typename first_directly_evaluable_conversion_binary<
       AdaptedType,
       Tag,
@@ -114,11 +147,12 @@ struct binary_traits_base<Tmpl<LhsDerived_, RhsDerived_>> {
 template <template <typename> class Tmpl, typename RhsDerived_>
 struct unary_traits_base<Tmpl<RhsDerived_>> {
     using RhsDerived = tmp::remove_cr_t<RhsDerived_>;
+    using RhsDerivedRef = RhsDerived_;
 
     /** The type of the derived template instantiated with a different parameter.
      *
-     * This pattern is known as "rebind", "policy clone", "meta-function wrapper idiom".
-     * Needed for UnaryExpression.
+     * This pattern is known as "rebind", "policy clone", "meta-function wrapper
+     * idiom". Needed for UnaryExpression.
      */
     template <typename NewRhs>
     using rebind = Tmpl<NewRhs>;
@@ -136,8 +170,8 @@ struct unary_traits_base<Tmpl<RhsDerived_>> {
     // Type of this expression template rebound to the prepared rhs
     using AdaptedType = rebind<RhsPrepared>;
 
-    // We want our Prepare step to apply one conversion to the Rhs, if needed. Find the
-    // conversion
+    // We want our Prepare step to apply one conversion to the Rhs, if needed. Find
+    // the conversion
     using ConvertedType = typename first_directly_evaluable_conversion_unary<
       AdaptedType,
       Tag,
@@ -165,6 +199,7 @@ template <template <typename, typename> class Tmpl,
           typename Tag_>
 struct unary_traits_base_tag<Tmpl<Aux, RhsDerived_>, Tag_> {
     using RhsDerived = tmp::remove_cr_t<RhsDerived_>;
+    using RhsDerivedRef = RhsDerived_;
     using Tag = Tag_;
 
     template <typename NewRhs>
@@ -180,8 +215,8 @@ struct unary_traits_base_tag<Tmpl<Aux, RhsDerived_>, Tag_> {
     // Type of this expression template rebound to the prepared rhs
     using AdaptedType = rebind<RhsPrepared>;
 
-    // We want our Prepare step to apply one conversion to the Rhs, if needed. Find the
-    // conversion
+    // We want our Prepare step to apply one conversion to the Rhs, if needed. Find
+    // the conversion
     using ConvertedType = typename first_directly_evaluable_conversion_unary<
       AdaptedType,
       Tag,
@@ -229,6 +264,18 @@ template <typename T>
 auto jacobianImpl(leaf, const T &, const T &) -> identity_t<T> {
     return identity_t<T>{};
 }
+
+/** Get index_sequence of tangent sizes from a type list of expression types */
+template <typename List>
+struct tangent_sizes_impl;
+
+template <typename List>
+using tangent_sizes = typename tangent_sizes_impl<List>::type;
+
+template <template <typename...> class List, typename... Ts>
+struct tangent_sizes_impl<List<Ts...>> {
+    using type = std::integer_sequence<int, traits<Ts>::TangentSize...>;
+};
 
 }  // namespace internal
 }  // namespace wave

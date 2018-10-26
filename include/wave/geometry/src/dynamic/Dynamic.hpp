@@ -37,7 +37,7 @@ struct Dynamic final : internal::base_tmpl_t<RhsDerived, Dynamic<RhsDerived>>,
 
  private:
     decltype(auto) constructEvaluator() const {
-        auto &&evaluable_expr = internal::PrepareExpr<CleanType>::run(this->rhs());
+        auto &&evaluable_expr = internal::prepareExpr(internal::adl{}, this->rhs());
         using ExprType = tmp::remove_cr_t<decltype(evaluable_expr)>;
         static_assert(std::is_same<ExprType, PreparedType>{}, "Internal sanity check");
         this->lazy_evaluator.emplace(std::move(evaluable_expr));
@@ -126,7 +126,7 @@ struct Dynamic final : internal::base_tmpl_t<RhsDerived, Dynamic<RhsDerived>>,
  */
 template <typename Derived>
 auto makeDynamic(const ExpressionBase<Derived> &expr) {
-    return Dynamic<internal::arg_t<Derived &>>{expr.derived()};
+    return Dynamic<internal::cr_arg_t<Derived>>{expr.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUE(makeDynamic, Dynamic, ExpressionBase);

@@ -11,7 +11,6 @@ namespace wave {
 template <typename Derived, typename RhsDerived_>
 struct UnaryStorage {
  private:
-    using RhsDerived = tmp::remove_cr_t<RhsDerived_>;
     // Hold a reference to leaf expressions to avoid copies, but a copy of other
     // expressions to avoid references to temporaries.
     using RhsStore = internal::storage_t<RhsDerived_>;
@@ -21,14 +20,14 @@ struct UnaryStorage {
     // Disable if copy ctor would apply - https://stackoverflow.com/a/39646176
     template <class Arg,
               std::enable_if_t<!std::is_same<std::decay_t<Arg>, Derived>{} &&
-                                 std::is_constructible<RhsDerived, Arg &&>{},
+                                 std::is_constructible<RhsStore, Arg &&>{},
                                int> = 0>
     explicit UnaryStorage(Arg &&arg) : rhs_{std::forward<Arg>(arg)} {}
 
     // Forward args to rhs (version for 0 or more than 1 argument)
     template <class... Args,
               std::enable_if_t<(sizeof...(Args) != 1) &&
-                                 std::is_constructible<RhsStore, Args...>::value,
+                                 std::is_constructible<RhsStore, Args &&...>::value,
                                int> = 0>
     explicit UnaryStorage(Args &&... args) : rhs_{std::forward<Args>(args)...} {}
 
@@ -47,12 +46,12 @@ struct UnaryStorage {
         return rhs_;
     }
 
-    const RhsStore &rhs() & {
+    RhsStore &rhs() & {
         return rhs_;
     }
 
-    RhsStore &&rhs() && {
-        return std::move(rhs_);
+    RhsStore rhs() && {
+        return rhs_;
     }
 
  protected:

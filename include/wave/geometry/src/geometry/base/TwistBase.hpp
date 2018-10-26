@@ -24,7 +24,7 @@ struct TwistBase : public VectorBase<Derived> {
 /** Takes exponential map of an se(3) element */
 template <typename R>
 auto exp(const TwistBase<R> &rhs) {
-    return ExpMap<internal::arg_t<R &>>{rhs.derived()};
+    return ExpMap<internal::cr_arg_t<R>>{rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUE(exp, ExpMap, TwistBase)

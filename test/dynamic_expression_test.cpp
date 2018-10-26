@@ -49,7 +49,7 @@ TYPED_TEST_CASE(RefProxyTest, test_types_list<wave::RotationQd>);
 
 TYPED_TEST(ProxyTest, constructDynamic) {
     const auto r = TestFixture::LeafAB::Random();
-    const auto d = wave::Dynamic<typename TestFixture::LeafAB &>{r};
+    const auto d = wave::Dynamic<const typename TestFixture::LeafAB &>{r};
 
     // Here we evaluate the Dynamic object directly
     // Note: it's generally pointless to use Dynamic except through a DynamicBase pointer

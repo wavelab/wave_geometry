@@ -119,13 +119,6 @@ class Identity;
 template <typename ScalarType>
 class Scalar;
 
-namespace internal {
-template <typename Derived, typename Enable = void>
-struct FramedLeafAccess;
-
-template <typename Derived>
-struct FramedLeafAccessBase;
-}  // namespace internal
 }  // namespace wave
 
 #endif  // WAVE_GEOMETRY_GEOMETRY_FORWARD_DECLARATIONS_HPP

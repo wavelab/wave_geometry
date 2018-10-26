@@ -43,12 +43,12 @@ struct BinaryStorage {
         return rhs_;
     }
 
-    LhsStore &&lhs() && {
-        return std::move(lhs_);
+    LhsStore lhs() && {
+        return lhs_;
     }
 
-    RhsStore &&rhs() && {
-        return std::move(rhs_);
+    RhsStore rhs() && {
+        return rhs_;
     }
 
  private:

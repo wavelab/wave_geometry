@@ -45,21 +45,6 @@ using is_derived_transform = std::is_base_of<TransformBase<T>, T>;
 template <class T>
 using is_derived_twist = std::is_base_of<TwistBase<T>, T>;
 
-TICK_TRAIT(is_rt_leaf, is_leaf_expression<_>) {
-    template <class T>
-    auto require(T && x)
-      ->valid<is_true<is_derived_rt<T>>,
-              decltype(x.rotation()),
-              decltype(x.translation())>;
-};
-
-TICK_TRAIT(is_transform_leaf, is_leaf_expression<_>) {
-    template <class T>
-    auto require(T && x)
-      ->valid<is_true<is_derived_transform<T>>,
-              decltype(x.rotation()),
-              decltype(x.translation())>;
-};
 
 // Traits for checking for Eigen expressions
 

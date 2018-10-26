@@ -49,8 +49,8 @@ class RotationBase : public TransformBase<Derived> {
  */
 template <typename L, typename R>
 auto operator*(const RotationBase<L> &lhs, const TranslationBase<R> &rhs) {
-    return Rotate<internal::arg_t<L &>, internal::arg_t<R &>>{lhs.derived(),
-                                                              rhs.derived()};
+    return Rotate<internal::cr_arg_t<L>, internal::cr_arg_t<R>>{lhs.derived(),
+                                                                rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*, Rotate, RotationBase, TranslationBase)
@@ -75,6 +75,8 @@ struct rotation_leaf_traits_base<Tmpl<ImplType_>> : leaf_traits_base<Tmpl<ImplTy
     // Each leaf must define its own PlainType. There is no consistent place to get it
     // because Eigen matrices have PlainObject in the class, Quaternion in traits, and
     // AngleAxis nowhere
+
+    using TangentBlocks = tmp::type_list<TangentType>;
 };
 
 /** Implementation of Random for a rotation leaf

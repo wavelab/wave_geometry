@@ -17,8 +17,7 @@ template <typename WrappedLeaf, typename... Frames>
 class Framed;
 
 template <typename WrappedLeaf, typename... Frames>
-class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Frames...>>,
-               public internal::FramedLeafAccess<Framed<WrappedLeaf, Frames...>> {
+class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Frames...>> {
     TICK_TRAIT_CHECK(internal::is_leaf_expression<WrappedLeaf>);
     TICK_TRAIT_CHECK(internal::is_unframed<WrappedLeaf>);
 
@@ -67,6 +66,14 @@ class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Fra
         // Evaluate to Framed and delegate to our copy or move constructor
         : Framed{wave::internal::evaluateTo<Framed>(other.derived())} {}
 
+    template <typename OtherDerived,
+              TICK_REQUIRES(WeArePlain and WeHaveFrames
+                              and internal::same_frames<Framed, OtherDerived>{})>
+    Framed(ExpressionBase<OtherDerived> &&other)
+        // Evaluate to Framed and delegate to our copy or move constructor
+        : Framed{wave::internal::evaluateTo<Framed>(std::move(other).derived())} {}
+
+
     /** Construct from an expression in the special case we have all NoFrame*/
     // The above constructor won't work in this case since evaluateTo will return an
     // unframed expression.
@@ -100,6 +107,13 @@ class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Fra
     template <TICK_REQUIRES(internal::is_vector_leaf<WrappedLeaf>{})>
     explicit Framed(Scalar x, Scalar y, Scalar z) : wrapped_leaf{x, y, z} {}
 
+    /** Assign from a matching expression */
+    template <typename Other, TICK_REQUIRES(internal::same_frames<Framed, Other>{})>
+    Framed &operator=(const typename Framed::template BaseTmpl<Other> &other) {
+        this->wrapped_leaf = other.derived().eval().wrapped_leaf;
+        return *this;
+    }
+
     // Leave default constructors and assignment operators
     Framed() = default;
     Framed(const Framed &) = default;
@@ -121,11 +135,12 @@ class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Fra
     }
 
  private:
+    // Friends with all other Framed<...>
+    template <typename, typename...>
+    friend class Framed;
+
     // Allow the WrapWithFrames functor to contruct Framed from an unframed leaf
     friend struct internal::WrapWithFrames<Frames...>;
-
-    // Allow our own FriendLeafAccess class to get the unframed leaf
-    friend struct internal::FramedLeafAccessBase<Framed>;
 
     // Strip frames at the start of evaluation
     // Note these friend functions are free functions which will be found by ADL.
@@ -160,45 +175,6 @@ class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Fra
 };
 
 namespace internal {
-
-/** Meant to be inherited by FriendLeafAccess - provides unframed leaf access to children
- */
-template <typename WrappedLeaf, typename... Frames>
-struct FramedLeafAccessBase<Framed<WrappedLeaf, Frames...>> {
-    using Derived = Framed<WrappedLeaf, Frames...>;
-
- protected:
-    /** Return reference to this as derived object */
-    inline WrappedLeaf &leaf() & noexcept {
-        return static_cast<Derived *>(this)->wrapped_leaf;
-    }
-    /** Return reference to this as derived object */
-    inline const WrappedLeaf &leaf() const &noexcept {
-        return static_cast<Derived const *>(this)->wrapped_leaf;
-    }
-    /** Return reference to this as derived object, when this is rvalue */
-    inline WrappedLeaf &&leaf() && noexcept {
-        return std::move(*static_cast<Derived *>(this)).wrapped_leaf;
-    }
-};
-
-/** Policy-like class template which can be specialized for Framed<Leaf, ...>
- * to give extra access methods like rotation() and translation().
- *
- * Framed<Leaf, ...> is intended to behave like Leaf, but it does not inherit Leaf
- * (otherwise, .derived() would not properly refer to Framed). Usually leaves have no
- * non-static, non-special methods other than value(), but sometimes it is desired: e.g.
- * for rotation() and translation() of a transform. Note these methods should have
- * different return types in a Framed<Transform> than in a Transform.
- *
- * In this case FramedLeafAccess allows us to to inject methods into Framed<Leaf, ...>
- * without specializing it entirely.
- *
- * This primary template does nothing.
- */
-template <typename Derived, typename Enable>
-struct FramedLeafAccess : FramedLeafAccessBase<Derived> {};
-
 
 // Traits for Framed with two frames
 template <typename WrappedLeaf, typename LeftFrame_, typename RightFrame_>

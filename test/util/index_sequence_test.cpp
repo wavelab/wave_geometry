@@ -32,5 +32,11 @@ void test_concat_index_sequence() {
       std::is_same<index_sequence<-1>, typename concat_index_sequence<C>::type>{}, "");
 };
 
+void test_sum_sequence() {
+    static_assert(0 == sum_sequence<std::index_sequence<>>::value, "");
+    static_assert(42 == sum_sequence<std::index_sequence<42>>::value, "");
+    static_assert(8 == sum_sequence<std::index_sequence<3, 0, 1, 1, 2, 1>>::value, "");
+};
+
 }  // namespace tmp
 }  // namespace wave

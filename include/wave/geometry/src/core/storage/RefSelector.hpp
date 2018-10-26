@@ -17,16 +17,10 @@ namespace internal {
  * template. It should be a wave_geometry expression or scalar type D with some
  * ref-qualifier. It is usually chosen by arg_selector, below.
  *
- * For most expressions, storage_selector uses the straightforward mapping below.
- * An argument of the form D& is stored by lvalue reference, and of form D by value.
- * Arguments of the form D&& are also stored by value; this form is used only to draw
- * attention to leaves being stored by value.
- *
- * | input T | output type  |
- * |---------|--------------|
- * | Expr    | Expr         |
- * | Expr&   | const Expr&  |
- * | Expr&&  | Expr         |
+ * For most expressions, storage_selector uses the incoming type. An argument of the form
+ * D& is stored by lvalue reference, and of form D by value. Arguments of the form D&& are
+ * also stored by value; this form is used only to draw attention to leaves being stored
+ * by value.
  *
  * This selector may be specialized for types with unusual storage requirements (though no
  * such type currently exists).
@@ -38,7 +32,7 @@ struct storage_selector {
 
 template <typename T>
 struct storage_selector<T &> {
-    using type = const T &;
+    using type = T &;
 };
 
 template <typename T>
@@ -49,6 +43,22 @@ struct storage_selector<T &&> {
 template <typename T>
 using storage_t = typename storage_selector<T>::type;
 
+
+/** Marks that storage should be a non-const reference */
+template <typename T>
+struct non_const {};
+
+template <typename T>
+struct traits<non_const<T>> : traits<T> {};
+
+
+template <typename T>
+struct storage_selector<non_const<T>> : storage_selector<T> {};
+
+template <typename T>
+struct storage_selector<non_const<T &>> {
+    using type = T &;
+};
 
 /** Chooses storage type (reference or value) for expressions in evaluators.
  *
@@ -83,12 +93,12 @@ using eval_storage_t =
 
  * The default behaviour is:
  *
- * |    input T     | output type |
- * |----------------|-------------|
- * | (const) Expr&  | Expr&       |
- * |         Expr   | Expr        |
- * | (const) Leaf&  | Leaf&       |
- * |         Leaf   | Leaf&&      |
+ * |    input T     |  output type  |
+ * |----------------|---------------|
+ * | (const) Expr&  | (const) Expr& |
+ * |         Expr   | Expr          |
+ * | (const) Leaf&  | (const) Leaf& |
+ * |         Leaf   | Leaf&&        |
  *
  * There is currently no difference in how storage_selector treats T and T&&. We use
  * T&& here for leaves to be more obvious that things are not like Eigen.
@@ -103,7 +113,7 @@ struct arg_selector;
 
 template <typename T>
 struct arg_selector<T &> {
-    using type = std::remove_const_t<T> &;
+    using type = T &;
 };
 
 template <typename T>
@@ -114,6 +124,9 @@ struct arg_selector<T> {
 template <typename T>
 using arg_t = typename arg_selector<T>::type;
 
+/** Convenience alias for non-forwarding const& arguments */
+template <typename T>
+using cr_arg_t = typename arg_selector<const T &>::type;
 
 /** Chooses cache storage type (reference or value) for Eigen matrix expressions in
  * Jacobian evaluators.

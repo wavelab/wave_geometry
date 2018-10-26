@@ -19,7 +19,7 @@
 #include "src/geometry/frames/frame_cast.hpp"
 #include "src/geometry/frames/Framed.hpp"
 
-// Geometric expressions
+// Geometric leaves and bases
 #include "src/geometry/base/ScalarBase.hpp"
 #include "src/geometry/op/CommonExpressions.hpp"
 #include "src/geometry/base/VectorBase.hpp"
@@ -40,6 +40,8 @@
 #include "src/geometry/base/RigidTransformBase.hpp"
 #include "src/geometry/base/TwistBase.hpp"
 #include "src/geometry/leaf/Twist.hpp"
+
+// Expressions
 #include "src/geometry/op/Sum.hpp"
 #include "src/geometry/op/Rotate.hpp"
 #include "src/geometry/op/Transform.hpp"

@@ -80,6 +80,21 @@ struct concat_index_sequence<index_sequence<I1...>> {
     using type = index_sequence<I1...>;
 };
 
+
+/** Get sum of integer sequence as `value`*/
+template <typename Seq>
+struct sum_sequence;
+
+template <typename T>
+struct sum_sequence<std::integer_sequence<T>> : std::integral_constant<T, 0> {};
+
+template <typename T, T Sum>
+struct sum_sequence<std::integer_sequence<T, Sum>> : std::integral_constant<T, Sum> {};
+
+template <typename T, T I1, T I2, T... Tail>
+struct sum_sequence<std::integer_sequence<T, I1, I2, Tail...>>
+    : sum_sequence<std::integer_sequence<T, I1 + I2, Tail...>> {};
+
 }  // namespace tmp
 }  // namespace wave
 

@@ -142,7 +142,7 @@ struct frames_traits_base : traits<WrappedLeaf> {
 
  public:
     // Copy most traits from the wrapped Leaf, but override some
-    using PreparedType = Derived &;
+    using PreparedType = const Derived &;
     using UniqueLeaves = has_unique_leaves_leaf<Derived>;
 
     // In evaluation we strip the frames

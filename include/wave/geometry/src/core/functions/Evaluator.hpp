@@ -104,6 +104,44 @@ struct Evaluator<Derived, enable_if_binary_t<Derived>> {
     const EvalType result;
 };
 
+/** Specialization for n-ary expression */
+template <typename Derived>
+struct Evaluator<Derived, enable_if_nary_t<Derived>> {
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    using EvalType = eval_t<Derived>;
+    using ChildEvalTuple =
+      tmp::apply_each_t<Evaluator, typename traits<Derived>::ElementTuple>;
+    using IndexSeq = std::make_index_sequence<traits<Derived>::CompoundSize>;
+    template <size_t... Is>
+
+    inline static ChildEvalTuple expandToChildEvalTuple(const Derived &nary,
+                                                        std::index_sequence<Is...>) {
+        // Evaluator<...> is needed here to make gcc 5 happy
+        return ChildEvalTuple{
+          Evaluator<typename traits<Derived>::template ElementType<Is>>{
+            nary.template get<Is>()}...};
+    }
+
+    template <size_t... Is>
+    inline EvalType expandToEvalImpl(std::index_sequence<Is...>) {
+        return evalImpl(get_expr_tag_t<Derived>(), std::get<Is>(this->children)()...);
+    }
+
+    WAVE_STRONG_INLINE explicit Evaluator(const Derived &expr)
+        : expr{expr},
+          children{expandToChildEvalTuple(expr, IndexSeq{})},
+          result{this->expandToEvalImpl(IndexSeq{})} {}
+
+    const EvalType &operator()() const {
+        return this->result;
+    }
+
+ public:
+    const eval_storage_t<Derived> expr;
+    const ChildEvalTuple children;
+    const EvalType result;
+};
+
 }  // namespace internal
 }  // namespace wave
 

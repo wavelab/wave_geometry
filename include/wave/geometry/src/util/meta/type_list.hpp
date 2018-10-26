@@ -211,6 +211,136 @@ struct concat_if_unique<List<As...>, List<>> : std::true_type {
 };
 
 
+/** Concatenate all "unique leaves" lists if no items are common between them.
+ *
+ * If no items are common in any two lists, `type` is the concatenated list and `value` is
+ * true. Otherwise, `type` is `false_type` and `value` is false.
+ *
+ * Lists are not checked for duplicates within themselves.
+ *
+ * @todo use better 3rd party metaprogramming library
+ *
+ * @tparam Us types containing a type list `type` and a boolean `value`
+ */
+template <typename... Us>
+struct concat_if_unique_many : std::true_type {};
+
+// Base case 1: only one list is given
+template <typename U1>
+struct concat_if_unique_many<U1> : U1 {};
+
+// Base case 2: last two lists
+template <typename U1, typename U2>
+struct concat_if_unique_many<U1, U2>
+    : concat_if_unique<typename U1::type, typename U2::type> {};
+
+// More than two lists: fold over concat_if_unique or short-circuit if false
+// (like std::conjunction)
+template <typename U1, typename U2, class... Tail>
+struct concat_if_unique_many<U1, U2, Tail...>
+    : std::conditional_t<
+        bool(concat_if_unique<typename U1::type, typename U2::type>::value),
+        concat_if_unique_many<concat_if_unique<typename U1::type, typename U2::type>,
+                              Tail...>,
+        concat_if_unique<typename U1::type, typename U2::type>> {};
+
+
+/** Zip two parameter packs of equal length
+ *
+ * zip<A, B, C>::with<Q, R, S>
+ *    -> type_list<type_list<A, Q>, type_list<B, R>, type_list<C, S>>
+ *
+ * @tparam Args1
+ */
+template <class... Ts>
+struct zip {
+    template <class... Us>
+    struct with {
+        using type = type_list<type_list<Ts, Us>...>;
+    };
+};
+
+/** Apply operator+ to tuple (or other get()-able container) elements
+ */
+template <typename Res, typename L, typename R, size_t... Is>
+auto elementwisePlusTo(L &&lhs, const R &&rhs, std::index_sequence<Is...>) -> Res {
+    using std::get;
+    return Res{(get<Is>(std::forward<L>(lhs)) + get<Is>(std::forward<R>(rhs)))...};
+}
+
+/** Apply operator- to tuple (or other get()-able container) elements
+ */
+template <typename Res, typename L, typename R, size_t... Is>
+auto elementwiseMinusTo(L &&lhs, const R &&rhs, std::index_sequence<Is...>) -> Res {
+    using std::get;
+    return Res{(get<Is>(std::forward<L>(lhs)) - get<Is>(std::forward<R>(rhs)))...};
+}
+
+
+template <typename T, typename SeqOut, typename SeqIn, T PrevI>
+struct cumulative_index_sequence_impl;
+
+template <typename T, T... Is, T Last, T PrevI>
+struct cumulative_index_sequence_impl<T,
+                                      std::integer_sequence<T, Is...>,
+                                      std::integer_sequence<T, Last>,
+                                      PrevI> {
+    using type = std::integer_sequence<T, Is...>;
+};
+
+template <typename T, T... Is, T NextSize, T... Sizes, T PrevI>
+struct cumulative_index_sequence_impl<T,
+                                      std::integer_sequence<T, Is...>,
+                                      std::integer_sequence<T, NextSize, Sizes...>,
+                                      PrevI>
+    : cumulative_index_sequence_impl<T,
+                                     std::integer_sequence<T, Is..., PrevI + NextSize>,
+                                     std::integer_sequence<T, Sizes...>,
+                                     PrevI + NextSize> {};
+
+
+/** Given input object lengths, get a sequence of indices to the objects.
+ * For example, for an input {2, 3, 4}, the output would be {0, 2, 5}.
+ * Note the last input is ignored, because indexing starts at zero.
+ */
+template <std::size_t... Is>
+using cumulative_index_sequence =
+  typename cumulative_index_sequence_impl<std::size_t,
+                                          std::index_sequence<>,
+                                          std::index_sequence<0, Is...>,
+                                          0>::type;
+
+
+template <typename Seq>
+struct accumulate_index_sequence_impl;
+
+template <typename T, T... Is>
+struct accumulate_index_sequence_impl<std::integer_sequence<T, Is...>>
+    : cumulative_index_sequence_impl<T,
+                                     std::integer_sequence<T>,
+                                     std::integer_sequence<T, 0, Is...>,
+                                     0> {};
+/** Given input sequence object lengths, get a sequence of indices to the objects.
+ * For example, for an input {2, 3, 4}, the output would be {0, 2, 5}.
+ * Note the last input is ignored, because indexing starts at zero.
+ */
+template <typename Seq>
+using accumulate_index_sequence = typename accumulate_index_sequence_impl<Seq>::type;
+
+
+/** Get I-th integer from an integer sequence as `value` */
+template <size_t I, typename Seq>
+struct integer_sequence_element;
+
+template <typename T, T Head, T... Tail>
+struct integer_sequence_element<0, std::integer_sequence<T, Head, Tail...>>
+    : std::integral_constant<T, Head> {};
+
+template <size_t I, typename T, T Head, T... Tail>
+struct integer_sequence_element<I, std::integer_sequence<T, Head, Tail...>>
+    : integer_sequence_element<I - 1, std::integer_sequence<T, Tail...>> {};
+
+
 }  // namespace tmp
 }  // namespace wave
 

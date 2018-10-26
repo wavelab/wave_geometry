@@ -15,8 +15,7 @@ namespace internal {
 template <typename Derived>
 WAVE_STRONG_INLINE auto prepareEvaluator(Derived &&expr) {
     // First, transform the expression
-    const auto &evaluable_expr =
-      PrepareExpr<tmp::remove_cr_t<Derived>>::run(std::forward<Derived>(expr));
+    const auto &evaluable_expr = prepareExpr(adl{}, std::forward<Derived>(expr));
     using ExprType = tmp::remove_cr_t<decltype(evaluable_expr)>;
 
     // Construct Evaluator tree
@@ -109,6 +108,16 @@ auto evaluateTo(Derived &&expr) -> Destination {
 template <typename Derived>
 auto eval(const ExpressionBase<Derived> &expr) -> internal::plain_output_t<Derived> {
     return expr.derived().eval();
+}
+
+template <typename Derived>
+auto eval(ExpressionBase<Derived> &expr) -> internal::plain_output_t<Derived> {
+    return expr.derived().eval();
+}
+
+template <typename Derived>
+auto eval(ExpressionBase<Derived> &&expr) -> internal::plain_output_t<Derived> {
+    return std::move(expr).derived().eval();
 }
 
 }  // namespace wave

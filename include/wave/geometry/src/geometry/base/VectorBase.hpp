@@ -28,14 +28,14 @@ struct VectorBase : ExpressionBase<Derived> {
 
     /** Returns a differentiable expression for the vector's L2 norm */
     auto norm() const & {
-        return Norm<internal::arg_t<Derived &>>{this->derived()};
+        return Norm<internal::cr_arg_t<Derived>>{this->derived()};
     }
 
     WAVE_OVERLOAD_SELF_METHOD_FOR_RVALUE(norm, Norm, Derived)
 
     /** Returns a differentiable expression for the vector's squared L2 norm */
     auto squaredNorm() const & {
-        return SquaredNorm<internal::arg_t<Derived &>>{this->derived()};
+        return SquaredNorm<internal::cr_arg_t<Derived>>{this->derived()};
     }
 
     WAVE_OVERLOAD_SELF_METHOD_FOR_RVALUE(squaredNorm, SquaredNorm, Derived)
@@ -63,7 +63,13 @@ struct vector_leaf_traits_base;
 template <template <typename...> class Tmpl, typename ImplType_>
 struct vector_leaf_traits_base<Tmpl<ImplType_>> : leaf_traits_base<Tmpl<ImplType_>>,
                                                   frameable_vector_traits {
+ private:
+    using Derived = Tmpl<ImplType_>;
+
+ public:
     // Vector-specific traits
+    using TangentType = Derived;
+    using TangentBlocks = std::tuple<Derived>;
     using ImplType = ImplType_;
 
     template <typename NewImplType>
@@ -229,7 +235,8 @@ auto rightJacobianImpl(expr<ScaleDiv>,
  */
 template <typename L, typename R>
 auto operator+(const VectorBase<L> &lhs, const VectorBase<R> &rhs) {
-    return Sum<internal::arg_t<L &>, internal::arg_t<R &>>{lhs.derived(), rhs.derived()};
+    return Sum<internal::cr_arg_t<L>, internal::cr_arg_t<R>>{lhs.derived(),
+                                                             rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator+, Sum, VectorBase, VectorBase)
@@ -263,7 +270,7 @@ auto operator-(VectorBase<L> &&lhs, VectorBase<R> &&rhs) {
  */
 template <typename R>
 auto operator-(const VectorBase<R> &rhs) {
-    return Minus<internal::arg_t<R &>>{rhs.derived()};
+    return Minus<internal::cr_arg_t<R>>{rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUE(operator-, Minus, VectorBase)
@@ -274,8 +281,8 @@ WAVE_OVERLOAD_FUNCTION_FOR_RVALUE(operator-, Minus, VectorBase)
  */
 template <typename L, typename R>
 auto operator*(const ScalarBase<L> &lhs, const VectorBase<R> &rhs) {
-    return Scale<internal::arg_t<L &>, internal::arg_t<R &>>{lhs.derived(),
-                                                             rhs.derived()};
+    return Scale<internal::cr_arg_t<L>, internal::cr_arg_t<R>>{lhs.derived(),
+                                                               rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*, Scale, ScalarBase, VectorBase)
@@ -287,8 +294,8 @@ WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_LEFT(*, VectorBase)
  */
 template <typename L, typename R>
 auto operator*(const VectorBase<L> &lhs, const ScalarBase<R> &rhs) {
-    return ScaleR<internal::arg_t<L &>, internal::arg_t<R &>>{lhs.derived(),
-                                                              rhs.derived()};
+    return ScaleR<internal::cr_arg_t<L>, internal::cr_arg_t<R>>{lhs.derived(),
+                                                                rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*, ScaleR, VectorBase, ScalarBase)
@@ -300,8 +307,8 @@ WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_RIGHT(*, VectorBase)
  */
 template <typename L, typename R>
 auto operator/(const VectorBase<L> &lhs, const ScalarBase<R> &rhs) {
-    return ScaleDiv<internal::arg_t<L &>, internal::arg_t<R &>>{lhs.derived(),
-                                                                rhs.derived()};
+    return ScaleDiv<internal::cr_arg_t<L>, internal::cr_arg_t<R>>{lhs.derived(),
+                                                                  rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator/, ScaleDiv, VectorBase, ScalarBase)

@@ -39,7 +39,7 @@ namespace internal {
 template <typename Leaf>
 struct traits<Zero<Leaf>> : traits<Leaf> {
     // Copy most traits from the wrapped Leaf, but override some
-    using PreparedType = Zero<Leaf> &;
+    using PreparedType = const Zero<Leaf> &;
     using UniqueLeaves = has_unique_leaves_leaf<Zero<Leaf>>;
 
     // In evaluation, we change the type

@@ -22,8 +22,8 @@ class RigidTransformBase : public TransformBase<Derived> {
  */
 template <typename L, typename R>
 auto operator*(const RigidTransformBase<L> &lhs, const TranslationBase<R> &rhs) {
-    return Transform<internal::arg_t<L &>, internal::arg_t<R &>>{lhs.derived(),
-                                                                 rhs.derived()};
+    return Transform<internal::cr_arg_t<L>, internal::cr_arg_t<R>>{lhs.derived(),
+                                                                   rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator*,
@@ -40,17 +40,26 @@ struct rt_leaf_traits_base;
 template <template <typename...> class Tmpl, typename ImplType_>
 struct rt_leaf_traits_base<Tmpl<ImplType_>> : leaf_traits_base<Tmpl<ImplType_>>,
                                               frameable_transform_traits {
+ private:
+    using Derived = Tmpl<ImplType_>;
+
+ public:
     template <typename NewImplType>
     using rebind = Tmpl<NewImplType>;
 
     using ImplType = ImplType_;
     using Scalar = typename ImplType::Scalar;
     using TangentType = Twist<Eigen::Matrix<Scalar, 6, 1>>;
-    enum : int { TangentSize = 6 };
 
     // Each leaf must define its own PlainType. There is no consistent place to get it
     // because Eigen matrices have PlainObject in the class, Quaternion in traits, and
     // AngleAxis nowhere
+
+    // Tangent sizes and block types
+    enum : int { TangentSize = 6 };  // @todo redundant? - must match total of blocks
+    // Must match the user-facing {Rotation, Translation} enum and aux. functors
+    using TangentBlocks = std::tuple<RelativeRotation<Eigen::Matrix<Scalar, 3, 1>>,
+                                     Translation<Eigen::Matrix<Scalar, 3, 1>>>;
 };
 
 /** Implementation of Random for a rigid transform
@@ -77,7 +86,7 @@ auto evalImpl(expr<Inverse>, const RigidTransformBase<Rhs> &rhs) {
 template <typename Val, typename Rhs>
 auto jacobianImpl(expr<Inverse>,
                   const RigidTransformBase<Val> &val,
-                  const RigidTransformBase<Rhs> &) -> jacobian_t<Val, Rhs> {
+                  const RigidTransformBase<Rhs> &) -> BlockMatrix<Val, Rhs> {
     using Scalar = scalar_t<Val>;
     using Mat3 = Eigen::Matrix<Scalar, 3, 3>;
 
@@ -86,13 +95,12 @@ auto jacobianImpl(expr<Inverse>,
     // @todo factor out adjoint
     const auto &R = Mat3{val.derived().rotation().value()};
     const auto &t = val.derived().translation().value();
-    jacobian_t<Val, Rhs> adj{};
+    BlockMatrix<Val, Rhs> adj{};
 
-    adj.template topLeftCorner<3, 3>() = R;
-    adj.template bottomLeftCorner<3, 3>() = crossMatrix(t) * R;
-    adj.template topRightCorner<3, 3>().setZero();
-    adj.template bottomRightCorner<3, 3>() = R;
-
+    adj.template blockWrt<Val::Rotation, Rhs::Rotation>() = R;
+    adj.template blockWrt<Val::Translation, Rhs::Rotation>() = crossMatrix(t) * R;
+    adj.template blockWrt<Val::Rotation, Rhs::Translation>().setZero();
+    adj.template blockWrt<Val::Translation, Rhs::Translation>() = R;
     return -adj;
 }
 
@@ -153,7 +161,7 @@ auto evalImpl(expr<LogMap>, const RigidTransformBase<Rhs> &rhs) ->
 template <typename Val, typename Rhs>
 auto jacobianImpl(expr<LogMap>,
                   const TwistBase<Val> &val,
-                  const RigidTransformBase<Rhs> &rhs) -> jacobian_t<Val, Rhs> {
+                  const RigidTransformBase<Rhs> &rhs) -> BlockMatrix<Val, Rhs> {
     using Scalar = scalar_t<Val>;
     using Mat3 = Eigen::Matrix<Scalar, 3, 3>;
 
@@ -190,50 +198,6 @@ auto jacobianImpl(expr<LogMap>,
     out.template bottomRightCorner<3, 3>() = Drot;             // t wrt t
     return out;
 }
-
-
-/** Gives .rotation() and .translation() methods to Framed<> versions of rigid transforms
- */
-template <typename Leaf, typename LeftFrame, typename RightFrame>
-struct FramedLeafAccess<Framed<Leaf, LeftFrame, RightFrame>,
-                        TICK_CLASS_REQUIRES(internal::is_rt_leaf<Leaf>{})>
-    : FramedLeafAccessBase<Framed<Leaf, LeftFrame, RightFrame>> {
-    using RotationType = decltype(std::declval<Leaf>().rotation());
-    using ConstRotationType = decltype(std::declval<const Leaf>().rotation());
-    using TranslationType = decltype(std::declval<Leaf>().translation());
-    using ConstTranslationType = decltype(std::declval<const Leaf>().translation());
-
- public:
-    /** Returns a mutable expression referring to the translation portion of this
-     * transform */
-    decltype(auto) rotation() & {
-        return internal::WrapWithFrames<LeftFrame, RightFrame>{}(this->leaf().rotation());
-    }
-
-    /** Returns a mutable expression referring to the translation portion of this
-     * transform */
-    decltype(auto) rotation() && noexcept {
-        return internal::WrapWithFrames<LeftFrame, RightFrame>{}(this->leaf().rotation());
-    }
-
-    /** Returns an expression referring to the rotation portion of this transform */
-    decltype(auto) rotation() const &noexcept {
-        return internal::WrapWithFrames<LeftFrame, RightFrame>{}(this->leaf().rotation());
-    }
-
-    /** Returns a mutable expression referring to the translation portion of this
-     * transform */
-    decltype(auto) translation() noexcept {
-        return internal::WrapWithFrames<LeftFrame, LeftFrame, RightFrame>{}(
-          this->leaf().translation());
-    }
-
-    /** Returns an expression referring to the translation portion of this transform */
-    decltype(auto) translation() const noexcept {
-        return internal::WrapWithFrames<LeftFrame, LeftFrame, RightFrame>{}(
-          this->leaf().translation());
-    }
-};
 
 }  // namespace internal
 }  // namespace wave

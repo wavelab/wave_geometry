@@ -82,7 +82,7 @@ struct is_proxy<RefProxy<Leaf>> : std::true_type {};
 template <typename Leaf>
 struct traits<RefProxy<Leaf>> {
     using Tag = expr<RefProxy>;
-    using PreparedType = RefProxy<Leaf> &;
+    using PreparedType = const RefProxy<Leaf> &;
     using EvalType = eval_t<Leaf>;
     using OutputFunctor = typename traits<Leaf>::OutputFunctor;
     using PlainType = Leaf;
@@ -98,6 +98,9 @@ struct traits<RefProxy<Leaf>> {
 // Store by value in expressions using the proxy, because proxies are rebindable
 template <typename Leaf>
 struct arg_selector<RefProxy<Leaf> &> : arg_selector<RefProxy<Leaf>> {};
+
+template <typename Leaf>
+struct arg_selector<const RefProxy<Leaf> &> : arg_selector<RefProxy<Leaf>> {};
 
 template <typename Leaf>
 decltype(auto) getWrtTarget(adl, const ExpressionBase<RefProxy<Leaf>> &proxy) {
