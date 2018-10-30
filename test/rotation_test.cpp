@@ -62,9 +62,7 @@ class RotationTest : public testing::Test {
 };
 
 // The list of implementation types to run each test case on
-// using LeafTypes = test_types_list<wave::RotationMd, wave::RotationQd,
-// wave::RotationAd>;
-using LeafTypes = testing::Types<UnframedParams<wave::RotationMd>>;
+using LeafTypes = test_types_list<wave::RotationMd, wave::RotationQd, wave::RotationAd>;
 // The following tests will be built for each type in LeafTypes
 TYPED_TEST_CASE(RotationTest, LeafTypes);
 
@@ -98,9 +96,18 @@ TYPED_TEST(RotationTest, constructRandom) {
 // Test methods of TransformBase
 TYPED_TEST(RotationTest, getRotation) {
     auto r = TestFixture::LeafAB::Random();
-    static_assert(std::is_same<typename TestFixture::LeafAB &, decltype(r.rotation())>{},
-                  "r.rotation() is not r");
+    static_assert(
+      std::is_same<typename TestFixture::LeafAB, decltype(r.rotation().eval())>{},
+      "r.rotation() is not expected type");
     EXPECT_APPROX(r, r.rotation());
+}
+
+TYPED_TEST(RotationTest, assignViaGetter) {
+    auto r = TestFixture::LeafAB::Random();
+    auto r2 = TestFixture::LeafAB::Random();
+
+    r.rotation() = r2;
+    EXPECT_APPROX(r2, r);
 }
 
 // Test methods of TransformBase
@@ -126,7 +133,7 @@ TYPED_TEST(RotationTest, inverse) {
     const auto r1 = TestFixture::LeafAB::Random();
     const auto r2 = typename TestFixture::LeafBA{inverse(r1)};
 
-    const auto eigen_rotation = r1.rotation().value();
+    const auto eigen_rotation = r1.rotation().eval().value();
     const auto expected = typename TestFixture::LeafBA{eigen_rotation.inverse()};
 
     EXPECT_APPROX(expected, r2);

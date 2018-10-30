@@ -2,9 +2,10 @@
 
 ## [Unreleased](https://github.com/wavelab/wave_geometry/compare/0.3.0..HEAD)
 ### New features
-- New `dynamic` module for heap-allocated, dynamically-composable `Proxy` expressions
-- New documentation built with Sphinx
-- New n-ary expressions
+- `dynamic` module with heap-allocated, dynamically-composable `Proxy` expressions
+- `estimation` module with uncertain objects and noise models
+- N-ary expressions
+- Documentation built with Sphinx
 
 ### Backward-incompatible API changes
 - C++17 is now required

@@ -77,6 +77,8 @@ TYPED_TEST(RigidTransformTest, getters) {
 
     EXPECT_APPROX(this->R1, typename TestFixture::Matrix3{R});
     EXPECT_APPROX(this->t1, t);
+    CHECK_JACOBIANS(true, rt.rotation(), rt);
+    CHECK_JACOBIANS(true, rt.translation(), rt);
 }
 
 TYPED_TEST(RigidTransformTest, assignViaSubobject) {
@@ -85,6 +87,16 @@ TYPED_TEST(RigidTransformTest, assignViaSubobject) {
     rt.translation() = typename TestFixture::PointAAB{1., 2., 3.};
     rt.rotation() = TestFixture::RotMAB::Random();
     EXPECT_APPROX(typename TestFixture::PointAAB(1., 2., 3.), rt.translation());
+}
+
+TYPED_TEST(RigidTransformTest, assignViaSubobjectLValue) {
+    auto rt = typename TestFixture::LeafAB{this->R1, this->t1};
+    const auto t = typename TestFixture::PointAAB{1., 2., 3.};
+    const auto r = TestFixture::RotMAB::Random();
+    rt.translation() = t;
+    rt.rotation() = r;
+    EXPECT_APPROX(t, rt.translation());
+    EXPECT_APPROX(r, rt.rotation());
 }
 
 TYPED_TEST(RigidTransformTest, assignViaSubobjectNoFrame) {

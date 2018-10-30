@@ -18,27 +18,35 @@ class RotationBase : public TransformBase<Derived> {
     template <typename T>
     using BaseTmpl = RotationBase<T>;
 
-    using RotationType = Derived;
-    using TranslationType = typename internal::add_frames<
-      LeftFrameOf<Derived>,
-      LeftFrameOf<Derived>,
-      RightFrameOf<Derived>>::template to<Zero<Translation<Eigen::Matrix<Scalar, 3, 1>>>>;
-
-    // Return self as rotation(), to fit Transform interface
-    auto rotation() const & -> const Derived & {
+    // Return self as rotation(), to fit TransformBase interface
+    const auto &rotation() const & {
         return this->derived();
     }
 
-    auto rotation() & -> Derived & {
+    auto &rotation() & {
         return this->derived();
     }
 
-    auto rotation() && -> Derived && {
+    auto &&rotation() && {
+        return std::move(*this).derived();
+    }
+
+    // Fit TransformBase interface
+    const auto &rotationBlock() const & {
         return this->derived();
     }
 
-    auto translation() const -> TranslationType {
-        return TranslationType{};
+    auto &rotationBlock() & {
+        return this->derived();
+    }
+
+    auto &&rotationBlock() && {
+        return std::move(*this).derived();
+    }
+
+    // Return Zero from translation(), to fit TransformBase interface
+    auto translationBlock() const {
+        return Zero<Translation<Eigen::Matrix<Scalar, 3, 1>>>{};
     }
 };
 

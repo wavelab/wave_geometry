@@ -112,8 +112,8 @@ struct Evaluator<Derived, enable_if_nary_t<Derived>> {
     using ChildEvalTuple = tmp::apply_each_t<::wave::internal::Evaluator,
                                              typename traits<Derived>::ElementTuple>;
     using IndexSeq = std::make_index_sequence<traits<Derived>::CompoundSize>;
-    template <size_t... Is>
 
+    template <size_t... Is>
     inline static ChildEvalTuple expandToChildEvalTuple(const Derived &nary,
                                                         std::index_sequence<Is...>) {
         // Evaluator<...> is needed here to make gcc 5 happy

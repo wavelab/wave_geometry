@@ -93,8 +93,8 @@ auto jacobianImpl(expr<Inverse>,
     // The derivative of the inverse can be found by applying the adjoint identity
     // (see http://ethaneade.com/lie.pdf) to be negative adjoint of the inverted SE(3)
     // @todo factor out adjoint
-    const auto &R = Mat3{val.derived().rotation().value()};
-    const auto &t = val.derived().translation().value();
+    const auto &R = Mat3{val.derived().rotationBlock().value()};
+    const auto &t = val.derived().translationBlock().value();
     BlockMatrix<Val, Rhs> adj{};
 
     adj.template blockWrt<Val::Rotation, Rhs::Rotation>() = R;
@@ -143,7 +143,7 @@ auto evalImpl(expr<LogMap>, const RigidTransformBase<Rhs> &rhs) ->
         const Mat3 Vinv =
           Mat3::Identity() - cross / 2 + (1 - A / 2 / B) / theta2 * cross2;
 
-        ln_t = Vinv * rhs.derived().translation().value();
+        ln_t = Vinv * rhs.derived().translationBlock().value();
 
     } else {
         // small theta2; use limit as theta -> 0
@@ -152,7 +152,7 @@ auto evalImpl(expr<LogMap>, const RigidTransformBase<Rhs> &rhs) ->
 
         const Mat3 Vinv = Mat3::Identity() - cross / 2;
 
-        ln_t = Vinv * rhs.derived().translation().value();
+        ln_t = Vinv * rhs.derived().translationBlock().value();
     }
     return typename traits<Rhs>::TangentType{omega, ln_t};
 }

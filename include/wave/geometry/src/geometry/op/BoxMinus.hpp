@@ -31,6 +31,27 @@ struct BoxMinus : internal::base_tmpl_t<typename internal::eval_traits<Lhs>::Tan
     static_assert(std::is_same<RightFrameOf<Lhs>, RightFrameOf<Rhs>>(), "Frame mismatch");
 };
 
+
+/** An expression representing the manifold subtraction of two compound +-manifold
+ * elements
+ *
+ * @f[ S \times S \to R^n @f]
+ */
+template <typename Lhs, typename Rhs>
+struct CompoundBoxMinus
+    : internal::base_tmpl_t<typename internal::eval_traits<Lhs>::TangentType,
+                            typename internal::eval_traits<Rhs>::TangentType,
+                            CompoundBoxMinus<Lhs, Rhs>>,
+      internal::binary_storage_for<CompoundBoxMinus<Lhs, Rhs>> {
+ private:
+    using Storage = internal::binary_storage_for<CompoundBoxMinus<Lhs, Rhs>>;
+
+ public:
+    // Inherit constructors from BinaryStorage
+    using Storage::Storage;
+};
+
+
 namespace internal {
 
 /** We implement BoxMinus as a "heavy alias": it is meant to act exactly like the LogMap
@@ -39,6 +60,11 @@ namespace internal {
 template <typename Lhs, typename Rhs>
 struct traits<BoxMinus<Lhs, Rhs>>
     : traits<LogMap<RightFrameOf<Rhs>, Compose<Lhs, Inverse<Rhs>>>> {};
+
+
+template <typename Lhs, typename Rhs>
+struct traits<CompoundBoxMinus<Lhs, Rhs>>
+    : binary_traits_base<CompoundBoxMinus<Lhs, Rhs>> {};
 
 }  // namespace internal
 }  // namespace wave

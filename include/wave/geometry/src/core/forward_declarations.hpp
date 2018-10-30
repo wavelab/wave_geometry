@@ -56,6 +56,9 @@ struct Convert;
 template <typename Fn, typename RhsDerived>
 struct MemberAccess;
 
+template <typename L, typename R>
+class BlockMatrix;
+
 }  // namespace wave
 
 #endif  // WAVE_GEOMETRY_FORWARD_DECLARATIONS_HPP

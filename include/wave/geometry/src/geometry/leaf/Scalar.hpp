@@ -87,10 +87,12 @@ struct traits<Scalar<ScalarType>> : leaf_traits_base<Scalar<ScalarType>>,
     template <typename NewScalarType>
     using rebind = ::wave::Scalar<NewScalarType>;
 
+    using TangentType = ::wave::Scalar<ScalarType>;
+    using TangentBlocks = std::tuple<TangentType>;
     using PlainType = ::wave::Scalar<ScalarType>;
     using Scalar = tmp::remove_cr_t<ScalarType>;
-    static constexpr int Size = 1;
-    enum : int { TangentSize = 1 };
+    using ImplType = Eigen::Matrix<Scalar, 1, 1>;
+    enum : int { Size = 1, TangentSize = 1 };
 };
 
 template <typename ScalarType>
@@ -101,8 +103,7 @@ struct traits<Scalar<ScalarType &>> : unary_traits_base<Scalar<ScalarType &>>,
 
     using PlainType = ::wave::Scalar<ScalarType>;
     using Scalar = tmp::remove_cr_t<ScalarType>;
-    static constexpr int Size = 1;
-    enum : int { TangentSize = 1 };
+    enum : int { Size = 1, TangentSize = 1 };
 };
 
 // Convert Scalar<ScalarType&> to a leaf expression during evaluation

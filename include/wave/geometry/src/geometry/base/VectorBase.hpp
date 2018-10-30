@@ -40,6 +40,13 @@ struct VectorBase : ExpressionBase<Derived> {
 
     WAVE_OVERLOAD_SELF_METHOD_FOR_RVALUE(squaredNorm, SquaredNorm, Derived)
 
+    /** Returns a differentiable expression for this vector divided by its L2 norm */
+    auto normalized() const & {
+        return Normalize<internal::cr_arg_t<Derived>>{this->derived()};
+    }
+
+    WAVE_OVERLOAD_SELF_METHOD_FOR_RVALUE(normalized, Normalize, Derived)
+
     /** Fuzzy comparison - see Eigen::DenseBase::isApprox() */
     template <typename R, TICK_REQUIRES(internal::same_base_tmpl_i<Derived, R>{})>
     bool isApprox(
@@ -153,6 +160,36 @@ auto jacobianImpl(expr<Norm>, const ScalarBase<Val> &norm, const VectorBase<Rhs>
     return rhs.derived().value() / norm.derived().value();
 }
 
+
+/** Implementation of division by L2 norm for a vector leaf
+ */
+template <typename Rhs>
+auto evalImpl(expr<Normalize>, const VectorBase<Rhs> &rhs) {
+    return makeVectorLike<Rhs>(rhs.derived().value().normalized());
+}
+
+/** Jacobian of division by L2 norm */
+template <typename Val, typename Rhs>
+auto jacobianImpl(expr<Normalize>, const VectorBase<Val> &val, const VectorBase<Rhs> &rhs)
+  -> jacobian_t<Val, Rhs> {
+    using J = jacobian_t<Val, Rhs>;
+    /*
+     * For a vector v, the derivative of v / ||v|| is, where n = ||v|| and I is identity:
+     *   (I * n^2 - v*v') / n^3
+     * = (I - v*v' / n^2) / n
+     *
+     * For example, for a vector (x, y, z) the derivative is
+     * [y^2 + x^2, -xy, -xz;
+     *  -xy, x^2 + z^2, -yz;
+     *  -xz, -yz, y^2 + z^2] ./ norm^3
+     */
+    const auto &v = rhs.derived().value();
+    const auto &v_over_norm = val.derived().value();
+    // Matrix A = v*v' / n^2
+    const auto A = v_over_norm * v_over_norm.transpose();
+    return J{(J::Identity() - A) / v.norm()};
+}
+
 /** Implementation of left scalar multiplication
  * Defer to the implementation type's arithmetic operators.
  */
@@ -225,6 +262,30 @@ auto rightJacobianImpl(expr<ScaleDiv>,
                        const ScalarBase<Rhs> &rhs) -> jacobian_t<Res, Rhs> {
     const auto rhs_squared = rhs.derived().value() * rhs.derived().value();
     return jacobian_t<Res, Rhs>{-lhs.derived().value() / rhs_squared};
+}
+
+/** Implements dot product
+ */
+template <typename Lhs, typename Rhs>
+auto evalImpl(expr<Dot>, const VectorBase<Lhs> &lhs, const VectorBase<Rhs> &rhs) {
+    return makeScalarResult(lhs.derived().value().dot(rhs.derived().value()));
+}
+
+// Jacobians of dot product
+template <typename Res, typename Lhs, typename Rhs>
+auto leftJacobianImpl(expr<Dot>,
+                      const ScalarBase<Res> &,
+                      const VectorBase<Lhs> &,
+                      const VectorBase<Rhs> &rhs) {
+    return jacobian_t<Res, Lhs>{rhs.derived().value()};
+}
+
+template <typename Res, typename Lhs, typename Rhs>
+auto rightJacobianImpl(expr<Dot>,
+                       const ScalarBase<Res> &,
+                       const VectorBase<Lhs> &lhs,
+                       const VectorBase<Rhs> &) {
+    return jacobian_t<Res, Rhs>{lhs.derived().value()};
 }
 
 }  // namespace internal
@@ -313,6 +374,17 @@ auto operator/(const VectorBase<L> &lhs, const ScalarBase<R> &rhs) {
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator/, ScaleDiv, VectorBase, ScalarBase)
 WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_RIGHT(/, VectorBase)
+
+/** Returns a differentiable expression for dot product of two vectors */
+template <typename L, typename R, TICK_REQUIRES(internal::same_base_tmpl_i<L, R>{})>
+auto dot(const VectorBase<L> &lhs, const VectorBase<R> &rhs) {
+    return Dot<internal::cr_arg_t<L>, internal::cr_arg_t<R>>{lhs.derived(),
+                                                             rhs.derived()};
+}
+
+WAVE_OVERLOAD_FUNCTION_FOR_RVALUES_REQ(
+  dot, Dot, VectorBase, VectorBase, TICK_REQUIRES(internal::same_base_tmpl_i<L, R>{}))
+
 
 }  // namespace wave
 

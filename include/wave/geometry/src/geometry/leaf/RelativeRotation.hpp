@@ -123,7 +123,8 @@ auto jacobianImpl(expr<ExpMap>,
     using Jacobian = jacobian_t<Val, RelativeRotation<ImplType>>;
     using Scalar = typename ImplType::Scalar;
     const auto &phi = rhs.value();
-    const auto &C = val.derived().value();  // Rotation matrix of the SO(3) output
+    const auto &C =
+      val.derived().value().matrix();  // Rotation matrix of the SO(3) output
 
     // Bloesch Equation 80, with adjustment for near-zero case
     const auto pcross = crossMatrix(phi);  // cross-matrix of the so(3) input

@@ -47,8 +47,8 @@ class MatrixRigidTransform
     MatrixRigidTransform(const RotationBase<RDerived> &R,
                          const TranslationBase<TDerived> &t)
         : MatrixRigidTransform{} {
-        this->rotation() = R.derived();
-        this->translation() = t.derived();
+        this->rotationBlock() = R.derived();
+        this->translationBlock() = t.derived();
     };
 
     /** Construct from a rotation and translation, given as Eigen matrices */
@@ -58,8 +58,8 @@ class MatrixRigidTransform
         : MatrixRigidTransform{} {
         EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(RDerived, 3, 3);
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(TDerived, 3);
-        this->rotation().value() << R;
-        this->translation().value() << t;
+        this->rotationBlock().value() << R;
+        this->translationBlock().value() << t;
     };
 
     /** Construct from an Eigen rotation and translation vector */
@@ -75,28 +75,32 @@ class MatrixRigidTransform
         EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(MDerived, 4, 4);
     }
 
+    // block getters - for differentiable expressions and consistent interface, use
+    // .rotation() and .translation()
+    // @todo make private?
+
     /** Returns a mutable expression referring to the translation portion of this
      * transform */
-    auto rotation() noexcept -> MatrixRotation<RotationBlock> {
+    auto rotationBlock() noexcept -> MatrixRotation<RotationBlock> {
         return MatrixRotation<RotationBlock>{
           this->value().template topLeftCorner<3, 3>()};
     }
 
     /** Returns an expression referring to the rotation portion of this transform */
-    auto rotation() const noexcept -> MatrixRotation<RotationConstBlock> {
+    auto rotationBlock() const noexcept -> MatrixRotation<RotationConstBlock> {
         return MatrixRotation<RotationConstBlock>{
           this->value().template topLeftCorner<3, 3>()};
     }
 
     /** Returns a mutable expression referring to the translation portion of this
      * transform */
-    auto translation() noexcept -> Translation<TranslationBlock> {
+    auto translationBlock() noexcept -> Translation<TranslationBlock> {
         return Translation<TranslationBlock>{
           this->value().template topRightCorner<3, 1>()};
     }
 
     /** Returns an expression referring to the translation portion of this transform */
-    auto translation() const noexcept -> Translation<TranslationConstBlock> {
+    auto translationBlock() const noexcept -> Translation<TranslationConstBlock> {
         return Translation<TranslationConstBlock>{
           this->value().template topRightCorner<3, 1>()};
     }

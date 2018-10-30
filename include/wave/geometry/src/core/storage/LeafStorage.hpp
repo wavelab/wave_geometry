@@ -82,6 +82,16 @@ template <template <typename> class LeafTmpl, typename ImplType>
 auto makeLeaf(ImplType &&arg) {
     return LeafTmpl<tmp::remove_cr_t<ImplType>>{std::forward<ImplType>(arg)};
 }
+
+/** Helper to return a copy of the value as a vector
+ *
+ * Works even if .value() returns a scalar. */
+template <typename Leaf, enable_if_leaf_t<tmp::remove_cr_t<Leaf>, bool> = true>
+auto valueAsVector(adl, Leaf &&leaf) {
+    using Vector = Eigen::Matrix<scalar_t<Leaf>, traits<Leaf>::TangentSize, 1>;
+    return Vector{std::move(leaf).value()};
+}
+
 }  // namespace internal
 }  // namespace wave
 #endif  // WAVE_GEOMETRY_LEAFSTORAGE_HPP

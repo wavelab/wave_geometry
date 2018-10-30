@@ -9,30 +9,6 @@
 namespace wave {
 namespace internal {
 
-TICK_TRAIT(valid_vector_traits, valid_expression_traits<_>) {
-    template <class T>
-    auto require(T &&)
-      ->valid<has_template<T::template rebind>,
-              has_type<typename T::ImplType,
-                       std::is_base_of<Eigen::MatrixBase<typename T::ImplType>, _>>,
-              is_true_c<T::Size == T::TangentSize>>;
-};
-
-TICK_TRAIT(has_valid_vector_traits) {
-    template <class T>
-    auto require(T &&)
-      ->valid<is_true<valid_vector_traits<typename ::wave::internal::traits<T>>>>;
-};
-
-
-TICK_TRAIT(is_vector_leaf, is_leaf_expression<_>, has_valid_vector_traits<_>) {
-    template <class T>
-    auto require(T && x)
-      ->valid<is_true<std::is_base_of<VectorBase<T>, T>>,
-              std::is_same<typename internal::traits<T>::ImplType,
-                           tmp::remove_cr_t<decltype(x.value())>>>;
-};
-
 template <class T>
 using is_derived_rotation = std::is_base_of<RotationBase<T>, T>;
 

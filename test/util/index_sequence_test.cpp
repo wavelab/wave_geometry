@@ -21,16 +21,18 @@ void test_make_index_sequence() {
 };
 
 void test_concat_index_sequence() {
-    using A = index_sequence<0, 1, 2>;
-    using B = index_sequence<25, 30>;
-    using C = index_sequence<-1>;
+    using A = std::index_sequence<0, 1, 2>;
+    using B = std::index_sequence<25, 30>;
+    using C = std::index_sequence<1>;
 
-    static_assert(std::is_same<index_sequence<0, 1, 2, 25, 30, -1>,
+    static_assert(std::is_same<std::index_sequence<0, 1, 2, 25, 30, 1>,
                                typename concat_index_sequence<A, B, C>::type>{},
                   "");
     static_assert(
-      std::is_same<index_sequence<-1>, typename concat_index_sequence<C>::type>{}, "");
+      std::is_same<std::index_sequence<1>, typename concat_index_sequence<C>::type>{},
+      "");
 };
+
 
 void test_sum_sequence() {
     static_assert(0 == sum_sequence<std::index_sequence<>>::value, "");

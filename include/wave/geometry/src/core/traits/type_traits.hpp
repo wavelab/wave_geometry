@@ -147,6 +147,23 @@ TICK_TRAIT(is_nary_expression, is_derived_expression<_>, has_valid_nary_traits<_
     auto require(T && x)->valid<decltype(x.template get<0>())>;
 };
 
+TICK_TRAIT(is_compound_leaf_expression, is_nary_expression<_>) {
+    template <typename T, typename Seq>
+    struct all_elements_leaves;
+
+    template <typename T, size_t... Is>
+    struct all_elements_leaves<T, std::index_sequence<Is...>> {
+        using type = tmp::conjunction<
+          is_leaf_expression<typename traits<T>::template ElementType<Is>>...>;
+    };
+
+    template <class T>
+    auto require(T && x)
+      ->is_true<typename all_elements_leaves<
+        T,
+        std::make_index_sequence<traits<T>::CompoundSize>>::type>;
+};
+
 /** True if type is a scalar (non-expression arithmetic type)
  * Note a scalar is separate from a size-1 vector.
  */
@@ -457,6 +474,53 @@ using same_base_tmpl_i = std::is_same<base_tmpl_t<A, B>, base_tmpl_t<B, B>>;
  */
 template <typename L, typename R>
 using rhs_is_tangent_of_lhs = same_base_tmpl_i<typename eval_traits<L>::TangentType, R>;
+
+
+//
+// Additional traits for kinds of expressions
+//
+
+TICK_TRAIT(valid_vector_traits, valid_expression_traits<_>) {
+    template <class T>
+    auto require(T &&)
+      ->valid<has_template<T::template rebind>,
+              has_type<typename T::ImplType,
+                       std::is_base_of<Eigen::MatrixBase<typename T::ImplType>, _>>,
+              is_true_c<T::Size == T::TangentSize>>;
+};
+
+TICK_TRAIT(has_valid_vector_traits) {
+    template <class T>
+    auto require(T &&)
+      ->valid<is_true<valid_vector_traits<typename ::wave::internal::traits<T>>>>;
+};
+
+
+TICK_TRAIT(is_vector_leaf, is_leaf_expression<_>, has_valid_vector_traits<_>) {
+    template <class T>
+    auto require(T && x)
+      ->valid<std::is_same<typename internal::traits<T>::ImplType,
+                           tmp::remove_cr_t<decltype(x.value())>>>;
+};
+
+// This trait can be used on incomplete types (so it only checks traits<T>)
+// Inputs should be known to be nary expressions
+TICK_TRAIT(is_compound_vector_expression, has_valid_nary_traits<_>) {
+    template <typename T, typename Seq>
+    struct all_elements_vectors;
+
+    template <typename T, size_t... Is>
+    struct all_elements_vectors<T, std::index_sequence<Is...>> {
+        using type = tmp::conjunction<
+          has_valid_vector_traits<typename eval_traits<T>::template ElementType<Is>>...>;
+    };
+
+    template <class T>
+    auto require(T && x)
+      ->is_true<typename all_elements_vectors<
+        T,
+        std::make_index_sequence<traits<T>::CompoundSize>>::type>;
+};
 
 
 }  // namespace internal

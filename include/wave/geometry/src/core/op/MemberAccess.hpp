@@ -50,12 +50,12 @@ struct MemberAccess final : internal::aux_base_tmpl_t<Aux, Rhs, MemberAccess<Aux
               std::enable_if_t<std::is_assignable<OutType &, const Other &>{} &&
                                  std::is_lvalue_reference<Rhs>{},
                                bool> = true>
-    MemberAccess &&operator=(typename Base::template BaseTmpl<Other> &other) && {
+    MemberAccess &&operator=(const typename Base::template BaseTmpl<Other> &other) && {
         // Skip evaluateTo and Evaluator for now because we need a non-const reference to
         // the leaf
         // @todo clean up
         auto &leaf = evalImpl(internal::get_expr_tag_t<Rhs>{}, this->rhs());
-        auto block = Aux{}.get(leaf);
+        auto block = internal::prepareLeafForOutput<MemberAccess>(Aux{}.get(leaf));
         block = other.derived();
         return std::move(*this);
     }
@@ -75,14 +75,13 @@ struct MemberAccess final : internal::aux_base_tmpl_t<Aux, Rhs, MemberAccess<Aux
 
 namespace internal {
 
-template <typename Aux>
-struct member_access_tag {};
 
 template <typename Aux, typename Rhs>
-struct traits<MemberAccess<Aux, Rhs>>
-    : unary_traits_base_tag<MemberAccess<Aux, Rhs>, member_access_tag<Aux>> {
+struct traits<MemberAccess<Aux, Rhs>> : unary_traits_base<MemberAccess<Aux, Rhs>> {
  public:
     using OutputFunctor = typename Aux::Frames;
+    using TangentBlocks = typename traits<functor_return_t<Aux, Rhs>>::TangentBlocks;
+    enum : int { TangentSize = traits<functor_return_t<Aux, Rhs>>::TangentSize };
 };
 
 /** Helper to make a member access expression.
@@ -92,11 +91,18 @@ auto memberAccess(Derived &&expr) {
     return MemberAccess<Aux, arg_t<Derived>>{std::forward<Derived>(expr)};
 }
 
-
 template <typename Aux, typename Rhs>
-auto evalImpl(member_access_tag<Aux>, Rhs &&rhs) {
-    return Aux{}.get(std::forward<Rhs>(rhs));
+auto evalImpl(expr<MemberAccess, Aux>, Rhs &&rhs) {
+    // Evaluate to plain type to avoid storing a pointer to a cached result in Evaluator
+    return Aux{}.get(std::forward<Rhs>(rhs)).eval();
 }
+
+template <typename Aux, typename Res, typename Rhs>
+auto jacobianImpl(expr<MemberAccess, Aux>, const Res &res, const Rhs &rhs)
+  -> BlockMatrix<Res, Rhs> {
+    return Aux{}.jacobian(res, rhs);
+}
+
 
 }  // namespace internal
 }  // namespace wave

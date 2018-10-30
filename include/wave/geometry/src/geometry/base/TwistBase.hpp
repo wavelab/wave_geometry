@@ -17,6 +17,9 @@ namespace wave {
  * */
 template <typename Derived>
 struct TwistBase : public VectorBase<Derived> {
+    // The blocks are stored in this order:
+    enum : int { Rotation, Translation };
+
     template <typename T>
     using BaseTmpl = TwistBase<T>;
 };

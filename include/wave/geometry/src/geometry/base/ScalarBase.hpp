@@ -54,8 +54,9 @@ template <typename T>
  */
 struct scalar_traits_base : leaf_traits_base<T>, frameable_vector_traits {
     using Scalar = T;
-    enum : int { TangentSize = 1 };
-    static constexpr int Size = 1;
+    enum : int { TangentSize = 1, Size = 1 };
+    using TangentType = T;
+    using TangentBlocks = std::tuple<T>;
 };
 
 /** Specialize traits for built-in arithmetic types.
@@ -106,6 +107,26 @@ template <typename Lhs, typename Rhs>
 auto evalImpl(expr<Divide>, const ScalarBase<Lhs> &lhs, const ScalarBase<Rhs> &rhs) {
     return makeScalarResult(lhs.derived().value() / rhs.derived().value());
 }
+
+/** Implements arccos */
+template <typename Rhs>
+auto evalImpl(expr<ACos>, const ScalarBase<Rhs> &rhs) {
+    using std::acos;
+    return makeScalarResult(acos(rhs.derived().value()));
+}
+
+/** Jacobian of arccos */
+template <typename Val, typename Rhs>
+auto jacobianImpl(expr<ACos>, const ScalarBase<Val> &, const ScalarBase<Rhs> &rhs)
+  -> jacobian_t<Val, Rhs> {
+    using std::sqrt;
+    const auto &x = rhs.derived().value();
+    // @todo blows up near x = 1
+    const auto derivative = -1 / sqrt(1 - x * x);
+    // Return size-1 matrix
+    return jacobian_t<Val, Rhs>{derivative};
+}
+
 
 /** Left Jacobian implementation for scalar / scalar division
  * (return 1x1 matrix) */
@@ -167,6 +188,14 @@ auto operator/(const ScalarBase<L> &lhs, const ScalarBase<R> &rhs) {
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator/, Divide, ScalarBase, ScalarBase)
 WAVE_OVERLOAD_OPERATORS_FOR_SCALAR(/, ScalarBase)
+
+/** Take arccos of a scalar expression */
+template <typename R>
+auto acos(const ScalarBase<R> &rhs) {
+    return ACos<internal::cr_arg_t<R>>{rhs.derived()};
+}
+
+WAVE_OVERLOAD_FUNCTION_FOR_RVALUE(acos, ACos, ScalarBase)
 
 }  // namespace wave
 

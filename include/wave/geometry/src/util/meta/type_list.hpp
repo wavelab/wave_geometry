@@ -105,7 +105,7 @@ struct apply<F, A, B, List<Items...>> {
  *
  * For example,
  *   apply_each<F, type_list<A, B, C>>::type is type_list<F<A>, F<B>, F<C>>
- *   apply<C, D, type_list<A, B, C>>::type is type_list<F<D, A>, F<D, B>, F<D, C>>
+ *   apply_each<F, D, type_list<A, B, C>>::type is type_list<F<D, A>, F<D, B>, F<D, C>>
  *
  * The template may also be used without a list: apply_each<F, A, B, C> is type_list<F<A,
  * B, C>>.
@@ -232,7 +232,9 @@ struct concat_if_unique_many<U1> : U1 {};
 // Base case 2: last two lists
 template <typename U1, typename U2>
 struct concat_if_unique_many<U1, U2>
-    : concat_if_unique<typename U1::type, typename U2::type> {};
+    : std::conditional_t<U1::value && U2::value,
+                         concat_if_unique<typename U1::type, typename U2::type>,
+                         std::false_type> {};
 
 // More than two lists: fold over concat_if_unique or short-circuit if false
 // (like std::conjunction)
@@ -339,6 +341,31 @@ struct integer_sequence_element<0, std::integer_sequence<T, Head, Tail...>>
 template <size_t I, typename T, T Head, T... Tail>
 struct integer_sequence_element<I, std::integer_sequence<T, Head, Tail...>>
     : integer_sequence_element<I - 1, std::integer_sequence<T, Tail...>> {};
+
+
+/** Filters a type list using a predicate.
+ *
+ * For example, if P<A>::value == P<C>::value = true  and P<B>::value == false,
+ *
+ *   filter<P, type_list<A, B, C>>::type is type_list<A, C>
+ */
+template <template <typename> class P, typename List>
+struct filter;
+
+template <template <typename> class P, typename List>
+using filter_t = typename filter<P, List>::type;
+
+// Use concat to do the work
+template <template <typename> class P, template <typename...> class List, typename... Ts>
+struct filter<P, List<Ts...>> {
+    using type = concat_t<std::conditional_t<P<Ts>::value, List<Ts>, List<>>...>;
+};
+
+// Trivial specialization for empty list
+template <template <typename> class P, template <typename...> class List>
+struct filter<P, List<>> {
+    using type = List<>;
+};
 
 
 }  // namespace tmp

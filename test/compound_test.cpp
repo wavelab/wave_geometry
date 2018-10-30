@@ -1,5 +1,4 @@
-#include "test.hpp"
-#include "wave/geometry/geometry.hpp"
+#include "estimation/test_factors.hpp"
 
 template <typename Params>
 class CompoundTest : public testing::Test {
@@ -32,3 +31,20 @@ class CompoundTest : public testing::Test {
 
     // Static traits checks
 };
+
+// The list of implementation types to run each test case on
+using LeafTypes = test_types_list<wave::RigidTransformMd>;
+
+// The following tests will be built for each type in LeafTypes
+TYPED_TEST_CASE(CompoundTest, LeafTypes);
+
+
+TYPED_TEST(CompoundTest, evalCompoundExpression) {
+    const auto a = wave::Scalar<double>{1.1};
+    const auto b = wave::Scalar<double>{2.2};
+    const auto expr = wave::internal::makeCompound<example::RangeBearing>(a, a + b);
+
+    EXPECT_DOUBLE_EQ(a, expr.range());
+    EXPECT_DOUBLE_EQ(a + b, expr.bearing());
+    CHECK_JACOBIANS(false, expr, a, b);
+}

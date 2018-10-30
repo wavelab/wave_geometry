@@ -233,6 +233,29 @@ TYPED_TEST(VectorTest, norm) {
     CHECK_JACOBIANS(true, t1.norm(), t1);
 }
 
+TYPED_TEST(VectorTest, normalize) {
+    const auto t1 = TestFixture::LeafAAB::Random();
+
+    // Note .norm() returns an expression, which here is implicitly converted to a double
+    const auto expr = t1.normalized();
+    const auto eigen_result = t1.value().normalized();
+
+    EXPECT_APPROX(eigen_result, expr.eval().value());
+    CHECK_JACOBIANS(true, expr, t1);
+}
+
+TYPED_TEST(VectorTest, dot) {
+    const auto t1 = TestFixture::LeafAAB::Random();
+    const auto t2 = TestFixture::LeafABC::Random();
+
+    // Note .norm() returns an expression, which here is implicitly converted to a double
+    const auto expr = dot(t1, t2);
+    const double eigen_result = t1.value().dot(t2.value());
+
+    EXPECT_DOUBLE_EQ(eigen_result, expr.eval().value());
+    CHECK_JACOBIANS(TestFixture::IsFramed, expr, t1, t2);
+}
+
 TYPED_TEST(VectorTest, addNorms) {
     const auto t1 = TestFixture::LeafAAB::Random();
     const auto t2 = TestFixture::LeafABC::Random();

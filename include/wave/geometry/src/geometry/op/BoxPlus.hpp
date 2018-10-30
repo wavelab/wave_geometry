@@ -39,6 +39,23 @@ struct BoxPlus : internal::base_tmpl_t<Lhs, BoxPlus<Lhs, Rhs>>,
     static_assert(std::is_same<RightFrameOf<Lhs>, RightFrameOf<Rhs>>(), "Frame mismatch");
 };
 
+
+/** An expression representing the manifold subtraction of a compound +-manifold element
+ *
+ * @f[ S \times R^n \to S @f]
+ */
+template <typename Lhs, typename Rhs>
+struct CompoundBoxPlus : internal::base_tmpl_t<Lhs, Rhs, CompoundBoxPlus<Lhs, Rhs>>,
+                         internal::binary_storage_for<CompoundBoxPlus<Lhs, Rhs>> {
+ private:
+    using Storage = internal::binary_storage_for<CompoundBoxPlus<Lhs, Rhs>>;
+
+ public:
+    // Inherit constructors from BinaryStorage
+    using Storage::Storage;
+};
+
+
 namespace internal {
 
 /** We implement BoxPlus as a "heavy alias": it is meant to act exactly like
@@ -61,6 +78,11 @@ namespace internal {
  */
 template <typename Lhs, typename Rhs>
 struct traits<BoxPlus<Lhs, Rhs>> : traits<ComposeFlipped<Lhs, ExpMap<Rhs>>> {};
+
+
+template <typename Lhs, typename Rhs>
+struct traits<CompoundBoxPlus<Lhs, Rhs>> : binary_traits_base<CompoundBoxPlus<Lhs, Rhs>> {
+};
 
 
 }  // namespace internal

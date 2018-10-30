@@ -22,9 +22,7 @@ using DynamicMatrix = Eigen::Matrix<ScalarType, Eigen::Dynamic, Eigen::Dynamic>;
 template <typename Derived>
 struct DynamicJacobianEvaluator<Derived, enable_if_leaf_or_scalar_t<Derived>> {
     using DynamicJacobian = DynamicMatrix<scalar_t<Derived>>;
-
- private:
-    static constexpr int JSize = traits<Derived>::TangentSize;
+    enum : int { TangentSize = eval_traits<Derived>::TangentSize };
 
  public:
     WAVE_STRONG_INLINE DynamicJacobianEvaluator(const Evaluator<Derived> &evaluator,
@@ -169,6 +167,83 @@ struct DynamicJacobianEvaluator<Derived, enable_if_binary_t<Derived>> {
                                    rhs_jac};
         }
         return DynamicJacobian{};
+    }
+};
+
+/** Specialization for n-ary expression */
+template <typename Derived>
+struct DynamicJacobianEvaluator<Derived, enable_if_nary_t<Derived>> {
+    using DynamicJacobian = DynamicMatrix<scalar_t<Derived>>;
+    enum : int { TangentSize = eval_traits<Derived>::TangentSize };
+    using IndexSeq = std::make_index_sequence<traits<Derived>::CompoundSize>;
+    using ChildJacEvalTuple =
+      tmp::apply_each_t<::wave::internal::DynamicJacobianEvaluator,
+                        typename traits<Derived>::ElementTuple>;
+
+ private:
+    // Wrapped Evaluator and nested jacobian-evaluators
+    const Evaluator<Derived> &evaluator;
+    const ChildJacEvalTuple children;
+
+    template <size_t... Is>
+    inline static ChildJacEvalTuple expandToChildJacEvalTuple(
+      const Evaluator<Derived> &evaluator,
+      const void *target,
+      std::index_sequence<Is...>) {
+        return ChildJacEvalTuple{
+          DynamicJacobianEvaluator<typename traits<Derived>::template ElementType<Is>>{
+            std::get<Is>(evaluator.children), target}...};
+    }
+
+    template <size_t... Is>
+    inline DynamicJacobian combineChildJacobians(std::index_sequence<Is...>) const {
+        auto jac = DynamicJacobian{};
+
+        // Build up the Jacobian block-by-block. The tricky part is we don't know the
+        // width until we get a non-empty child Jacobian. Thus we have to keep track of
+        // the row number and fill in the missed blocks with zeros later.
+        int row_reached = 0;
+        tmp::foreach (
+          [&jac, &row_reached](const auto &child) {
+              const auto &child_jac = child.jacobian();
+              if (child_jac.size() > 0) {
+                  if (jac.size() == 0) {
+                      // Resize the matrix now that we know the width
+                      jac.resize(TangentSize, child_jac.cols());
+                      // Fill the previously missed blocks with zero
+                      jac.topRows(row_reached).setZero();
+                      assert(child_jac.rows() == child.TangentSize);
+                  }
+                  // Add the next Jacobian
+                  jac.middleRows(row_reached, child.TangentSize) = child_jac;
+              } else if (jac.size() > 0) {
+                  // An empty (meaning zero) child jacobian, but we know the width already
+                  jac.middleRows(row_reached, child.TangentSize).setZero();
+              }
+              row_reached += child.TangentSize;
+          },
+          std::get<Is>(children)...);
+        // Return the matrix whether it is empty (representing zero) or not
+        return jac;
+    }
+
+
+ public:
+    /** Constructs JacobianEvaluator and its N children */
+    WAVE_STRONG_INLINE DynamicJacobianEvaluator(const Evaluator<Derived> &evaluator,
+                                                const void *target)
+        : evaluator{evaluator},
+          children{expandToChildJacEvalTuple(evaluator, target, IndexSeq{})} {}
+
+
+    /** @returns jacobian matrix if expr contains target type, or zero matrix otherwise.
+     *
+     * @todo for now, a compound expression just combines others; its own derivative is
+     * identity. Therefore its Jacobian is a vertical concatenation of its children's.
+     * @todo n-ary jacobians
+     */
+    WAVE_STRONG_INLINE DynamicJacobian jacobian() const {
+        return this->combineChildJacobians(IndexSeq{});
     }
 };
 

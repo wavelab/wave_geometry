@@ -19,9 +19,11 @@
 #include "src/geometry/frames/frame_cast.hpp"
 #include "src/geometry/frames/Framed.hpp"
 
-// Geometric leaves and bases
-#include "src/geometry/base/ScalarBase.hpp"
 #include "src/geometry/op/CommonExpressions.hpp"
+
+// Geometric leaves and bases
+#include "src/geometry/base/CompoundBase.hpp"
+#include "src/geometry/base/ScalarBase.hpp"
 #include "src/geometry/base/VectorBase.hpp"
 #include "src/geometry/base/TransformBase.hpp"
 #include "src/geometry/base/RotationBase.hpp"

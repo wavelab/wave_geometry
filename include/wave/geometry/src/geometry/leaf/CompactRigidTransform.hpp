@@ -48,8 +48,8 @@ class CompactRigidTransform
     template <typename RDerived, typename TDerived>
     CompactRigidTransform(const RotationBase<RDerived> &R,
                           const TranslationBase<TDerived> &t) {
-        this->rotation() = R.derived();
-        this->translation() = t.derived();
+        this->rotationBlock() = R.derived();
+        this->translationBlock() = t.derived();
     };
 
     /** Constructs from a rotation and translation, given as Eigen matrices */
@@ -74,24 +74,28 @@ class CompactRigidTransform
         EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(VDerived, 7);
     }
 
+    // block getters - for differentiable expressions and consistent interface, use
+    // .rotation() and .translation()
+    // @todo make private?
+
     /** Returns a reference to the rotation portion of this transform */
-    QuaternionRotation<RotationMap> rotation() noexcept {
+    QuaternionRotation<RotationMap> rotationBlock() noexcept {
         return QuaternionRotation<RotationMap>{RotationMap{this->value().data()}};
     }
 
     /** Returns a const reference to the rotation portion of this transform */
-    QuaternionRotation<RotationConstMap> rotation() const noexcept {
+    QuaternionRotation<RotationConstMap> rotationBlock() const noexcept {
         return QuaternionRotation<RotationConstMap>{
           RotationConstMap{this->value().data()}};
     }
 
     /** Returns a reference to the translation portion of this transform */
-    Translation<TranslationBlock> translation() noexcept {
+    Translation<TranslationBlock> translationBlock() noexcept {
         return Translation<TranslationBlock>{this->value().template tail<3>()};
     }
 
     /** Returns a const reference to the translation portion of this transform */
-    Translation<TranslationConstBlock> translation() const noexcept {
+    Translation<TranslationConstBlock> translationBlock() const noexcept {
         return Translation<TranslationConstBlock>{this->value().template tail<3>()};
     }
 };

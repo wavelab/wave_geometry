@@ -107,6 +107,7 @@ void test_concat_if_unique_many() {
     using A = concat_if_unique<test_list_t<int>, test_list_t<bool>>;
     using B = concat_if_unique<test_list_t<float>, test_list_t<double>>;
     using D = concat_if_unique<test_list_t<void *>, test_list_t<char>>;
+    using N = concat_if_unique<test_list_t<int>, test_list_t<int>>;
 
     static_assert(std::is_same<typename concat_if_unique_many<A, B>::type,
                                type_list<int, bool, float, double>>{},
@@ -119,6 +120,8 @@ void test_concat_if_unique_many() {
     static_assert(concat_if_unique_many<A, B, D>{}, "");
 
     static_assert(concat_if_unique_many<A, B, D, A>{} == false, "");
+
+    static_assert(concat_if_unique_many<N, B>{} == false, "");
 };
 
 void test_has_unique_leaves() {
@@ -179,6 +182,16 @@ void test_integer_sequence_element() {
     static_assert(integer_sequence_element<0, Seq>::value == 21, "");
     static_assert(integer_sequence_element<1, Seq>::value == 42, "");
     static_assert(integer_sequence_element<3, Seq>::value == 84, "");
+};
+
+void test_filter() {
+    using A = std::tuple<int, double, void, char>;
+    using E = std::tuple<>;
+
+
+    static_assert(std::is_same<std::tuple<int, char>, filter_t<std::is_integral, A>>{},
+                  "");
+    static_assert(std::is_same<E, filter_t<std::is_integral, E>>{}, "");
 };
 
 }  // namespace tmp

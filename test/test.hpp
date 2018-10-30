@@ -350,9 +350,17 @@ inline ::std::ostream &operator<<(::std::ostream &os, const AngleAxis<Scalar> &a
 namespace wave {
 
 // Let gtest print wave expressions, using their internal values
-template <typename Derived>
+template <typename Derived,
+          internal::enable_if_leaf_t<internal::eval_t<Derived>, bool> = true>
 std::ostream &operator<<(std::ostream &os, const ExpressionBase<Derived> &expr) {
     return os << ::testing::PrintToString(expr.derived().eval().value());
+}
+
+template <typename Derived,
+          internal::enable_if_nary_t<internal::eval_t<Derived>, bool> = true>
+std::ostream &operator<<(std::ostream &os, const ExpressionBase<Derived> &expr) {
+    return os << ::testing::PrintToString(
+             valueAsVector(internal::adl{}, expr.derived().eval()));
 }
 
 }  // namespace wave

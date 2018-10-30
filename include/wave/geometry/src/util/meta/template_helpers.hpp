@@ -225,6 +225,13 @@ struct tmpl {
 template <int I>
 using Int = std::integral_constant<int, I>;
 
+/** Calls the given function for each element of a parameter pack */
+template <typename Fn, typename... Args>
+void foreach (Fn f, Args && ... args) {
+    int for_each_helper[] = {(f(std::forward<Args>(args)), 0)...};
+    (void) for_each_helper;
+}
+
 }  // namespace tmp
 }  // namespace wave
 

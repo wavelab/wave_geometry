@@ -15,7 +15,13 @@ class Framed;
 struct NoFrame;
 
 template <typename Derived>
+struct CompoundBase;
+
+template <typename Derived>
 struct VectorBase;
+
+template <typename Derived>
+struct ScalarBase;
 
 template <typename ToDerived, typename FromDerived>
 struct Conversion;
@@ -67,6 +73,12 @@ struct BoxPlus;
 
 template <typename Lhs, typename Rhs>
 struct BoxMinus;
+
+template <typename Lhs, typename Rhs>
+struct CompoundBoxPlus;
+
+template <typename Lhs, typename Rhs>
+struct CompoundBoxMinus;
 
 template <typename ImplType>
 class MatrixRotation;

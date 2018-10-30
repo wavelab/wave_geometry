@@ -19,44 +19,34 @@ struct Random : internal::base_tmpl_t<Derived, Random<Derived>> {
     }
 };
 
-/** Scalar expression representing the square of the L2 norm of a vector value
- */
-template <typename Rhs>
-struct SquaredNorm : ScalarBase<SquaredNorm<Rhs>>,
-                     internal::unary_storage_for<SquaredNorm<Rhs>> {
- private:
-    using Storage = internal::unary_storage_for<SquaredNorm<Rhs>>;
-
- public:
-    // Inherit constructors
-    using Storage::Storage;
-};
-
-/** Scalar expression representing the L2 norm of a vector value
- */
-template <typename Rhs>
-struct Norm : ScalarBase<Norm<Rhs>>, internal::unary_storage_for<Norm<Rhs>> {
- private:
-    using Storage = internal::unary_storage_for<Norm<Rhs>>;
-
- public:
-    // Inherit constructors
-    using Storage::Storage;
-};
-
-
 namespace internal {
 
 template <typename Derived>
 struct traits<Random<Derived>> : nullary_traits_base<Random<Derived>> {};
 
-template <typename Rhs>
-struct traits<Norm<Rhs>> : unary_traits_base<Norm<Rhs>> {};
-
-template <typename Rhs>
-struct traits<SquaredNorm<Rhs>> : unary_traits_base<SquaredNorm<Rhs>> {};
-
 }  // namespace internal
+
+/** Scalar expression representing the square of the L2 norm of a vector value
+ */
+WAVE_SIMPLE_UNARY_EXPRESSION(SquaredNorm, ScalarBase);
+
+/** Scalar expression representing the L2 norm of a vector value
+ */
+WAVE_SIMPLE_UNARY_EXPRESSION(Norm, ScalarBase);
+
+/** Vector expression representing a vector divided by its L2 norm
+ */
+WAVE_SPACE_PRESERVING_UNARY_EXPRESSION(Normalize);
+
+
+/** Scalar expression representing the dot product of two vectors
+ */
+WAVE_SIMPLE_BINARY_EXPRESSION(Dot, ScalarBase);
+
+/** Scalar expression representing arccos
+ */
+WAVE_SIMPLE_UNARY_EXPRESSION(ACos, ScalarBase);
+
 }  // namespace wave
 
 #endif  // WAVE_GEOMETRY_COMMONEXPRESSIONS_HPP

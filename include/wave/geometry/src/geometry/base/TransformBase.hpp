@@ -8,14 +8,25 @@
 
 namespace wave {
 
-/** Auxilliary struct for .rotation() member function */
+/** Auxilliary struct for .rotation() member function
+ * @todo clean up
+ */
 template <typename Derived>
 struct RotationGetter {
     using Frames = internal::WrapWithFrames<LeftFrameOf<Derived>, RightFrameOf<Derived>>;
 
     template <typename BareTf>
-    static auto get(BareTf &&leaf) {
-        return std::forward<BareTf>(leaf).rotation();
+    static decltype(auto) get(BareTf &&leaf) {
+        return std::forward<BareTf>(leaf).rotationBlock();
+    }
+
+    template <typename Rot, typename Rt>
+    static auto jacobian(const Rot &, const Rt &) {
+        //@todo optimize with sparse block matrix
+        auto jac = BlockMatrix<Rot, Rt>{};
+        jac.template colsWrt<1>().setZero();
+        jac.template colsWrt<0>().setIdentity();
+        return jac;
     }
 };
 
@@ -27,7 +38,18 @@ struct TranslationGetter {
 
     template <typename BareTf>
     static auto get(BareTf &&leaf) {
-        return std::forward<BareTf>(leaf).translation();
+        return std::forward<BareTf>(leaf).translationBlock();
+    }
+
+    template <typename Trans, typename Rt>
+    static auto jacobian(const Trans &t, const Rt &) -> BlockMatrix<Trans, Rt> {
+        //@todo optimize with sparse block matrix
+        auto jac = BlockMatrix<Trans, Rt>{};
+        // Derivative of translation w.r.t. the transform depends on the rotation part
+        // as well. (Rotation block is same as left jacobian of Rotate)
+        jac.template colsWrt<0>() = crossMatrix(-t.value());
+        jac.template colsWrt<1>().setIdentity();
+        return jac;
     }
 };
 
@@ -56,7 +78,7 @@ class TransformBase : public ExpressionBase<Derived> {
 
     auto translation() && {
         return internal::memberAccess<TranslationGetter<Derived>>(
-          std::move(*this)->derived());
+          std::move(*this).derived());
     }
 
     /** Gets an expression representing the rotation part of the transform */
@@ -69,7 +91,7 @@ class TransformBase : public ExpressionBase<Derived> {
     }
 
     auto rotation() && {
-        return internal::memberAccess<RotationGetter>(std::move(*this)->derived());
+        return internal::memberAccess<RotationGetter>(std::move(*this).derived());
     }
 
     /** Produce a random element */
@@ -192,8 +214,8 @@ auto rightJacobianImpl(expr<Compose>,
     // From http://ethaneade.com/lie.pdf - note we swap order of rotation and translation
     // Actually the adjoint of SE(3)
     // @todo factor out adjoint
-    const auto &R = Mat3{lhs.derived().rotation().value()};
-    const auto &t = lhs.derived().translation().value();
+    const auto &R = Mat3{lhs.derived().rotationBlock().value()};
+    const auto &t = lhs.derived().translationBlock().value();
     jacobian_t<Val, Lhs> out{};
 
     out.template topLeftCorner<3, 3>() = R;
@@ -235,7 +257,7 @@ auto rightJacobianImpl(expr<Transform>,
                        const TranslationBase<Val> &,
                        const TransformBase<Lhs> &lhs,
                        const TranslationBase<Rhs> &) -> jacobian_t<Val, Rhs> {
-    return jacobian_t<Val, Rhs>{lhs.derived().rotation().value()};
+    return jacobian_t<Val, Rhs>{lhs.derived().rotationBlock().value()};
 }
 
 }  // namespace internal

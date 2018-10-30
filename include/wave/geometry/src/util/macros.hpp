@@ -128,4 +128,52 @@
     WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_LEFT(OpSymbol, OtherBase) \
     WAVE_OVERLOAD_OPERATORS_FOR_SCALAR_RIGHT(OpSymbol, OtherBase)
 
+/** Generate an empty unary expression and traits */
+#define WAVE_SIMPLE_UNARY_EXPRESSION(Name, Base)                            \
+    template <typename Rhs>                                                 \
+    struct Name : Base<Name<Rhs>>, internal::unary_storage_for<Name<Rhs>> { \
+     private:                                                               \
+        using Storage = internal::unary_storage_for<Name<Rhs>>;             \
+                                                                            \
+     public:                                                                \
+        using Storage::Storage;                                             \
+    };                                                                      \
+    namespace internal {                                                    \
+    template <typename Rhs>                                                 \
+    struct traits<Name<Rhs>> : unary_traits_base<Name<Rhs>> {};             \
+    }  // namespace internal
+
+/** Generate an empty unary expression and traits.
+ * The expression copies the space of its input */
+#define WAVE_SPACE_PRESERVING_UNARY_EXPRESSION(Name)            \
+    template <typename Rhs>                                     \
+    struct Name : internal::base_tmpl_t<Rhs, Name<Rhs>>,        \
+                  internal::unary_storage_for<Name<Rhs>> {      \
+     private:                                                   \
+        using Storage = internal::unary_storage_for<Name<Rhs>>; \
+                                                                \
+     public:                                                    \
+        using Storage::Storage;                                 \
+    };                                                          \
+    namespace internal {                                        \
+    template <typename Rhs>                                     \
+    struct traits<Name<Rhs>> : unary_traits_base<Name<Rhs>> {}; \
+    }  // namespace internal
+
+/** Generate an empty binary expression and traits */
+#define WAVE_SIMPLE_BINARY_EXPRESSION(Name, Base)                                      \
+    template <typename Lhs, typename Rhs>                                              \
+    struct Name : Base<Name<Lhs, Rhs>>, internal::binary_storage_for<Name<Lhs, Rhs>> { \
+     private:                                                                          \
+        using Storage = internal::binary_storage_for<Name<Lhs, Rhs>>;                  \
+                                                                                       \
+     public:                                                                           \
+        using Storage::Storage;                                                        \
+    };                                                                                 \
+    namespace internal {                                                               \
+    template <typename Lhs, typename Rhs>                                              \
+    struct traits<Name<Lhs, Rhs>> : binary_traits_base<Name<Lhs, Rhs>> {};             \
+    }  // namespace internal
+
+
 #endif  // WAVE_GEOMETRY_MACROS_HPP

@@ -8,16 +8,12 @@
 namespace wave {
 namespace internal {
 
-template <typename T>
-auto tangentValueAsVector(const ExpressionBase<T> &t) {
-    return Eigen::Matrix<scalar_t<T>, traits<T>::Size, 1>{t.derived().value()};
-}
-
 /** Helper to make a tangent type from a vector expression, if the tangent type might be a
- * scalar */
+ * scalar or n-ary type */
 template <typename TangentType,
           typename Vector,
-          TICK_REQUIRES(wave::internal::traits<TangentType>::Size != 1)>
+          TICK_REQUIRES(is_leaf_expression<TangentType>{} &&
+                        traits<TangentType>::Size != 1)>
 auto makeTangent(const Vector &v) {
     return TangentType{v};
 }
@@ -26,9 +22,41 @@ auto makeTangent(const Vector &v) {
 // derivative w.r.t. a scalar. It is just needed for the function to compile
 template <typename TangentType,
           typename Vector,
-          TICK_REQUIRES(wave::internal::traits<TangentType>::Size == 1)>
+          TICK_REQUIRES(is_leaf_or_scalar<TangentType>{} &&
+                        traits<TangentType>::Size == 1)>
 auto makeTangent(const Vector &v) {
     return TangentType{v[0]};
+}
+
+// Helper returns double when given a size-1 Eigen matrix
+template <typename Derived,
+          std::enable_if_t<Derived::SizeAtCompileTime == 1, bool> = true>
+auto passMatrixOrScalar(const Eigen::MatrixBase<Derived> &m) {
+    return m.derived().value();
+}
+
+template <typename Derived,
+          std::enable_if_t<Derived::SizeAtCompileTime != 1, bool> = true>
+const auto &passMatrixOrScalar(const Eigen::MatrixBase<Derived> &m) {
+    return m.derived();
+}
+
+
+// Helper for below makeTangent()
+template <typename TangentType, typename BlockVector, size_t... Is>
+auto makeCompoundTangentExpand(BlockVector &vec, std::index_sequence<Is...>) {
+    return TangentType{passMatrixOrScalar(vec.template rowsWrt<Is>())...};
+}
+
+// This version works for compound expressions with NaryStorage
+// @todo use another storage class that's already a block vector, instead of a tuple?
+template <typename TangentType,
+          typename BlockVector,
+          TICK_REQUIRES(is_nary_expression<TangentType>{})>
+auto makeTangent(const BlockVector &v) {
+    // Must split the vector into blocks
+    using Indices = std::make_index_sequence<traits<TangentType>::CompoundSize>;
+    return makeCompoundTangentExpand<TangentType>(v, Indices{});
 }
 
 /** Evaluate an expression adding an offset along one dimension if expr === target
@@ -43,9 +71,9 @@ inline auto evaluateWithDeltaImpl(const Derived &expr,
     static_assert(std::is_same<scalar_t<Derived>, Scalar>{}, "Scalar types must match");
 
     using TangentType = plain_tangent_t<Derived>;
-    using EigenVector = Eigen::Matrix<Scalar, eval_traits<Derived>::TangentSize, 1>;
+    using Vector = BlockMatrix<tangent_t<Derived>, Scalar>;
     if (isSame(expr, target)) {
-        EigenVector delta_vec = EigenVector::Zero();
+        Vector delta_vec = Vector::Zero();
         delta_vec[coeff] = delta;
         // Add the offset. This + might be overloaded as box-plus!
         return plain_eval_t<Derived>{value + makeTangent<TangentType>(delta_vec)};
@@ -143,6 +171,51 @@ struct EvaluatorWithDelta<Derived, enable_if_binary_t<Derived>> {
     }
 };
 
+/** Specialization for n-ary expression */
+template <typename Derived>
+struct EvaluatorWithDelta<Derived, enable_if_nary_t<Derived>> {
+    using Scalar = scalar_t<Derived>;
+
+    // A bunch of tuple manipulation to get PlainExpr
+    using ChildEvalTuple = tmp::apply_each_t<::wave::internal::EvaluatorWithDelta,
+                                             typename traits<Derived>::ElementTuple>;
+    template <typename T>
+    using get_plain_type = typename T::PlainType;
+    using ChildPlainTypes = tmp::apply_each_t<get_plain_type, ChildEvalTuple>;
+    using PlainExpr = tmp::apply_t<traits<Derived>::template rebind, ChildPlainTypes>;
+
+    using IndexSeq = std::make_index_sequence<traits<Derived>::CompoundSize>;
+    using OutputType = plain_output_t<Derived>;
+    using PlainType = plain_eval_t<Derived>;
+
+    template <size_t... Is>
+    inline static auto expandToGetValue(const Derived &nary,
+                                        const void *target,
+                                        int coeff,
+                                        Scalar delta,
+                                        std::index_sequence<Is...>) {
+        /* Horrible one-liner to expand the parameter pack. Roughly, for each child we do:
+         *   for each child i:
+         *     child_eval[i] = EvaluatorWithDelta<child derived type>{};
+         *     child_value[i] = child_eval[i](nary.get<i>(), ...)
+         *   expr = PlainExpr{child_value[0], ... child_value[n]};
+         */
+        auto expr = PlainExpr{
+          EvaluatorWithDelta<typename traits<Derived>::template ElementType<Is>>{}(
+            nary.template get<Is>(), target, coeff, delta)...};
+        auto v_eval = prepareEvaluatorTo<OutputType>(std::move(expr));
+        return PlainType{v_eval()};
+    }
+
+    PlainType operator()(const Derived &expr,
+                         const void *target,
+                         int coeff,
+                         Scalar delta) const {
+        const auto value = expandToGetValue(expr, target, coeff, delta, IndexSeq{});
+        return evaluateWithDeltaImpl(expr, target, value, coeff, delta);
+    }
+};
+
 
 /** Numerically evaluate a jacobian of an expression tree, given an evaluator
  */
@@ -171,7 +244,7 @@ auto evaluateNumericalJacobianImpl(const Evaluator<Derived> &evaluator,
 
         // Calculate one column of Jacobian
         const auto &diff = tangent_t<Derived>{forward_value - value};
-        jacobian.col(i) = tangentValueAsVector(diff) / delta;
+        jacobian.col(i) = valueAsVector(adl{}, diff) / delta;
     }
     return jacobian;
 }

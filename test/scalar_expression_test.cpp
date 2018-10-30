@@ -52,3 +52,12 @@ TYPED_TEST(ScalarTest, assignFromExpression) {
     s = t.norm();
     EXPECT_EQ(t.value().norm(), s);
 }
+
+TYPED_TEST(ScalarTest, acos) {
+    const auto c = std::cos(this->a());
+    const auto scalar = wave::Scalar<TypeParam>{c};
+    const auto expr = acos(scalar);
+    EXPECT_EQ(std::acos(c), expr.eval());
+    EXPECT_DOUBLE_EQ(this->a(), expr.eval());
+    CHECK_JACOBIANS(true, expr, scalar);
+}

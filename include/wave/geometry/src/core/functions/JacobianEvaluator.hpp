@@ -247,6 +247,87 @@ struct JacobianEvaluator<
     }
 };
 
+
+/** Specialization for n-ary expression */
+template <typename Derived, typename Target>
+struct JacobianEvaluator<Derived, Target, enable_if_nary_t<Derived>> {
+    using Jacobian = BlockMatrix<Derived, Target>;
+
+    // We will construct child JacobianEvaluators only for the types that may contain
+    // our target
+
+    template <typename T>
+    using Pred = contains_same_type<T, Target>;
+    using ChildExprTuple = tmp::filter_t<Pred, typename traits<Derived>::ElementTuple>;
+
+    template <typename T>
+    using make_child = JacobianEvaluator<T, Target>;
+    using ChildJacEvalTuple = tmp::apply_each_t<make_child, ChildExprTuple>;
+
+    template <std::size_t I>
+    using IndexPred =
+      contains_same_type<std::tuple_element_t<I, typename traits<Derived>::ElementTuple>,
+                         Target>;
+    using IndicesOfChildrenToCall = tmp::filter_index_sequence_t<
+      IndexPred,
+      std::make_index_sequence<traits<Derived>::CompoundSize>>;
+
+
+ private:
+    // Wrapped Evaluator and nested jacobian-evaluators
+    const Evaluator<Derived> &evaluator;
+    const ChildJacEvalTuple children;
+
+    template <size_t... Is>
+    inline static ChildJacEvalTuple expandToChildJacEvalTuple(
+      const Evaluator<Derived> &evaluator,
+      const Target &target,
+      std::index_sequence<Is...>) {
+        return ChildJacEvalTuple{
+          JacobianEvaluator<typename traits<Derived>::template ElementType<Is>, Target>{
+            std::get<Is>(evaluator.children), target}...};
+    }
+
+    template <size_t... Is>
+    inline Jacobian combineChildJacobians(std::index_sequence<Is...>) const {
+        // Fill with zero first. @todo profile/optimize
+        auto jac = Jacobian{};
+        jac.setZero();
+        int foreach[] = {
+          (std::get<Is>(children).jacobian()
+             ? (jac.template rowsWrt<Is>() = *std::get<Is>(children).jacobian(), 0)
+             : 0)...};
+        (void) foreach;
+        return jac;
+    }
+
+
+ public:
+    /** Constructs JacobianEvaluator and its N children */
+    WAVE_STRONG_INLINE JacobianEvaluator(const Evaluator<Derived> &evaluator,
+                                         const Target &target)
+        : evaluator{evaluator},
+          children{
+            expandToChildJacEvalTuple(evaluator, target, IndicesOfChildrenToCall{})} {}
+
+
+    /** @returns jacobian matrix if expr contains target type, or zero matrix otherwise.
+     *
+     * @todo for now, a compound expression just combines others; its own derivative is
+     * identity. Therefore its Jacobian is a vertical concatenation of its children's.
+     * @todo n-ary jacobians
+     */
+    WAVE_STRONG_INLINE boost::optional<Jacobian> jacobian() const {
+        constexpr auto N = std::tuple_size<ChildJacEvalTuple>::value;
+        if (N > 0) {
+            using Indices = std::make_index_sequence<N>;
+            return this->combineChildJacobians(Indices{});
+        } else {
+            return boost::none;
+        }
+    }
+};
+
 /** Evaluate a jacobian using an existing Evaluator tree
  */
 template <typename Derived, typename Target>

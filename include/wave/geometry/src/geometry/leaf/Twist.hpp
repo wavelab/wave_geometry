@@ -82,7 +82,10 @@ namespace internal {
 
 template <typename ImplType>
 struct traits<Twist<ImplType>> : vector_leaf_traits_base<Twist<ImplType>> {
-    using ExpType = MatrixRigidTransform<Eigen::Matrix<typename ImplType::Scalar, 4, 4>>;
+    using Scalar = typename ImplType::Scalar;
+    using ExpType = MatrixRigidTransform<Eigen::Matrix<Scalar, 4, 4>>;
+    using TangentBlocks = std::tuple<RelativeRotation<Eigen::Matrix<Scalar, 3, 1>>,
+                                     Translation<Eigen::Matrix<Scalar, 3, 1>>>;
 };
 
 /** Implements exp map of a twist into a MatrixRigidTransform
@@ -110,8 +113,8 @@ auto evalImpl(expr<ExpMap>, const Twist<ImplType> &rhs) ->
         const Mat3 cross = crossMatrix(omega);
         const Mat3 cross2 = cross * cross;
         const Mat3 V = Mat3::Identity() + B * cross + C * cross2;
-        out.translation().value() = V * rhs.translation().value();
-        out.rotation().value() = Mat3::Identity() + A * cross + B * cross2;
+        out.translationBlock().value() = V * rhs.translation().value();
+        out.rotationBlock().value() = Mat3::Identity() + A * cross + B * cross2;
     } else {
         // small theta2; use Taylor expansions
         const auto A = Scalar{1.0};
@@ -120,8 +123,8 @@ auto evalImpl(expr<ExpMap>, const Twist<ImplType> &rhs) ->
         const Mat3 cross = crossMatrix(omega);
         const Mat3 cross2 = cross * cross;
         const Mat3 V = Mat3::Identity() + B * cross + C * cross2;
-        out.translation().value() = V * rhs.translation().value();
-        out.rotation().value() = Mat3::Identity() + A * cross + B * cross2;
+        out.translationBlock().value() = V * rhs.translation().value();
+        out.rotationBlock().value() = Mat3::Identity() + A * cross + B * cross2;
     }
 
     return out;
@@ -130,7 +133,7 @@ auto evalImpl(expr<ExpMap>, const Twist<ImplType> &rhs) ->
 /** Jacobian of ExpMap for a twist */
 template <typename Val, typename Rhs>
 auto jacobianImpl(expr<ExpMap>, const TransformBase<Val> &val, const TwistBase<Rhs> &rhs)
-  -> jacobian_t<Val, Rhs> {
+  -> BlockMatrix<Val, Rhs> {
     using Scalar = scalar_t<Val>;
     using Mat3 = Eigen::Matrix<Scalar, 3, 3>;
 
@@ -139,8 +142,8 @@ auto jacobianImpl(expr<ExpMap>, const TransformBase<Val> &val, const TwistBase<R
     using std::cos;
     using std::sin;
     // First get Jacobian of expmap of rotation part only
-    const auto &Drot =
-      jacobianImpl(expr<ExpMap>{}, val.derived().rotation(), rhs.derived().rotation());
+    const auto &Drot = jacobianImpl(
+      expr<ExpMap>{}, val.derived().rotationBlock(), rhs.derived().rotation());
 
     const auto &omega = rhs.derived().rotation().value();
     const auto &u = rhs.derived().translation().value();
@@ -159,11 +162,11 @@ auto jacobianImpl(expr<ExpMap>, const TransformBase<Val> &val, const TwistBase<R
                    c * (omega * u.transpose() + u * omega.transpose()) + omega.dot(u) * W;
 
 
-    Eigen::Matrix<Scalar, 6, 6> out{};
-    out.template topLeftCorner<3, 3>() = Drot;
-    out.template bottomLeftCorner<3, 3>() = B;
-    out.template topRightCorner<3, 3>().setZero();
-    out.template bottomRightCorner<3, 3>() = Drot;
+    BlockMatrix<Val, Rhs> out{};
+    out.template blockWrt<Val::Rotation, Rhs::Rotation>() = Drot;
+    out.template blockWrt<Val::Translation, Rhs::Rotation>() = B;
+    out.template blockWrt<Val::Rotation, Rhs::Translation>().setZero();
+    out.template blockWrt<Val::Translation, Rhs::Translation>() = Drot;
     return out;
 }
 
