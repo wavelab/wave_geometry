@@ -2,7 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.2)
 PROJECT(wave_geometry)
 
 # Compiler settings for all targets
-SET(CMAKE_CXX_STANDARD 14)
+SET(CMAKE_CXX_STANDARD 17)
 
 # Package version, used when other projects FIND_PACKAGE(wave <version>)
 SET(WAVE_GEOMETRY_PACKAGE_VERSION 0.4.0)

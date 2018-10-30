@@ -14,13 +14,7 @@ Above, `J_p2_wrt_R` is the 3x3 Jacobian of `p2 = R * p1` with respect to small c
 It is possible (and more efficient) to combine evaluation and multiple Jacobian calculations:
 
 ```cpp
-// Using C++17
 auto [p2, J_p2_wrt_R, J_p2_wrt_p1] = (R * p1).evalWithJacobians(R, p1);
-
-// Or, using C++11
-wave::Translationd p2;
-Eigen::Matrix3d J_p2_wrt_R, J_p2_wrt_p1;
-std::tie(p2, J_p2_wrt_R, J_p2_wrt_p1) = (R * p1).evalWithJacobians(R, p1);
 ```
 
 We can also get all Jacobians at once by providing no arguments:

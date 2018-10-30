@@ -4,7 +4,7 @@
 [![Build Status](https://travis-ci.com/wavelab/wave_geometry.svg?branch=master)](https://travis-ci.com/wavelab/wave_geometry)
 [![Documentation](https://img.shields.io/website-online-offline-blue-red/http/wavelab.github.io%2Fwave_geometry.svg?label=docs)](https://wavelab.github.io/wave_geometry/)
 
-**wave_geometry** is a header-only C++14 library for working with rotations and transformations in robotics and computer vision applications. It differs from similar libraries by offering:
+**wave_geometry** is a header-only C++17 library for working with rotations and transformations in robotics and computer vision applications. It differs from similar libraries by offering:
 
 * Fast operations using expression templates
 * Fast on-manifold automatic differentiation
@@ -29,13 +29,7 @@ wave::RotationMd R = wave::RotationMd::Random();
 wave::Translationd p1 = wave::Translationd::Random();
 wave::Translationd p2 = R * p1;
 
-// Using C++17
 auto [p2, J_p2_wrt_R, J_p2_wrt_p1] = (R * p1).evalWithJacobians(R, p1);
-
-// Or, using C++14
-wave::Translationd p2;
-Eigen::Matrix3d J_p2_wrt_R, J_p2_wrt_p1;
-std::tie(p2, J_p2_wrt_R, J_p2_wrt_p1) = (R * p1).evalWithJacobians(R, p1);
 ```
 
 `wave_geometry` computes *local Jacobians*, which are independent of the choice of parametrization for `R` (e.g., rotation matrix or quaternion), and are useful for on-manifold optimization.
@@ -86,7 +80,7 @@ wave::RotationMFd<WorldFrame, CameraFrame> result = r1 * inverse(r2);
 
 `wave_geometry` is a header-only library, meaning no prior compilation is required to use
 it in your project. It requires Eigen 3.3.2 or above, Boost 1.58 or above
-(header-only libraries), and a C++14 compiler.
+(header-only libraries), and a C++17 compiler.
 
 `wave_geometry` can be installed with CMake:
 see [installation instructions](https://wavelab.github.io/wave_geometry/install.html).

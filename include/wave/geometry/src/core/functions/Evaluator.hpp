@@ -109,8 +109,8 @@ template <typename Derived>
 struct Evaluator<Derived, enable_if_nary_t<Derived>> {
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     using EvalType = eval_t<Derived>;
-    using ChildEvalTuple =
-      tmp::apply_each_t<Evaluator, typename traits<Derived>::ElementTuple>;
+    using ChildEvalTuple = tmp::apply_each_t<::wave::internal::Evaluator,
+                                             typename traits<Derived>::ElementTuple>;
     using IndexSeq = std::make_index_sequence<traits<Derived>::CompoundSize>;
     template <size_t... Is>
 

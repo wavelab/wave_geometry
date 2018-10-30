@@ -25,8 +25,8 @@ _common_packages: &common_packages
 
 jobs:
   include:
-    - name: "GCC 5"
-      env: WAVE_CXX=g++-5 WAVE_CC=gcc-5
+    - name: "GCC 6"
+      env: WAVE_CXX=g++-6 WAVE_CC=gcc-6
       addons:
         apt:
           sources:
@@ -35,20 +35,20 @@ jobs:
             - *common_sources
           packages:
             - *common_packages
-            - g++-5
-    - name: "Clang 4"
-      env: WAVE_CXX=clang++-4.0 WAVE_CC=clang-4.0
+            - g++-6
+    - name: "Clang 5"
+      env: WAVE_CXX=clang++-5.0 WAVE_CC=clang-5.0
       addons:
         apt:
           sources:
-            - llvm-toolchain-trusty-4.0
+            - llvm-toolchain-trusty-5.0
             - sourceline: 'ppa:lkoppel/robotics'
             - sourceline: 'ppa:kzemek/boost'
             - *common_sources
           packages:
             - *common_packages
             - g++-5
-            - clang-4.0
+            - clang-5.0
     - name: "GCC 8 AddressSanitizer"
       env: WAVE_CXX=g++-8 WAVE_CC=gcc-8 \
         ASAN_OPTIONS=detect_leaks=0:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1 \

@@ -13,7 +13,7 @@ git clone https://github.com/wavelab/wave_geometry
 wave_geometry requires:
   * an existing installation of [Eigen](http://eigen.tuxfamily.org) 3.3.2 or above
   * an existing installation of Boost 1.58 or above (header-only libraries)
-  * a C++14 compiler (tested on GCC 5.5, clang 4.0)
+  * a C++17 compiler (tested on GCC 6.5, clang 5.0)
 
 It has only been tested on Linux.
 
@@ -44,7 +44,7 @@ your project's `CMakeLists.txt` file as follows:
 cmake_minimum_required(VERSION 3.2)
 project(example)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 find_package(wave_geometry REQUIRED)
 

@@ -1,14 +1,4 @@
 # Benchmarks of the preintegrated IMU factor example
-#
-# Use C++17 for structured bindings
-# Rotate_chain uses C++17
-list (FIND CMAKE_CXX_KNOWN_FEATURES "cxx_std_17" index)
-if (${index} GREATER -1)
-  set(CMAKE_CXX_STANDARD 17)
-else()
-  message(STATUS "Not configuring imu_preint benchmarks because C++17 is not known to this version of CMake")
-  return()
-endif()
 
 wave_geometry_add_benchmark(rotate_chain_hand_bench rotate_chain_hand_bench.cpp)
 wave_geometry_add_benchmark(rotate_chain_wave_bench rotate_chain_wave_bench.cpp)

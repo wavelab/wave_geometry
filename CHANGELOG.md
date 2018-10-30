@@ -7,7 +7,7 @@
 - New n-ary expressions
 
 ### Backward-incompatible API changes
-- C++14 is now required
+- C++17 is now required
 - Boost 1.58 is now required
 - Change selection of storage types from expression types.
   (Described in docs under "Storage and auto")
@@ -28,7 +28,7 @@
 - Automated CI builds
 
 ### Deprecated support
-- C++11 support is deprecated. The next release will use C++14.
+- C++11 support is deprecated. The next release will use C++17.
 - Eigen 3.2.92 (3.3-beta2) is not officially supported. It works as of this release, but
 only 3.3.2 is tested in CI.
 
