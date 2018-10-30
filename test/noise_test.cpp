@@ -45,9 +45,11 @@ TYPED_TEST_CASE(NoiseTest, LeafTypes);
 
 
 TYPED_TEST(NoiseTest, diagonalNoise) {
+    using Block = typename TestFixture::Block;
+
     const auto stddev = TestFixture::TangentAA::Random().value();
-    const auto expected_cov = typename TestFixture::Block{stddev.asDiagonal()} *
-                              typename TestFixture::Block{stddev.asDiagonal()};
+    const auto expected_cov =
+      Block{Block{stddev.asDiagonal()} * Block{stddev.asDiagonal()}};
 
     const auto n = wave::DiagonalNoise<typename TestFixture::LeafAA>::FromStdDev(stddev);
 
