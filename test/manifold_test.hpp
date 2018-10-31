@@ -25,7 +25,6 @@ class ManifoldTest : public testing::Test {
  protected:
     using Scalar = typename Params::Scalar;
     using Leaf = typename Params::Leaf;
-    using ImplType = typename wave::internal::traits<Leaf>::ImplType;
 
     // Used for CHECK_JACOBIANS macro
     static constexpr bool IsFramed = Params::IsFramed;

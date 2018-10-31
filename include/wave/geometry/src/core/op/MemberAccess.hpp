@@ -34,6 +34,9 @@ struct MemberAccess final : internal::aux_base_tmpl_t<Aux, Rhs, MemberAccess<Aux
     using Base = internal::aux_base_tmpl_t<Aux, Rhs, MemberAccess<Aux, Rhs>>;
     using OutType = internal::functor_return_t<Aux, Rhs>;
     using Storage = internal::unary_storage_for<MemberAccess>;
+    using PlainEvalType = internal::plain_eval_t<MemberAccess>;
+    static constexpr bool WeHaveFrames = !internal::is_unframed<MemberAccess>{};
+    static constexpr bool LvalueRhs = std::is_lvalue_reference<Rhs>{};
 
  public:
     using Storage::Storage;
@@ -46,30 +49,55 @@ struct MemberAccess final : internal::aux_base_tmpl_t<Aux, Rhs, MemberAccess<Aux
      * Only allowed when this is an rvalue: we want to allow `a.translation() = x` but
      * avoid the confusion of `auto t = a.translation(); t = x;`
      */
-    template <typename Other,
-              std::enable_if_t<std::is_assignable<OutType &, const Other &>{} &&
-                                 std::is_lvalue_reference<Rhs>{},
-                               bool> = true>
-    MemberAccess &&operator=(const typename Base::template BaseTmpl<Other> &other) && {
+    template <
+      typename Other,
+      std::enable_if_t<!WeHaveFrames && internal::same_frames<MemberAccess, Other>{} &&
+                         LvalueRhs && std::is_assignable<OutType &, const Other &>{},
+                       bool> = true>
+    MemberAccess &operator=(const typename Base::template BaseTmpl<Other> &other) && {
         // Skip evaluateTo and Evaluator for now because we need a non-const reference to
         // the leaf
         // @todo clean up
         auto &leaf = evalImpl(internal::get_expr_tag_t<Rhs>{}, this->rhs());
-        auto block = internal::prepareLeafForOutput<MemberAccess>(Aux{}.get(leaf));
-        block = other.derived();
-        return std::move(*this);
+        Aux{}.get(leaf) = other.derived();
+        return *this;
     }
 
     // Overload for rvalue
-    template <typename Other,
-              std::enable_if_t<std::is_assignable<OutType &, Other &&>{} &&
-                                 std::is_lvalue_reference<Rhs>{},
-                               bool> = true>
-    MemberAccess &&operator=(typename Base::template BaseTmpl<Other> &&other) {
+    template <
+      typename Other,
+      std::enable_if_t<!WeHaveFrames && internal::same_frames<MemberAccess, Other>{} &&
+                         LvalueRhs && std::is_assignable<OutType &, Other &&>{},
+                       bool> = true>
+    MemberAccess &operator=(typename Base::template BaseTmpl<Other> &&other) {
         auto &leaf = evalImpl(internal::get_expr_tag_t<Rhs>{}, this->rhs());
-        auto block = internal::prepareLeafForOutput<MemberAccess>(Aux{}.get(leaf));
-        block = std::move(other).derived();
-        return std::move(*this);
+        Aux{}.get(leaf) = std::move(other).derived();
+        return *this;
+    }
+
+    // Overload for member with frames
+    template <
+      typename Other,
+      std::enable_if_t<WeHaveFrames && internal::same_frames<MemberAccess, Other>{} &&
+                         LvalueRhs && std::is_assignable<OutType &, const Other &>{},
+                       bool> = true>
+    MemberAccess &operator=(const typename Base::template BaseTmpl<Other> &other) && {
+        auto &leaf = evalImpl(internal::get_expr_tag_t<Rhs>{}, this->rhs());
+        Aux{}.get(leaf) = internal::prepareEvaluatorTo<PlainEvalType>(other.derived())();
+        return *this;
+    }
+
+    // Overload for rvalue, if member has frames
+    template <
+      typename Other,
+      std::enable_if_t<WeHaveFrames && internal::same_frames<MemberAccess, Other>{} &&
+                         LvalueRhs && std::is_assignable<OutType &, Other &&>{},
+                       bool> = true>
+    MemberAccess &operator=(typename Base::template BaseTmpl<Other> &&other) {
+        auto &leaf = evalImpl(internal::get_expr_tag_t<Rhs>{}, this->rhs());
+        Aux{}.get(leaf) =
+          internal::prepareEvaluatorTo<PlainEvalType>(std::move(other).derived())();
+        return *this;
     }
 };
 

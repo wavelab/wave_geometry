@@ -362,6 +362,13 @@ std::ostream &operator<<(std::ostream &os, const ExpressionBase<Derived> &expr) 
     return os << valueAsVector(internal::adl{}, expr.derived().eval());
 }
 
+// Let gtest print tuples
+template <typename... Ts>
+std::ostream &operator<<(std::ostream &os, const std::tuple<Ts...> &tup) {
+    return os << ::testing::PrintToString(tup);
+}
+
+
 }  // namespace wave
 
 // Example Frames

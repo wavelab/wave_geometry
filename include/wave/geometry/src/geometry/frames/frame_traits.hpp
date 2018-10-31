@@ -41,10 +41,6 @@ TICK_TRAIT(has_two_decorators) {
               is_false<has_three_decorators<D>>>;
 };
 
-/** Check if the expression has exactly matching frames, via traits */
-template <typename LhsDerived, typename RhsDerived, typename Enable = void>
-struct same_frames : std::false_type {};
-
 template <typename Lhs, typename Rhs>
 struct same_frames<
   Lhs,
@@ -84,9 +80,6 @@ struct is_unframed_impl<NoFrame, NoFrame, NoFrame> : std::true_type {};
  *
  * @note even an explicitly defined type Framed<..., NoFrame, NoFrame> will evaluate true.
  */
-template <typename Derived, typename Enable = void>
-struct is_unframed : std::false_type {};
-
 template <typename Derived>
 struct is_unframed<Derived, std::enable_if_t<has_two_decorators<Derived>{}>>
     : is_unframed_impl<typename eval_traits<Derived>::LeftFrame,

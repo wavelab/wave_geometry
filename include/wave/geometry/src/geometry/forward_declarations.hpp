@@ -119,7 +119,7 @@ class RigidTransformBase;
 template <typename Derived>
 class MatrixRigidTransform;
 
-template <typename Derived>
+template <typename QuatType, typename VecType>
 class CompactRigidTransform;
 
 template <typename Leaf>

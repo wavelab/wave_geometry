@@ -35,11 +35,27 @@ struct CompoundLeafStorage {
     CompoundLeafStorage &operator=(const CompoundLeafStorage &) = default;
     CompoundLeafStorage &operator=(CompoundLeafStorage &&) = default;
 
-    template <typename... Args, std::enable_if_t<(sizeof...(Args) > 1), bool> = true>
+    /** Constructs storage tuple from multiple arguments */
+    template <typename... Args,
+              std::enable_if_t<(sizeof...(Args) > 1) &&
+                                 std::is_constructible<StorageType, Args...>{},
+                               bool> = true>
     explicit CompoundLeafStorage(Args &&... args)
         : storage_{std::forward<Args>(args)...} {}
 
-    /** Assign from another expression */
+    /** Constructs storage tuple from a single (presumably tuple) argument */
+    template <typename Arg,
+              std::enable_if_t<!std::is_same<std::decay_t<Arg>, CompoundLeafStorage>{} &&
+                                 std::is_constructible<StorageType, Arg>{},
+                               bool> = true>
+    explicit CompoundLeafStorage(Arg &&arg) : storage_{std::forward<Arg>(arg)} {}
+
+    /** Constructs from another expression */
+    template <typename OtherDerived>
+    explicit CompoundLeafStorage(const ExpressionBase<OtherDerived> &rhs)
+        : CompoundLeafStorage{wave::internal::evaluateTo<Derived>(rhs.derived())} {}
+
+    /** Assigns from another expression */
     template <typename Rhs, typename RhsBase = internal::base_tmpl_t<Derived, Rhs>>
     Derived &operator=(const RhsBase &rhs) {
         this->storage =

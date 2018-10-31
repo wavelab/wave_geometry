@@ -33,6 +33,14 @@ struct NotAllowed {};
 /** Marker of ADL-enabled functions in internal namespace */
 struct adl {};
 
+/** Check if the expression has exactly matching frames, via traits */
+template <typename Lhs, typename Rhs, typename Enable = void>
+struct same_frames;
+
+/** Check if the expression has no frames */
+template <typename Derived, typename Enable = void>
+struct is_unframed : std::true_type {};
+
 }  // namespace internal
 
 template <typename Derived, typename StorageType>

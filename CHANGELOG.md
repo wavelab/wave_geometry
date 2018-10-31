@@ -12,6 +12,8 @@
 - Boost 1.58 is now required
 - Change selection of storage types from expression types.
   (Described in docs under "Storage and auto")
+- `CompactRigidTransform` stored as separate quaternion and vector instead of 7-vector.
+  Changed template parameters.
 
 ### Fixes and minor changes
 - Fix finding googletest source package on Ubuntu bionic

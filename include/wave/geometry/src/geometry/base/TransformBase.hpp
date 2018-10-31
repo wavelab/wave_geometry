@@ -37,7 +37,7 @@ struct TranslationGetter {
       WrapWithFrames<LeftFrameOf<Derived>, LeftFrameOf<Derived>, RightFrameOf<Derived>>;
 
     template <typename BareTf>
-    static auto get(BareTf &&leaf) {
+    static decltype(auto) get(BareTf &&leaf) {
         return std::forward<BareTf>(leaf).translationBlock();
     }
 
