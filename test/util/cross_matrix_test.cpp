@@ -27,7 +27,7 @@ TEST(CrossMatrixTest, evaluate) {
         Eigen::Matrix3d expected = manualCrossMatrix(vec);
         const auto &crossExpr = wave::crossMatrix(vec);
 
-        EXPECT_EQ(expected, crossExpr);
+        EXPECT_APPROX(expected, crossExpr);
     }
 }
 
@@ -39,7 +39,7 @@ TEST(CrossMatrixTest, evaluateForProduct) {
         Eigen::Matrix3d expected = manualCrossMatrix(mat * vec);
         const auto &crossExpr = wave::crossMatrix(mat * vec);
 
-        EXPECT_EQ(expected, crossExpr);
+        EXPECT_APPROX(expected, crossExpr);
     }
 }
 
@@ -52,7 +52,7 @@ TEST(CrossMatrixTest, multiplyVec) {
         expected = manualCrossMatrix(a) * b;
         actual = wave::crossMatrix(a) * b;
 
-        EXPECT_EQ(expected, actual);
+        EXPECT_APPROX(expected, actual);
     }
 }
 
@@ -65,7 +65,7 @@ TEST(CrossMatrixTest, multiplyNegativeVec) {
         expected = -manualCrossMatrix(a) * b;
         actual = -wave::crossMatrix(a) * b;
 
-        EXPECT_EQ(expected, actual);
+        EXPECT_APPROX(expected, actual);
     }
 }
 
@@ -79,7 +79,7 @@ TEST(CrossMatrixTest, multiplyMat) {
         expected = manualCrossMatrix(a) * b;
         actual = wave::crossMatrix(a) * b;
 
-        EXPECT_EQ(expected, actual);
+        EXPECT_APPROX(expected, actual);
     }
 }
 
@@ -93,7 +93,7 @@ TEST(CrossMatrixTest, crossNegTimesMat) {
         expected = manualCrossMatrix(-a) * b;
         actual = wave::crossMatrix(-a) * b;
 
-        EXPECT_EQ(expected, actual);
+        EXPECT_APPROX(expected, actual);
     }
 }
 
@@ -108,7 +108,7 @@ TEST(CrossMatrixTest, multiplyMatRight) {
         expected = b * manualCrossMatrix(a);
         actual = b * wave::crossMatrix(a);
 
-        EXPECT_EQ(expected, actual);
+        EXPECT_APPROX(expected, actual);
     }
 }
 
@@ -122,7 +122,7 @@ TEST(CrossMatrixTest, multiplyDynamicMat) {
         expected = manualCrossMatrix(a) * b;
         actual = wave::crossMatrix(a) * b;
 
-        EXPECT_EQ(expected, actual);
+        EXPECT_APPROX(expected, actual);
     }
 }
 
@@ -136,7 +136,7 @@ TEST(CrossMatrixTest, multiplyDynamicMatRight) {
         expected = b * manualCrossMatrix(a);
         actual = b * wave::crossMatrix(a);
 
-        EXPECT_EQ(expected, actual);
+        EXPECT_APPROX(expected, actual);
     }
 }
 
