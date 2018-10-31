@@ -35,13 +35,15 @@ struct CompoundLeafStorage {
     CompoundLeafStorage &operator=(const CompoundLeafStorage &) = default;
     CompoundLeafStorage &operator=(CompoundLeafStorage &&) = default;
 
-    /** Constructs storage tuple from multiple arguments */
+    /** Constructs storage tuple from one argument per primitive */
     template <typename... Args,
-              std::enable_if_t<(sizeof...(Args) > 1) &&
-                                 std::is_constructible<StorageType, Args...>{},
-                               bool> = true>
+              std::enable_if_t<
+                (sizeof...(Args) > 1) &&
+                  std::conjunction<
+                    std::is_constructible<internal::storage_t<Primitives>, Args>...>{},
+                bool> = true>
     explicit CompoundLeafStorage(Args &&... args)
-        : storage_{std::forward<Args>(args)...} {}
+        : storage_{internal::storage_t<Primitives>{std::forward<Args>(args)}...} {}
 
     /** Constructs storage tuple from a single (presumably tuple) argument */
     template <typename Arg,
