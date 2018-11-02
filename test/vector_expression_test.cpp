@@ -37,23 +37,20 @@ class VectorTest : public testing::Test {
                      wave::FrameCast<FrameC, FrameB, FrameA, LeafAAB>>);
 };
 
-// The list of implementation types to run each test case on
-using LeafTypes = test_types_list<wave::Translationd,
-                                  wave::Translation<Eigen::Vector3f>,
-                                  wave::RelativeRotationd,
-                                  wave::Twistd>;
-// The following tests will be built for each type in LeafTypes
-TYPED_TEST_CASE(VectorTest, LeafTypes);
+// Use a type-parametrized test case, meaning we can instantiate it with types later
+// without knowing the types in advance.
+// See https://github.com/google/googletest/blob/master/googletest/docs/advanced.md
+TYPED_TEST_CASE_P(VectorTest);
 
 // Direct construct from an Eigen vector
-TYPED_TEST(VectorTest, constructFromVector) {
+TYPED_TEST_P(VectorTest, constructFromVector) {
     const auto eigen_vec = typename TestFixture::Vector{TestFixture::Vector::Random()};
     const auto t = typename TestFixture::LeafAAB{eigen_vec};
     EXPECT_APPROX(eigen_vec, t.value());
 }
 
 // Direct construct from a temporary Eigen vector
-TYPED_TEST(VectorTest, constructFromTempVector) {
+TYPED_TEST_P(VectorTest, constructFromTempVector) {
     const auto eigen_vec = typename TestFixture::Vector{TestFixture::Vector::Zero()};
     const auto t = typename TestFixture::LeafAAB{
       typename TestFixture::Vector{TestFixture::Vector::Zero()}};
@@ -61,7 +58,7 @@ TYPED_TEST(VectorTest, constructFromTempVector) {
 }
 
 // Direct construct from a non-plain Eigen expression
-TYPED_TEST(VectorTest, constructFromEigenExpression) {
+TYPED_TEST_P(VectorTest, constructFromEigenExpression) {
     const auto eigen_vec = typename TestFixture::Vector{TestFixture::Vector::Random()};
     const auto t = typename TestFixture::LeafAAB{-eigen_vec};
     EXPECT_APPROX((-eigen_vec).eval(), t.value());
@@ -84,12 +81,12 @@ template <typename T,
 void testConstructFromScalars() {}
 
 // Direct construct from three scalars (only for 3-vector case)
-TYPED_TEST(VectorTest, constructFromCoeffs) {
+TYPED_TEST_P(VectorTest, constructFromCoeffs) {
     testConstructFromScalars<typename TestFixture::LeafAAB>();
 }
 
 // Construct from an object of the same type
-TYPED_TEST(VectorTest, copyConstructBraces) {
+TYPED_TEST_P(VectorTest, copyConstructBraces) {
     const auto eigen_vec = typename TestFixture::Vector{TestFixture::Vector::Random()};
     const typename TestFixture::LeafAAB t1{eigen_vec};
 
@@ -98,7 +95,7 @@ TYPED_TEST(VectorTest, copyConstructBraces) {
 }
 
 // Construct from an object of the same type
-TYPED_TEST(VectorTest, copyConstructEquals) {
+TYPED_TEST_P(VectorTest, copyConstructEquals) {
     const auto eigen_vec = typename TestFixture::Vector{TestFixture::Vector::Random()};
     const typename TestFixture::LeafAAB t1{eigen_vec};
 
@@ -107,7 +104,7 @@ TYPED_TEST(VectorTest, copyConstructEquals) {
 }
 
 // Assign from an object of the same type
-TYPED_TEST(VectorTest, copyAssign) {
+TYPED_TEST_P(VectorTest, copyAssign) {
     const auto eigen_vec = typename TestFixture::Vector{TestFixture::Vector::Random()};
     typename TestFixture::LeafAAB t1{eigen_vec}, t2{};
 
@@ -116,7 +113,7 @@ TYPED_TEST(VectorTest, copyAssign) {
 }
 
 // Assign from a temporary object of the same type
-TYPED_TEST(VectorTest, moveAssign) {
+TYPED_TEST_P(VectorTest, moveAssign) {
     const auto eigen_vec = typename TestFixture::Vector{TestFixture::Vector::Random()};
     typename TestFixture::LeafAAB t2;
 
@@ -125,7 +122,7 @@ TYPED_TEST(VectorTest, moveAssign) {
 }
 
 // Construct a plain leaf from a non-plain leaf, whose ImplType is an Eigen sum expression
-TYPED_TEST(VectorTest, directConstructFromExpr) {
+TYPED_TEST_P(VectorTest, directConstructFromExpr) {
     const auto eigen_a = typename TestFixture::Vector{TestFixture::Vector::Random()};
     const auto eigen_b = typename TestFixture::Vector{TestFixture::Vector::Random()};
 
@@ -141,14 +138,14 @@ TYPED_TEST(VectorTest, directConstructFromExpr) {
 }
 
 // Check that the result of Random() is the same type
-TYPED_TEST(VectorTest, constructRandom) {
+TYPED_TEST_P(VectorTest, constructRandom) {
     auto t1 = typename TestFixture::LeafAAB{};
     auto t2 = TestFixture::LeafAAB::Random();
     static_assert(std::is_same<decltype(t1), decltype(t2)>{},
                   "Random() returns non-plain type");
 }
 
-TYPED_TEST(VectorTest, add) {
+TYPED_TEST_P(VectorTest, add) {
     const auto t1 = TestFixture::LeafAAB::Random();
     const auto t2 = TestFixture::LeafABC::Random();
 
@@ -159,7 +156,7 @@ TYPED_TEST(VectorTest, add) {
     CHECK_JACOBIANS(TestFixture::IsFramed, t1 + t2, t1, t2);
 }
 
-TYPED_TEST(VectorTest, addFlipped) {
+TYPED_TEST_P(VectorTest, addFlipped) {
     const auto t1 = TestFixture::LeafAAB::Random();
     const auto t2 = TestFixture::LeafABC::Random();
 
@@ -170,7 +167,7 @@ TYPED_TEST(VectorTest, addFlipped) {
     CHECK_JACOBIANS(TestFixture::IsFramed, t2 + t1, t2, t1);
 }
 
-TYPED_TEST(VectorTest, addWithFrameCast) {
+TYPED_TEST_P(VectorTest, addWithFrameCast) {
     const auto t1 = TestFixture::LeafAAB::Random();
     const auto expr = wave::frame_cast<typename TestFixture::FrameA,
                                        typename TestFixture::FrameC,
@@ -186,7 +183,7 @@ TYPED_TEST(VectorTest, addWithFrameCast) {
     CHECK_JACOBIANS(false, expr, t1);
 }
 
-TYPED_TEST(VectorTest, subtract) {
+TYPED_TEST_P(VectorTest, subtract) {
     const auto t1 = TestFixture::LeafAAC::Random();
     const auto t2 = TestFixture::LeafABC::Random();
     const auto result = typename TestFixture::LeafAAB{t1 - t2};
@@ -196,7 +193,7 @@ TYPED_TEST(VectorTest, subtract) {
     CHECK_JACOBIANS(TestFixture::IsFramed, t1 - t2, t1, t2);
 }
 
-TYPED_TEST(VectorTest, negate) {
+TYPED_TEST_P(VectorTest, negate) {
     const auto t1 = TestFixture::LeafAAB::Random();
     const auto result = typename TestFixture::LeafABA{-t1};
     const auto eigen_result = typename TestFixture::Vector{-(t1.value())};
@@ -205,7 +202,7 @@ TYPED_TEST(VectorTest, negate) {
     CHECK_JACOBIANS(true, -t1, t1);
 }
 
-TYPED_TEST(VectorTest, squaredNorm) {
+TYPED_TEST_P(VectorTest, squaredNorm) {
     const auto t1 = TestFixture::LeafAAB::Random();
 
     // Note .squaredNorm() returns an expression, which here is implicitly converted to a
@@ -222,7 +219,7 @@ TYPED_TEST(VectorTest, squaredNorm) {
     CHECK_JACOBIANS(true, t1.squaredNorm(), t1);
 }
 
-TYPED_TEST(VectorTest, norm) {
+TYPED_TEST_P(VectorTest, norm) {
     const auto t1 = TestFixture::LeafAAB::Random();
 
     // Note .norm() returns an expression, which here is implicitly converted to a double
@@ -233,7 +230,7 @@ TYPED_TEST(VectorTest, norm) {
     CHECK_JACOBIANS(true, t1.norm(), t1);
 }
 
-TYPED_TEST(VectorTest, normalize) {
+TYPED_TEST_P(VectorTest, normalize) {
     const auto t1 = TestFixture::LeafAAB::Random();
 
     // Note .norm() returns an expression, which here is implicitly converted to a double
@@ -244,7 +241,7 @@ TYPED_TEST(VectorTest, normalize) {
     CHECK_JACOBIANS(true, expr, t1);
 }
 
-TYPED_TEST(VectorTest, dot) {
+TYPED_TEST_P(VectorTest, dotProduct) {
     const auto t1 = TestFixture::LeafAAB::Random();
     const auto t2 = TestFixture::LeafABC::Random();
 
@@ -256,7 +253,7 @@ TYPED_TEST(VectorTest, dot) {
     CHECK_JACOBIANS(TestFixture::IsFramed, expr, t1, t2);
 }
 
-TYPED_TEST(VectorTest, addNorms) {
+TYPED_TEST_P(VectorTest, addNorms) {
     const auto t1 = TestFixture::LeafAAB::Random();
     const auto t2 = TestFixture::LeafABC::Random();
 
@@ -267,7 +264,7 @@ TYPED_TEST(VectorTest, addNorms) {
     CHECK_JACOBIANS(TestFixture::IsFramed, t1.norm() + t2.norm(), t1, t2);
 }
 
-TYPED_TEST(VectorTest, addMultiple) {
+TYPED_TEST_P(VectorTest, addMultiple) {
     const auto t1 = TestFixture::LeafAAB::Random();
     const auto t2 = TestFixture::LeafABC::Random();
     const auto t3 = TestFixture::LeafACA::Random();
@@ -279,7 +276,7 @@ TYPED_TEST(VectorTest, addMultiple) {
     CHECK_JACOBIANS(false, t1 + t2 + t3 + t1, t1, t2, t3);
 }
 
-TYPED_TEST(VectorTest, addTemporary) {
+TYPED_TEST_P(VectorTest, addTemporary) {
     const auto t1 = TestFixture::LeafAAB::Random();
     const auto v2 = typename TestFixture::Vector{TestFixture::Vector::Random()};
     const auto result =
@@ -288,13 +285,13 @@ TYPED_TEST(VectorTest, addTemporary) {
     EXPECT_APPROX(eigen_result, result.value());
 }
 
-TYPED_TEST(VectorTest, constructFromZeroLeaf) {
+TYPED_TEST_P(VectorTest, constructFromZeroLeaf) {
     const auto t1 = typename TestFixture::LeafAAB{typename TestFixture::ZeroLeafAAB{}};
     const auto expected = typename TestFixture::Vector{TestFixture::Vector::Zero()};
     EXPECT_APPROX(expected, t1.value());
 }
 
-TYPED_TEST(VectorTest, addZeroLeaf) {
+TYPED_TEST_P(VectorTest, addZeroLeaf) {
     const auto t1 = TestFixture::LeafAAB::Random();
     const auto t2 = typename TestFixture::ZeroLeafABC{};
     const auto result = (t1 + t2).eval();
@@ -305,7 +302,7 @@ TYPED_TEST(VectorTest, addZeroLeaf) {
     CHECK_JACOBIANS(true, t1 + t2, t1, t2);
 }
 
-TYPED_TEST(VectorTest, addZeroLeafLhs) {
+TYPED_TEST_P(VectorTest, addZeroLeafLhs) {
     const auto t1 = typename TestFixture::ZeroLeafAAB{};
     const auto t2 = TestFixture::LeafABC::Random();
     const auto result = (t1 + t2).eval();
@@ -313,7 +310,7 @@ TYPED_TEST(VectorTest, addZeroLeafLhs) {
     CHECK_JACOBIANS(true, t1 + t2, t1, t2);
 }
 
-TYPED_TEST(VectorTest, addTwoZeroLeafs) {
+TYPED_TEST_P(VectorTest, addTwoZeroLeafs) {
     const auto t1 = typename TestFixture::ZeroLeafAAB{};
     const auto t2 = typename TestFixture::ZeroLeafABC{};
     const auto result = (t1 + t2).eval();
@@ -323,7 +320,7 @@ TYPED_TEST(VectorTest, addTwoZeroLeafs) {
     CHECK_JACOBIANS(TestFixture::IsFramed, t1 + t2, t1, t2);
 }
 
-TYPED_TEST(VectorTest, scaleLeft) {
+TYPED_TEST_P(VectorTest, scaleLeft) {
     const auto t1 = TestFixture::LeafAAB::Random();
     const auto a = wave::uniformRandom<typename TestFixture::Scalar>(-3.0, 3.0);
     const auto result = typename TestFixture::LeafAAB{a * t1};
@@ -332,7 +329,7 @@ TYPED_TEST(VectorTest, scaleLeft) {
     CHECK_JACOBIANS(true, a * t1, a, t1);
 }
 
-TYPED_TEST(VectorTest, scaleRight) {
+TYPED_TEST_P(VectorTest, scaleRight) {
     const auto t1 = TestFixture::LeafAAB::Random();
     const auto a = wave::uniformRandom<typename TestFixture::Scalar>(-3.0, 3.0);
     const auto result = typename TestFixture::LeafAAB{t1 * a};
@@ -342,7 +339,7 @@ TYPED_TEST(VectorTest, scaleRight) {
     CHECK_JACOBIANS(true, t1 * a, t1, a);
 }
 
-TYPED_TEST(VectorTest, scaleDivideRight) {
+TYPED_TEST_P(VectorTest, scaleDivideRight) {
     const auto t1 = TestFixture::LeafAAB::Random();
     const auto a = wave::uniformRandom<typename TestFixture::Scalar>(-3.0, 3.0);
     const auto result = typename TestFixture::LeafAAB{t1 / a};
@@ -352,7 +349,7 @@ TYPED_TEST(VectorTest, scaleDivideRight) {
     CHECK_JACOBIANS(true, t1 * a, t1, a);
 }
 
-TYPED_TEST(VectorTest, scaleByExpressionLeft) {
+TYPED_TEST_P(VectorTest, scaleByExpressionLeft) {
     const auto t1 = TestFixture::LeafAAB::Random();
     const auto t2 = TestFixture::LeafABC::Random();
     const auto result = typename TestFixture::LeafAAB{t2.norm() * t1};
@@ -363,7 +360,7 @@ TYPED_TEST(VectorTest, scaleByExpressionLeft) {
     CHECK_JACOBIANS(TestFixture::IsFramed, t2.norm() * t1, t2, t1);
 }
 
-TYPED_TEST(VectorTest, scaleByExpressionRight) {
+TYPED_TEST_P(VectorTest, scaleByExpressionRight) {
     const auto t1 = TestFixture::LeafAAB::Random();
     const auto t2 = TestFixture::LeafABC::Random();
     const auto result = typename TestFixture::LeafAAB{t1 * t2.norm()};
@@ -374,7 +371,7 @@ TYPED_TEST(VectorTest, scaleByExpressionRight) {
     CHECK_JACOBIANS(TestFixture::IsFramed, t1 * t2.norm(), t1, t2);
 }
 
-TYPED_TEST(VectorTest, scaleDivideByExpressionRight) {
+TYPED_TEST_P(VectorTest, scaleDivideByExpressionRight) {
     const auto t1 = TestFixture::LeafAAB::Random();
     const auto t2 = TestFixture::LeafABC::Random();
     const auto result = typename TestFixture::LeafAAB{t1 / t2.norm()};
@@ -384,3 +381,39 @@ TYPED_TEST(VectorTest, scaleDivideByExpressionRight) {
     EXPECT_APPROX(eigen_result, result.value());
     CHECK_JACOBIANS(TestFixture::IsFramed, t1 / t2.norm(), t1, t2);
 }
+
+// When adding a test it must also be added to the REGISTER_TYPED_TEST_CASE_P call below.
+// Yes, it's redundant; apparently the drawback of using type-parameterized tests.
+REGISTER_TYPED_TEST_CASE_P(VectorTest,
+                           constructFromVector,
+                           constructFromTempVector,
+                           constructFromEigenExpression,
+                           constructFromCoeffs,
+                           copyConstructBraces,
+                           copyConstructEquals,
+                           copyAssign,
+                           moveAssign,
+                           directConstructFromExpr,
+                           constructRandom,
+                           add,
+                           addFlipped,
+                           addWithFrameCast,
+                           subtract,
+                           negate,
+                           squaredNorm,
+                           norm,
+                           normalize,
+                           dotProduct,
+                           addNorms,
+                           addMultiple,
+                           addTemporary,
+                           constructFromZeroLeaf,
+                           addZeroLeaf,
+                           addZeroLeafLhs,
+                           addTwoZeroLeafs,
+                           scaleLeft,
+                           scaleRight,
+                           scaleDivideRight,
+                           scaleByExpressionLeft,
+                           scaleByExpressionRight,
+                           scaleDivideByExpressionRight);

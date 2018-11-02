@@ -9,7 +9,15 @@ WAVE_GEOMETRY_ADD_TEST(rotation_test rotation_test.cpp)
 WAVE_GEOMETRY_ADD_TEST(scalar_expression_test scalar_expression_test.cpp
   scalar_expression_op_test.cpp
   scalar_ref_test.cpp)
-WAVE_GEOMETRY_ADD_TEST(vector_expression_test vector_expression_test.cpp)
+
+WAVE_GEOMETRY_ADD_TYPED_TEST(vector_expression_test vector_expression_test.cpp
+  VectorTest TYPES
+  wave::Translationd
+  wave::Translation<Eigen::Vector3f>
+  wave::RelativeRotationd
+  wave::Twistd)
+
+
 WAVE_GEOMETRY_ADD_TEST(rvalue_expression_test rvalue_expression_test.cpp)
 WAVE_GEOMETRY_ADD_TEST(rigid_transform_test rigid_transform_test.cpp)
 WAVE_GEOMETRY_ADD_TEST(manifold_test manifold_test_so3.cpp manifold_test_se3.cpp)

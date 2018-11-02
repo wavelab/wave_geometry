@@ -39,6 +39,53 @@ FUNCTION(WAVE_GEOMETRY_ADD_TEST NAME)
 
 ENDFUNCTION(WAVE_GEOMETRY_ADD_TEST)
 
+# wave_geometry_add_typed_test: Add a gtest target, with a macro for the type under test
+#
+# WAVE_GEOMETRY_ADD_TYPED_TEST(Name src TestCase TYPES t1 [t2...] [DISABLED])
+#
+# For each given type name, a test will be added with WAVE_GEOMETRY_ADD_TEST using a
+# generated file which uses gtest's INSTANTIATE_TYPED_TEST_CASE_P macro. The TEST_CASE
+# argument must match the gtest test case name in the source file.
+#
+# This helper lets us separate compilation of typed tests into multiple translation units
+# without manually making separate source files for each instantiation.
+#
+# This function is limited to tests with a single source file.
+FUNCTION(WAVE_GEOMETRY_ADD_TYPED_TEST NAME SOURCE_FILE TEST_CASE)
+    # Define the arguments this function accepts
+    SET(options "")  # We pass on the DISABLED option as an unparsed argument
+    SET(one_value_args "")
+    SET(multi_value_args TYPES)
+    CMAKE_PARSE_ARGUMENTS(wave_geometry_add_typed_test
+      "${options}" "${one_value_args}" "${multi_value_args}" ${ARGN})
+
+    IF(NOT wave_geometry_add_typed_test_TYPES)
+        MESSAGE(FATAL_ERROR "At least one value must be given for TYPES")
+    ENDIF()
+
+    SET(generated_sources "")
+
+    FOREACH(type_name ${wave_geometry_add_typed_test_TYPES})
+        STRING(REPLACE "::" "_" replaced_name ${type_name})
+        STRING(REGEX REPLACE "[<>]" "_" replaced_name ${replaced_name})
+        SET(generated_file "${NAME}_${replaced_name}.cpp")
+
+        SET(TEST_SOURCE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_FILE}")
+        SET(WAVE_GEOMETRY_TYPE_UNDER_TEST ${type_name})
+        SET(TEST_CASE_PREFIX "${replaced_name}")
+        SET(TEST_CASE_NAME "${TEST_CASE}")
+        CONFIGURE_FILE("${PROJECT_SOURCE_DIR}/test/instantiate_typed_test.cpp.in"
+            "${generated_file}" @ONLY)
+        LIST(APPEND generated_sources "${generated_file}")
+    ENDFOREACH()
+
+
+    WAVE_GEOMETRY_ADD_TEST(${NAME} ${generated_sources}
+      ${wave_geometry_add_typed_test_UNPARSED_ARGUMENTS})
+
+ENDFUNCTION(WAVE_GEOMETRY_ADD_TYPED_TEST)
+
+
 #     wave_geometry_add_benchmark: Add a target which links against google benchmark
 #
 # WAVE_GEOMETRY_ADD_BENCHMARK(Name src1 [src2...])

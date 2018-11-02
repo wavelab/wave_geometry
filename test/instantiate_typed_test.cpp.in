@@ -1,0 +1,11 @@
+/* This file is used by the WAVE_GEOMETRY_ADD_TYPED_TEST CMake function to generate a unit
+ * test executable with multiple instantiations of typed tests. This helper lets us
+ * separate compilation of typed tests into multiple translation units, without actually
+ * using separate source files and gtest's TYPED_TEST_P macros.
+ */
+#include "@TEST_SOURCE_FILE@"
+
+// Run each test for framed and unframed variants of these types
+using LeafTypes = test_types_list<@WAVE_GEOMETRY_TYPE_UNDER_TEST@>;
+
+INSTANTIATE_TYPED_TEST_CASE_P(@TEST_CASE_PREFIX@, @TEST_CASE_NAME@, LeafTypes);
