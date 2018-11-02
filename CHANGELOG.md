@@ -10,16 +10,16 @@
 ### Backward-incompatible API changes
 - C++17 is now required
 - Boost 1.58 is now required
-- Change selection of storage types from expression types.
+- Changed selection of storage types from expression types.
   (Described in docs under "Storage and auto")
 - `CompactRigidTransform` stored as separate quaternion and vector instead of 7-vector.
   Changed template parameters.
 
 ### Fixes and minor changes
-- Fix finding googletest source package on Ubuntu bionic
-- Fix (trivial) reverse-mode AD on a single leaf
-- Move numerical Jacobian evaluator into `core` module
-- Reorganize and rename storage base classes
+- Fixed finding googletest source package on Ubuntu bionic
+- Fixed (trivial) reverse-mode AD on a single leaf
+- Moved numerical Jacobian evaluator into `core` module
+- Reorganized and renamed storage base classes
 - .translation() and .rotation() methods work on all transform expressions (not just leaves)
 
 ## [0.3.0](https://github.com/wavelab/wave_geometry/compare/0.2.0...0.3.0) (2018-08-19)
