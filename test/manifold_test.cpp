@@ -13,10 +13,6 @@
  * The tests are included in this header file so that instantiations for different types
  * (e.g. RotationMd and RigidTransformMd) can be split into different translation units.
  */
-
-#ifndef WAVE_GEOMETRY_MANIFOLD_TEST_HPP
-#define WAVE_GEOMETRY_MANIFOLD_TEST_HPP
-
 #include "wave/geometry/geometry.hpp"
 #include "test.hpp"
 
@@ -226,5 +222,3 @@ REGISTER_TYPED_TEST_CASE_P(ManifoldTest,
                            expMapJacobianNearZero,
                            boxPlusJacobian,
                            boxMinusJacobian);
-
-#endif  // WAVE_GEOMETRY_MANIFOLD_TEST_HPP

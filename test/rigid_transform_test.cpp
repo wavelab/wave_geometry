@@ -56,20 +56,19 @@ class RigidTransformTest : public testing::Test {
     TICK_TRAIT_CHECK(wave::internal::is_leaf_expression<LeafAB>);
 };
 
-// The list of implementation types to run each test case on
-using LeafTypes = test_types_list<wave::RigidTransformMd, wave::RigidTransformQd>;
+// Use a type-parametrized test case, meaning we can instantiate it with types later
+// without knowing the types in advance.
+// See https://github.com/google/googletest/blob/master/googletest/docs/advanced.md
+TYPED_TEST_CASE_P(RigidTransformTest);
 
-// The following tests will be built for each type in LeafTypes
-TYPED_TEST_CASE(RigidTransformTest, LeafTypes);
-
-TYPED_TEST(RigidTransformTest, constructFromMatrixAndVector) {
+TYPED_TEST_P(RigidTransformTest, constructFromMatrixAndVector) {
     auto rt = typename TestFixture::LeafAB{this->R1, this->t1};
 
     EXPECT_APPROX(this->R1, typename TestFixture::Matrix3{rt.rotation().eval().value()});
     EXPECT_APPROX(this->t1, rt.translation().eval().value());
 }
 
-TYPED_TEST(RigidTransformTest, getters) {
+TYPED_TEST_P(RigidTransformTest, getters) {
     const auto rt = typename TestFixture::LeafAB{this->R1, this->t1};
 
     const auto &R = rt.rotation().eval().value();
@@ -81,7 +80,7 @@ TYPED_TEST(RigidTransformTest, getters) {
     //    CHECK_JACOBIANS(true, rt.translation(), rt);
 }
 
-TYPED_TEST(RigidTransformTest, assignRvalueViaSubobject) {
+TYPED_TEST_P(RigidTransformTest, assignRvalueViaSubobject) {
     auto rt = typename TestFixture::LeafAB{this->R1, this->t1};
     const auto r = TestFixture::RotMAB::Random();
 
@@ -91,7 +90,7 @@ TYPED_TEST(RigidTransformTest, assignRvalueViaSubobject) {
     EXPECT_APPROX(r, rt.rotation());
 }
 
-TYPED_TEST(RigidTransformTest, assignLvalueViaSubobject) {
+TYPED_TEST_P(RigidTransformTest, assignLvalueViaSubobject) {
     auto rt = typename TestFixture::LeafAB{this->R1, this->t1};
     const auto t = typename TestFixture::PointAAB{1., 2., 3.};
     const auto r = TestFixture::RotMAB::Random();
@@ -101,7 +100,7 @@ TYPED_TEST(RigidTransformTest, assignLvalueViaSubobject) {
     EXPECT_APPROX(r, rt.rotation());
 }
 
-TYPED_TEST(RigidTransformTest, assignViaSubobjectNoFrame) {
+TYPED_TEST_P(RigidTransformTest, assignViaSubobjectNoFrame) {
     // Special case where the object is Framed but has NoFrame descriptors - should be
     // assignable from unframed
     auto rt = wave::Framed<typename TestFixture::Leaf, wave::NoFrame, wave::NoFrame>{
@@ -113,7 +112,7 @@ TYPED_TEST(RigidTransformTest, assignViaSubobjectNoFrame) {
 }
 
 // These tests ensure there are no problems with invalid references to temporaries, etc
-TYPED_TEST(RigidTransformTest, sumOfProductOfSubobjects) {
+TYPED_TEST_P(RigidTransformTest, sumOfProductOfSubobjects) {
     const auto rt1 = TestFixture::LeafAB::Random();
     const auto rt2 = TestFixture::LeafBC::Random();
 
@@ -127,7 +126,7 @@ TYPED_TEST(RigidTransformTest, sumOfProductOfSubobjects) {
 }
 
 
-TYPED_TEST(RigidTransformTest, copyConstruct) {
+TYPED_TEST_P(RigidTransformTest, copyConstruct) {
     const auto rt1 = TestFixture::LeafAB::Random();
     const auto rt2 = rt1;
     EXPECT_APPROX(rt1.rotation(), rt2.rotation());
@@ -136,14 +135,14 @@ TYPED_TEST(RigidTransformTest, copyConstruct) {
 }
 
 
-TYPED_TEST(RigidTransformTest, identity) {
+TYPED_TEST_P(RigidTransformTest, identityExpr) {
     const auto rt = TestFixture::LeafAB::Identity();
 
     EXPECT_TRUE(typename TestFixture::Matrix3{rt.rotation().value()}.isIdentity());
     EXPECT_TRUE(rt.translation().eval().value().isZero());
 }
 
-TYPED_TEST(RigidTransformTest, inverse) {
+TYPED_TEST_P(RigidTransformTest, inverseExpr) {
     const auto r1 = TestFixture::LeafAB::Random();
     const auto r2 = typename TestFixture::LeafBA{inverse(r1)};
 
@@ -159,7 +158,7 @@ TYPED_TEST(RigidTransformTest, inverse) {
     CHECK_JACOBIANS(true, inverse(r1), r1);
 }
 
-TYPED_TEST(RigidTransformTest, composeWithM) {
+TYPED_TEST_P(RigidTransformTest, composeWithM) {
     const auto lhs = TestFixture::LeafAB::Random();
     const auto rhs = TestFixture::TransformM_BC::Random();
 
@@ -176,7 +175,7 @@ TYPED_TEST(RigidTransformTest, composeWithM) {
     CHECK_JACOBIANS(expected_unique, lhs * rhs, lhs, rhs);
 }
 
-TYPED_TEST(RigidTransformTest, composeWithQ) {
+TYPED_TEST_P(RigidTransformTest, composeWithQ) {
     const auto lhs = TestFixture::LeafAB::Random();
     const auto rhs = TestFixture::TransformQ_BC::Random();
 
@@ -193,7 +192,7 @@ TYPED_TEST(RigidTransformTest, composeWithQ) {
     CHECK_JACOBIANS(expected_unique, lhs * rhs, lhs, rhs);
 }
 
-TYPED_TEST(RigidTransformTest, transformVector) {
+TYPED_TEST_P(RigidTransformTest, transformVector) {
     const auto rt = TestFixture::LeafBA::Random();
     const auto p1 = TestFixture::PointAAC::Random();
     const auto p2 = typename TestFixture::PointBBC{rt * p1};
@@ -206,3 +205,19 @@ TYPED_TEST(RigidTransformTest, transformVector) {
 
     CHECK_JACOBIANS(true, rt * p1, rt, p1);
 }
+
+// When adding a test it must also be added to the REGISTER_TYPED_TEST_CASE_P call below.
+// Yes, it's redundant; apparently the drawback of using type-parameterized tests.
+REGISTER_TYPED_TEST_CASE_P(RigidTransformTest,
+                           constructFromMatrixAndVector,
+                           getters,
+                           assignRvalueViaSubobject,
+                           assignLvalueViaSubobject,
+                           assignViaSubobjectNoFrame,
+                           sumOfProductOfSubobjects,
+                           copyConstruct,
+                           identityExpr,
+                           inverseExpr,
+                           composeWithM,
+                           composeWithQ,
+                           transformVector);

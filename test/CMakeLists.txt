@@ -1,11 +1,12 @@
-IF(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  # Disable excessive warning from clang (see https://github.com/dealii/dealii/issues/3705)
-  # from templated test fixtures
-  ADD_COMPILE_OPTIONS(-Wno-undefined-var-template)
-ENDIF()
-
 # geometry
-WAVE_GEOMETRY_ADD_TEST(rotation_test rotation_test.cpp)
+WAVE_GEOMETRY_ADD_TYPED_TEST(rotation_test rotation_test.cpp
+  RotationTest TYPES
+  wave::RotationMd
+  wave::RotationQd
+  wave::RotationAd)
+
+WAVE_GEOMETRY_ADD_TEST(rotation_misc_test rotation_misc_test.cpp)
+
 WAVE_GEOMETRY_ADD_TEST(scalar_expression_test scalar_expression_test.cpp
   scalar_expression_op_test.cpp
   scalar_ref_test.cpp)
@@ -17,10 +18,20 @@ WAVE_GEOMETRY_ADD_TYPED_TEST(vector_expression_test vector_expression_test.cpp
   wave::RelativeRotationd
   wave::Twistd)
 
+WAVE_GEOMETRY_ADD_TYPED_TEST(rigid_transform_test rigid_transform_test.cpp
+  RigidTransformTest TYPES
+  wave::RigidTransformMd
+  wave::RigidTransformQd)
+
+WAVE_GEOMETRY_ADD_TYPED_TEST(manifold_test manifold_test.cpp
+  ManifoldTest TYPES
+  wave::RotationMd
+  wave::RotationQd
+  wave::RotationAd
+  wave::RigidTransformMd
+  wave::RigidTransformQd)
 
 WAVE_GEOMETRY_ADD_TEST(rvalue_expression_test rvalue_expression_test.cpp)
-WAVE_GEOMETRY_ADD_TEST(rigid_transform_test rigid_transform_test.cpp)
-WAVE_GEOMETRY_ADD_TEST(manifold_test manifold_test_so3.cpp manifold_test_se3.cpp)
 
 # benchmarks
 WAVE_GEOMETRY_ADD_TEST(imu_preint_test imu_preint_test.cpp)
@@ -41,5 +52,9 @@ WAVE_GEOMETRY_ADD_TEST(dynamic_expression_test.cpp dynamic_expression_test.cpp)
 WAVE_GEOMETRY_ADD_TEST(compound_test compound_test.cpp)
 
 # estimation
-WAVE_GEOMETRY_ADD_TEST(noise_test noise_test.cpp)
+WAVE_GEOMETRY_ADD_TYPED_TEST(noise_test estimation/noise_test.cpp
+  NoiseTest TYPES
+  wave::RotationQd
+  wave::Translationd)
+
 WAVE_GEOMETRY_ADD_TEST(factor_test estimation/factor_test.cpp)

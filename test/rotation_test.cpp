@@ -61,40 +61,40 @@ class RotationTest : public testing::Test {
     TICK_TRAIT_CHECK(wave::internal::is_unary_expression<wave::BoxMinus<LeafAB, LeafAB>>);
 };
 
-// The list of implementation types to run each test case on
-using LeafTypes = test_types_list<wave::RotationMd, wave::RotationQd, wave::RotationAd>;
-// The following tests will be built for each type in LeafTypes
-TYPED_TEST_CASE(RotationTest, LeafTypes);
+// Use a type-parametrized test case, meaning we can instantiate it with types later
+// without knowing the types in advance.
+// See https://github.com/google/googletest/blob/master/googletest/docs/advanced.md
+TYPED_TEST_CASE_P(RotationTest);
 
 // Each rotation type should be constructable from all 3 Eigen rotation types
-TYPED_TEST(RotationTest, constructFromM) {
+TYPED_TEST_P(RotationTest, constructFromM) {
     const typename TestFixture::Matrix3 eigen_obj{this->q1};
     const auto rotation = typename TestFixture::LeafAB{eigen_obj};
     EXPECT_APPROX(typename TestFixture::ImplType{eigen_obj}, rotation.value());
 }
 
-TYPED_TEST(RotationTest, constructFromQ) {
+TYPED_TEST_P(RotationTest, constructFromQ) {
     const typename TestFixture::Quaternion eigen_obj{this->q1};
     const auto rotation = typename TestFixture::LeafAB{eigen_obj};
     EXPECT_APPROX(typename TestFixture::ImplType{eigen_obj}, rotation.value());
 }
 
 
-TYPED_TEST(RotationTest, constructFromA) {
+TYPED_TEST_P(RotationTest, constructFromA) {
     const typename TestFixture::AngleAxis eigen_obj{this->q1};
     const auto rotation = typename TestFixture::LeafAB{eigen_obj};
     EXPECT_APPROX(typename TestFixture::ImplType{eigen_obj}, rotation.value());
 }
 
 // Check that the result of Random() is the same type
-TYPED_TEST(RotationTest, constructRandom) {
+TYPED_TEST_P(RotationTest, constructRandom) {
     auto r = TestFixture::LeafAB::Random();
     static_assert(std::is_same<typename TestFixture::LeafAB, decltype(r)>{},
                   "Random() returns non-plain type");
 }
 
 // Test methods of TransformBase
-TYPED_TEST(RotationTest, getRotation) {
+TYPED_TEST_P(RotationTest, getRotation) {
     auto r = TestFixture::LeafAB::Random();
     static_assert(
       std::is_same<typename TestFixture::LeafAB, decltype(r.rotation().eval())>{},
@@ -102,7 +102,7 @@ TYPED_TEST(RotationTest, getRotation) {
     EXPECT_APPROX(r, r.rotation());
 }
 
-TYPED_TEST(RotationTest, assignViaGetter) {
+TYPED_TEST_P(RotationTest, assignViaGetter) {
     auto r = TestFixture::LeafAB::Random();
     auto r2 = TestFixture::LeafAB::Random();
 
@@ -111,13 +111,13 @@ TYPED_TEST(RotationTest, assignViaGetter) {
 }
 
 // Test methods of TransformBase
-TYPED_TEST(RotationTest, getTranslation) {
+TYPED_TEST_P(RotationTest, getTranslation) {
     auto r = TestFixture::LeafAB::Random();
     auto t = typename TestFixture::PointAAB{r.translation()};
     EXPECT_TRUE(t.value().isZero());
 }
 
-TYPED_TEST(RotationTest, rotateVector) {
+TYPED_TEST_P(RotationTest, rotateVector) {
     const auto r1 = TestFixture::LeafBA::Random();
     const auto p1 = TestFixture::PointAAB::Random();
     const auto p2 = typename TestFixture::PointBAB{r1 * p1};
@@ -129,7 +129,7 @@ TYPED_TEST(RotationTest, rotateVector) {
     CHECK_JACOBIANS(true, r1 * p1, r1, p1);
 }
 
-TYPED_TEST(RotationTest, inverse) {
+TYPED_TEST_P(RotationTest, inverseExpr) {
     const auto r1 = TestFixture::LeafAB::Random();
     const auto r2 = typename TestFixture::LeafBA{inverse(r1)};
 
@@ -140,7 +140,7 @@ TYPED_TEST(RotationTest, inverse) {
     CHECK_JACOBIANS(true, inverse(r1), r1);
 }
 
-TYPED_TEST(RotationTest, composeWithM) {
+TYPED_TEST_P(RotationTest, composeWithM) {
     const auto r1 = TestFixture::LeafAB::Random();
     const auto r2 = TestFixture::RotationM_BC::Random();
     const auto result = typename TestFixture::LeafAC{r1 * r2};
@@ -157,7 +157,7 @@ TYPED_TEST(RotationTest, composeWithM) {
     CHECK_JACOBIANS(expected_unique, r1 * r2, r1, r2);
 }
 
-TYPED_TEST(RotationTest, composeWithQ) {
+TYPED_TEST_P(RotationTest, composeWithQ) {
     const auto r1 = TestFixture::LeafAB::Random();
     const auto r2 = TestFixture::RotationQ_BC::Random();
     const auto result = typename TestFixture::LeafAC{r1 * r2};
@@ -174,7 +174,7 @@ TYPED_TEST(RotationTest, composeWithQ) {
     CHECK_JACOBIANS(expected_unique, r1 * r2, r1, r2);
 }
 
-TYPED_TEST(RotationTest, composeWithA) {
+TYPED_TEST_P(RotationTest, composeWithA) {
     const auto r1 = TestFixture::LeafAB::Random();
     const auto r2 = TestFixture::RotationA_BC::Random();
     const auto result = typename TestFixture::LeafAC{r1 * r2};
@@ -191,38 +191,18 @@ TYPED_TEST(RotationTest, composeWithA) {
     CHECK_JACOBIANS(expected_unique, r1 * r2, r1, r2);
 }
 
-// Miscellanious tests which don't apply to every type
-
-// So far the fixture doesn't test maps, so test a few things here.
-// (assume that the map will work the same as non-map after construction).
-TEST(RotationMiscTest, constructRotationQConstMap) {
-    const auto q = wave::randomQuaternion<double>();
-    // Currently a mapped rotation can be constructed by giving it a map temporary
-    // @todo add constructor taking a pointer?
-    const wave::QuaternionRotation<Eigen::Map<const Eigen::Quaterniond>> r{
-      Eigen::Map<const Eigen::Quaterniond>{q.coeffs().data()}};
-
-    EXPECT_APPROX(wave::RotationQd{q}, r);
-}
-
-TEST(RotationMiscTest, constructRotationQMap) {
-    auto q = wave::randomQuaternion<double>();
-    wave::QuaternionRotation<Eigen::Map<Eigen::Quaterniond>> r{
-      Eigen::Map<Eigen::Quaterniond>{q.coeffs().data()}};
-
-    EXPECT_APPROX(wave::RotationQd{q}, r);
-
-    // Change mapped value: both should change
-    r.value() = wave::randomQuaternion<double>();
-    EXPECT_APPROX(wave::RotationQd{q}, r);
-    EXPECT_EQ(q.coeffs().data(), r.value().coeffs().data());
-}
-
-TEST(RotationMiscTest, constructRotationMMap) {
-    auto m = Eigen::Matrix3d{wave::randomQuaternion<double>()};
-    const wave::MatrixRotation<Eigen::Map<Eigen::Matrix3d>> r{
-      Eigen::Map<Eigen::Matrix3d>{m.data()}};
-
-    EXPECT_APPROX(m, r.value());
-    EXPECT_EQ(m.data(), r.value().data());
-}
+// When adding a test it must also be added to the REGISTER_TYPED_TEST_CASE_P call below.
+// Yes, it's redundant; apparently the drawback of using type-parameterized tests.
+REGISTER_TYPED_TEST_CASE_P(RotationTest,
+                           constructFromM,
+                           constructFromQ,
+                           constructFromA,
+                           constructRandom,
+                           getRotation,
+                           assignViaGetter,
+                           getTranslation,
+                           rotateVector,
+                           inverseExpr,
+                           composeWithM,
+                           composeWithQ,
+                           composeWithA);

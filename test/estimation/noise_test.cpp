@@ -1,4 +1,4 @@
-#include "test.hpp"
+#include "../test.hpp"
 #include "wave/geometry/estimation.hpp"
 
 template <typename Params>
@@ -37,14 +37,12 @@ class NoiseTest : public testing::Test {
     // Static traits checks
 };
 
-// The list of implementation types to run each test case on
-using LeafTypes = test_types_list<wave::RotationQd>;
+// Use a type-parametrized test case, meaning we can instantiate it with types later
+// without knowing the types in advance.
+// See https://github.com/google/googletest/blob/master/googletest/docs/advanced.md
+TYPED_TEST_CASE_P(NoiseTest);
 
-// The following tests will be built for each type in LeafTypes
-TYPED_TEST_CASE(NoiseTest, LeafTypes);
-
-
-TYPED_TEST(NoiseTest, diagonalNoise) {
+TYPED_TEST_P(NoiseTest, diagonalNoise) {
     using Block = typename TestFixture::Block;
 
     const auto stddev = TestFixture::TangentAA::Random().value();
@@ -59,7 +57,7 @@ TYPED_TEST(NoiseTest, diagonalNoise) {
       n.inverseSqrtCov().toDenseMatrix() * n.inverseSqrtCov().toDenseMatrix());
 }
 
-TYPED_TEST(NoiseTest, singleNoise) {
+TYPED_TEST_P(NoiseTest, singleNoise) {
     const auto stddev = 1.1;
 
     const auto noise =
@@ -68,7 +66,7 @@ TYPED_TEST(NoiseTest, singleNoise) {
     EXPECT_DOUBLE_EQ(1. / stddev, noise.inverseSqrtCov().toDenseMatrix()[0]);
 }
 
-TYPED_TEST(NoiseTest, fullNoise) {
+TYPED_TEST_P(NoiseTest, fullNoise) {
     // Construct a random positive-definite matrix
     const auto r = TestFixture::Block::Random().eval();
     const auto n = TestFixture::Block::RowsAtCompileTime;
@@ -83,3 +81,7 @@ TYPED_TEST(NoiseTest, fullNoise) {
                   noise.inverseSqrtCov() * cov * noise.inverseSqrtCov());
     EXPECT_APPROX(TestFixture::Block::Identity(), r * A * r);
 }
+
+// When adding a test it must also be added to the REGISTER_TYPED_TEST_CASE_P call below.
+// Yes, it's redundant; apparently the drawback of using type-parameterized tests.
+REGISTER_TYPED_TEST_CASE_P(NoiseTest, diagonalNoise, singleNoise, fullNoise);
