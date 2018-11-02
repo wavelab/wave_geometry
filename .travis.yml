@@ -47,7 +47,7 @@ jobs:
             - *common_sources
           packages:
             - *common_packages
-            - g++-5
+            - g++-6
             - clang-5.0
     - name: "GCC 8 AddressSanitizer"
       env: WAVE_CXX=g++-8 WAVE_CC=gcc-8 \
