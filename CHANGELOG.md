@@ -21,6 +21,7 @@
 - Moved numerical Jacobian evaluator into `core` module
 - Reorganized and renamed storage base classes
 - .translation() and .rotation() methods work on all transform expressions (not just leaves)
+- Faster exponential map to quaternions
 
 ## [0.3.0](https://github.com/wavelab/wave_geometry/compare/0.2.0...0.3.0) (2018-08-19)
 ### New features

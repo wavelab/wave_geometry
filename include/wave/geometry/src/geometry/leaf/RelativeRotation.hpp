@@ -87,31 +87,45 @@ namespace internal {
 template <typename ImplType>
 struct traits<RelativeRotation<ImplType>>
     : vector_leaf_traits_base<RelativeRotation<ImplType>> {
+    // Type of exponential map, currently used by expmap of Zero expression
     using ExpType = MatrixRotation<Eigen::Matrix<typename ImplType::Scalar, 3, 3>>;
 };
 
-/** Implements exp map of a relative rotation into a rotation matrix */
+/** Implements exp map of a relative rotation into a quaternion rotation
+ *
+ * When evaluating a rotation matrix, a conversion is needed. However, as shown by
+ * expmap_bench.cpp, this method is faster than the Rodrigues formula expmap to matrix,
+ * even after the conversion.
+ *
+ * Based on:  F. S. Grassia, "Practical parameterization of rotations using the
+ * exponential map," Journal of graphics tools, 1998.
+ */
 template <typename ImplType>
 auto evalImpl(expr<ExpMap>, const RelativeRotation<ImplType> &rhs) {
-    using ExpType = typename traits<RelativeRotation<ImplType>>::ExpType;
     using Scalar = typename ImplType::Scalar;
-    using Mat3 = Eigen::Matrix<Scalar, 3, 3>;
     using std::cos;
     using std::sin;
     using std::sqrt;
-    const auto &r = rhs.value();
-    // Rodrigues formula - see http://ethaneade.com/lie.pdf
-    const auto angle2 = r.squaredNorm();
-    const auto angle = sqrt(angle2);
-    if (angle2 > Eigen::NumTraits<Scalar>::epsilon()) {
-        return ExpType{Mat3::Identity() + sin(angle) / angle * crossMatrix(r) +
-                       (Scalar{1} - cos(angle)) / angle2 * crossMatrix(r) *
-                         crossMatrix(r)};
+
+    auto q = QuaternionRotation<Eigen::Quaternion<Scalar>>{};
+    const auto &v = rhs.value();
+    const Scalar angle2 = v.squaredNorm();
+    const Scalar angle = sqrt(angle2);
+    Scalar s;
+    Scalar c;
+
+    if (angle2 * angle2 > Eigen::NumTraits<Scalar>::epsilon()) {
+        const Scalar sa = sin(angle / 2);
+        s = sa / angle;
+        c = cos(angle / 2);
     } else {
-        // Small angle: use Taylor expansions
-        return ExpType{Mat3::Identity() + crossMatrix(r) +
-                       Scalar{0.5} * crossMatrix(r) * crossMatrix(r)};
+        s = Scalar{0.5} + angle2 / 48;
+        c = 1 - angle2 / 8;
     }
+
+    // storage order x, y, z, w
+    q.value().coeffs() << s * v, c;
+    return q;
 }
 
 /** Jacobian of exp map of a relative rotation */

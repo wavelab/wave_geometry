@@ -34,7 +34,7 @@ inline Mat3 expMapM(const Vec3 &v) {
         const auto s_half = sin(angle / 2);
 
         return Mat3{Mat3::Identity() + s / angle * crossMatrix(v) +
-            2 * s_half * s_half / angle2 * crossMatrix(v) * crossMatrix(v)};
+                    2 * s_half * s_half / angle2 * crossMatrix(v) * crossMatrix(v)};
     } else {
         // Small angle: use linear terms of Taylor expansion
         return Mat3{Mat3::Identity() + crossMatrix(v)};

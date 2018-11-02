@@ -93,7 +93,9 @@ BENCHMARK_F(Imu, waveUntyped)(benchmark::State &state) {
 }
 
 Eigen::Matrix3d expMap(const Eigen::Vector3d &phi) {
-    return evalImpl(wave::internal::expr<ExpMap>{}, wave::RelativeRotationd{phi}).value();
+    const auto &q =
+      evalImpl(wave::internal::expr<ExpMap>{}, wave::RelativeRotationd{phi});
+    return q.value().matrix();
 }
 
 Eigen::Vector3d logMap(const Eigen::Matrix3d &C) {
