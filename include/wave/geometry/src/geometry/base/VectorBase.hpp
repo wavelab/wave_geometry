@@ -8,24 +8,24 @@
 
 namespace wave {
 
-/** Mixin representing an expression on @f[ \mathbb{R}^n @f]
+/** Represents a Euclidean vector
+ *
+ * Conceptual base class for expressions representing a Euclidean vector on
+ * @f[ \mathbb{R}^n @f].
+ *
+ * Where A is AffineBase and V is a VectorBase, we hold
+ *   V + V -> V
+ *     -V  -> V
+ *   A + V -> A
+ *   A - A -> V
  */
 template <typename Derived>
-struct VectorBase : ExpressionBase<Derived> {
+struct VectorBase : AffineBase<Derived> {
  private:
     using Scalar = internal::scalar_t<Derived>;
     using OutputType = internal::plain_output_t<Derived>;
 
  public:
-    static auto Random() -> OutputType {
-        return ::wave::Random<OutputType>{}.eval();
-    }
-
-    /** Returns an expression representing a zero element*/
-    static auto Zero() -> ::wave::Zero<OutputType> {
-        return ::wave::Zero<OutputType>{};
-    }
-
     /** Returns a differentiable expression for the vector's L2 norm */
     auto norm() const & {
         return Norm<internal::cr_arg_t<Derived>>{this->derived()};
@@ -46,24 +46,12 @@ struct VectorBase : ExpressionBase<Derived> {
     }
 
     WAVE_OVERLOAD_SELF_METHOD_FOR_RVALUE(normalized, Normalize, Derived)
-
-    /** Fuzzy comparison - see Eigen::DenseBase::isApprox() */
-    template <typename R, TICK_REQUIRES(internal::same_base_tmpl_i<Derived, R>{})>
-    bool isApprox(
-      const VectorBase<R> &rhs,
-      const Scalar &prec = Eigen::NumTraits<Scalar>::dummy_precision()) const {
-        return this->eval().value().isApprox(rhs.eval().value(), prec);
-    }
-
-    /** True if approximately zero vector - see Eigen::DenseBase::isZero() */
-    bool isZero(const Scalar &prec = Eigen::NumTraits<Scalar>::dummy_precision()) const {
-        return this->eval().value().isZero(prec);
-    }
 };
 
 namespace internal {
 
-/** Base for traits of a vector leaf expression using an Eigen type for storage.*/
+/** Base for traits of a vector or affine expression using an Eigen vector type for
+ * storage.*/
 template <typename Derived>
 struct vector_leaf_traits_base;
 
@@ -75,8 +63,8 @@ struct vector_leaf_traits_base<Tmpl<ImplType_>> : leaf_traits_base<Tmpl<ImplType
 
  public:
     // Vector-specific traits
-    using TangentType = Derived;
-    using TangentBlocks = std::tuple<Derived>;
+    using TangentType = Derived;  // must be changed for non-vector affine objects
+    using TangentBlocks = std::tuple<Derived>;  // must be changed for non-vector affine
     using ImplType = ImplType_;
 
     template <typename NewImplType>
@@ -95,41 +83,21 @@ auto makeVectorLike(ImplType &&arg) {
       std::forward<ImplType>(arg)};
 }
 
-/** Implementation of conversion between two vector leaves
- *
- * While this seems trivial, it is needed for the case the template params are not the
- * same.
+/** Implementation of Sum for two vector leaves
+ * (disambiguates overload resolution of AffineBase sums)
+ * Assume spaces have already been checked.
  */
-template <typename ToType,
-          typename Rhs,
-          TICK_REQUIRES(internal::same_base_tmpl<ToType, Rhs>{})>
-auto evalImpl(expr<Convert, ToType>, const VectorBase<Rhs> &rhs) -> ToType {
-    return ToType{rhs.derived().value()};
+template <typename Lhs, typename Rhs>
+auto evalImpl(expr<Sum>, const VectorBase<Lhs> &lhs, const VectorBase<Rhs> &rhs) {
+    return plain_output_t<Lhs>{lhs.derived().value() + rhs.derived().value()};
 }
 
-/** Implementation of Sum for two vector leaves
- *
- * Since the temporary is so small, we return a plain vector instead of an Eigen::Sum.
- */
-template <typename Lhs, typename Rhs, TICK_REQUIRES(internal::same_base_tmpl<Lhs, Rhs>{})>
-auto evalImpl(expr<Sum>, const VectorBase<Lhs> &lhs, const VectorBase<Rhs> &rhs) {
-    return plain_output_t<Rhs>{lhs.derived().value() + rhs.derived().value()};
-}
 
 /** Implementation of Minus for a vector leaf
  */
 template <typename Rhs>
 auto evalImpl(expr<Minus>, const VectorBase<Rhs> &rhs) {
     return makeVectorLike<Rhs>(-rhs.derived().value());
-}
-
-/** Implementation of Random for a vector leaf
- *
- * Produces a random vector with coefficients from -1 to 1
- */
-template <typename Leaf, typename Rhs>
-auto evalImpl(expr<Random, Leaf>, const VectorBase<Rhs> &) {
-    return Leaf{internal::traits<Leaf>::ImplType::Random()};
 }
 
 /** Implementation of squared L2 norm for a vector leaf
@@ -301,29 +269,6 @@ auto operator+(const VectorBase<L> &lhs, const VectorBase<R> &rhs) {
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator+, Sum, VectorBase, VectorBase)
-
-/** Applies vector addition to two vector expressions (of the same space)
- *
- * @f[ \mathbb{R}^n \times \mathbb{R}^n \to \mathbb{R}^n @f]
- */
-template <typename L, typename R>
-auto operator-(const VectorBase<L> &lhs, const VectorBase<R> &rhs) {
-    return lhs.derived() + (-rhs.derived());
-}
-
-// Overloads for rvalues
-template <typename L, typename R>
-auto operator-(VectorBase<L> &&lhs, const VectorBase<R> &rhs) {
-    return std::move(lhs).derived() + (-rhs.derived());
-}
-template <typename L, typename R>
-auto operator-(const VectorBase<L> &lhs, VectorBase<R> &&rhs) {
-    return lhs.derived() + (-std::move(rhs).derived());
-}
-template <typename L, typename R>
-auto operator-(VectorBase<L> &&lhs, VectorBase<R> &&rhs) {
-    return std::move(lhs).derived() + (-std::move(rhs).derived());
-}
 
 /** Negates a vector expression
  *

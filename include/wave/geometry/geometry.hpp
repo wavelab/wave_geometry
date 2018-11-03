@@ -24,6 +24,7 @@
 // Geometric leaves and bases
 #include "src/geometry/base/CompoundBase.hpp"
 #include "src/geometry/base/ScalarBase.hpp"
+#include "src/geometry/base/AffineBase.hpp"
 #include "src/geometry/base/VectorBase.hpp"
 #include "src/geometry/base/TransformBase.hpp"
 #include "src/geometry/base/RotationBase.hpp"

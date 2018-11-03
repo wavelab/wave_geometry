@@ -18,6 +18,9 @@ template <typename Derived>
 struct CompoundBase;
 
 template <typename Derived>
+struct AffineBase;
+
+template <typename Derived>
 struct VectorBase;
 
 template <typename Derived>

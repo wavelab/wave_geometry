@@ -13,6 +13,11 @@ namespace wave {
 template <typename Lhs, typename Rhs>
 struct Sum : internal::base_tmpl_t<Lhs, Rhs, Sum<Lhs, Rhs>>,
              internal::binary_storage_for<Sum<Lhs, Rhs>> {
+    static_assert(
+      internal::same_base_tmpl<typename internal::eval_traits<Lhs>::TangentType,
+                               typename internal::eval_traits<Rhs>::TangentType>{},
+      "Operands to sum have mismatching difference types");
+
     // Inherit constructor from BinaryStorage
     using Storage = internal::binary_storage_for<Sum<Lhs, Rhs>>;
     using Storage::Storage;
