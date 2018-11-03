@@ -65,6 +65,12 @@ struct same_frames<
                                std::is_same<typename eval_traits<Lhs>::RightFrame,
                                             typename eval_traits<Rhs>::RightFrame>{}> {};
 
+// Static assert whether frames match, in a way that shows the frames in compiler message
+// Where we have an expression Rhs, we use this by instantiating with plain_output_t<Rhs>
+template <typename Lhs, typename Rhs>
+inline void assert_same_frames() {
+    static_assert(same_frames<Lhs, Rhs>{}, "Mismatching frames");
+};
 
 template <typename...>
 struct is_unframed_impl : std::false_type {};
@@ -115,7 +121,8 @@ template <typename... Frames>
 struct WrapWithFrames {
     template <typename Arg>
     auto operator()(Arg &&leaf) const -> Framed<tmp::remove_cr_t<Arg>, Frames...> {
-        return Framed<tmp::remove_cr_t<Arg>, Frames...>{std::forward<Arg>(leaf)};
+        using FramedType = Framed<tmp::remove_cr_t<Arg>, Frames...>;
+        return FramedType{typename FramedType::from_unframed{}, std::forward<Arg>(leaf)};
     }
 };
 

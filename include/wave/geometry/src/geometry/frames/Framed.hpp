@@ -59,30 +59,31 @@ class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Fra
      *
      * Allowed only if our leaf is plain (e.g. a Vector3d, not a Sum expression)
      */
-    template <typename OtherDerived,
-              TICK_REQUIRES(WeArePlain and WeHaveFrames
-                              and internal::same_frames<Framed, OtherDerived>{})>
-    Framed(const ExpressionBase<OtherDerived> &other)
+    template <typename Rhs, TICK_REQUIRES(WeArePlain and WeHaveFrames)>
+    Framed(const ExpressionBase<Rhs> &other)
         // Evaluate to Framed and delegate to our copy or move constructor
-        : Framed{wave::internal::evaluateTo<Framed>(other.derived())} {}
+        : Framed{wave::internal::evaluateTo<Framed>(other.derived())} {
+        internal::assert_same_frames<Framed, internal::plain_output_t<Rhs>>();
+    }
 
-    template <typename OtherDerived,
-              TICK_REQUIRES(WeArePlain and WeHaveFrames
-                              and internal::same_frames<Framed, OtherDerived>{})>
-    Framed(ExpressionBase<OtherDerived> &&other)
+    template <typename Rhs, TICK_REQUIRES(WeArePlain and WeHaveFrames)>
+    Framed(ExpressionBase<Rhs> &&other)
         // Evaluate to Framed and delegate to our copy or move constructor
-        : Framed{wave::internal::evaluateTo<Framed>(std::move(other).derived())} {}
+        : Framed{wave::internal::evaluateTo<Framed>(std::move(other).derived())} {
+        internal::assert_same_frames<Framed, internal::plain_output_t<Rhs>>();
+    }
 
 
     /** Construct from an expression in the special case we have all NoFrame*/
     // The above constructor won't work in this case since evaluateTo will return an
     // unframed expression.
-    template <typename OtherDerived,
-              TICK_REQUIRES(WeArePlain and !WeHaveFrames and
-                            internal::same_frames<Framed, OtherDerived>{})>
+    template <typename OtherDerived, TICK_REQUIRES(WeArePlain and !WeHaveFrames)>
     Framed(const ExpressionBase<OtherDerived> &other)
         // Evaluate to Framed and delegate to our copy or move constructor
-        : wrapped_leaf{wave::internal::evaluateTo<WrappedLeaf>(other.derived())} {}
+        : wrapped_leaf{wave::internal::evaluateTo<WrappedLeaf>(other.derived())} {
+        static_assert(internal::same_frames<Framed, OtherDerived>{},
+                      "Mismatching frames");
+    }
 
     // Forward args to rhs (version for one argument)
     // Disable if copy ctor would apply - https://stackoverflow.com/a/39646176
@@ -140,7 +141,11 @@ class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Fra
     friend class Framed;
 
     // Allow the WrapWithFrames functor to contruct Framed from an unframed leaf
-    friend struct internal::WrapWithFrames<Frames...>;
+    template <typename...>
+    friend struct internal::WrapWithFrames;
+
+    // Tag used to construct a Framed from an unframed
+    struct from_unframed {};
 
     // Strip frames at the start of evaluation
     // Note these friend functions are free functions which will be found by ADL.
@@ -161,7 +166,7 @@ class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Fra
               std::enable_if_t<internal::is_leaf_expression<OtherDerived>{} &&
                                  internal::is_unframed<OtherDerived>{},
                                int> = 0>
-    explicit Framed(ExpressionBase<OtherDerived> &&other)
+    explicit Framed(from_unframed, ExpressionBase<OtherDerived> &&other)
         : wrapped_leaf{std::move(other.derived())} {}
 
     /** Construct from an unframed leaf - only allowed for our friend functor which is
@@ -170,7 +175,7 @@ class Framed : public internal::base_tmpl_t<WrappedLeaf, Framed<WrappedLeaf, Fra
               std::enable_if_t<internal::is_leaf_expression<OtherDerived>{} &&
                                  WeHaveFrames && internal::is_unframed<OtherDerived>{},
                                int> = 0>
-    explicit Framed(const ExpressionBase<OtherDerived> &other)
+    explicit Framed(from_unframed, const ExpressionBase<OtherDerived> &other)
         : wrapped_leaf{other.derived()} {}
 };
 

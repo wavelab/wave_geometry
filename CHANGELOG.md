@@ -26,6 +26,7 @@
 - .translation() and .rotation() methods work on all transform expressions (not just leaves)
 - Faster exponential map to quaternions
 - `Subtract` expression represents subtraction, replacing combination of sum and negation.
+- Improved error message on trying to construct a Framed object from a mismatching expression.
 
 ## [0.3.0](https://github.com/wavelab/wave_geometry/compare/0.2.0...0.3.0) (2018-08-19)
 ### New features
