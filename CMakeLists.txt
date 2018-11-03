@@ -1,4 +1,4 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.2)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.8)
 PROJECT(wave_geometry)
 
 # Compiler settings for all targets

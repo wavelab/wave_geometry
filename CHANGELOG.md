@@ -10,6 +10,7 @@
 ### Backward-incompatible API changes
 - C++17 is now required
 - Boost 1.58 is now required
+- CMake 3.8 is now required
 - Changed selection of storage types from expression types.
   (Described in docs under "Storage and auto")
 - `CompactRigidTransform` stored as separate quaternion and vector instead of 7-vector.

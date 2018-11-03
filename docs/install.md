@@ -41,7 +41,7 @@ Once wave_geometry has been either installed or exported by CMake, it can be use
 your project's `CMakeLists.txt` file as follows:
 
 ```cmake
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.8)
 project(example)
 
 set(CMAKE_CXX_STANDARD 17)
