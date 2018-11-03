@@ -1,0 +1,8 @@
+{% extends "!layout.html" %}
+{% block extrabody %}
+{# Include macros inside MathJax inline math block. display:none to avoid flickering
+before MathJax processes it. #}
+<div style="display:none">
+{% include 'macros.tex' %}
+</div>
+{% endblock %}

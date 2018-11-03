@@ -1,32 +1,49 @@
 # Manifold operations
 
-`wave_geometry` includes operations on `$SO(3)$`, the Lie group of 3D rotations,
-and `$SE(3)$`, the group of 3D rigid transformations.
+`wave_geometry` includes operations on `$\SO3$`, the Lie group of 3D rotations,
+and `$\SE3$`, the group of 3D rigid transformations.
 
 ```eval_rst
-
-.. csv-table:: Supported operations
+.. csv-table:: Supported manifold operations
    :header: Operation, "", Code
-   :widths: 15, 10, 30
+   :widths: 30, 20, 30
     
-    Sum, :math:`\mathbf{v}+\mathbf{v}`, ``v + v``
-    Difference, :math:`\mathbf{v}-\mathbf{v}`, ``v - v``
-    Negative, :math:`-\mathbf v`, ``-v``
-    Scalar multiplication, :math:`a\mathbf v`, ``a * v``
-    Scalar division, :math:`\mathbf v/a`, ``v / a``
-    Composition, :math:`\mathbf \Phi \circ \mathbf \Phi`, ``R * R``
-    Inverse, :math:`\mathbf \Phi^{-1}`, ``inverse(R)``
-    Coordinate map, :math:`\mathbf \Phi (\mathbf p)`, ``R * p``
-    Exponential map, :math:`\exp(\mathbf \varphi)`, ``exp(w)``
-    Logarithmic map, :math:`\log(\mathbf \Phi)`, ``log(R)``
-    Manifold plus, :math:`\mathbf\Phi \boxplus \mathbf\varphi = \exp(\mathbf\varphi) \circ \mathbf\Phi`, ``R + w``
-    Manifold minus, :math:`\mathbf\Phi_1 \boxminus \mathbf\Phi_2 = \log(\mathbf\Phi_1 \circ \mathbf\Phi_2^{-1})`, ``R - R``
-
+    Composition, :math:`\vgrp \circ \vgrp`, ``R * R``
+    Inverse, :math:`\vgrp^{-1}`, ``inverse(R)``
+    Coordinate map, :math:`\vgrp (\vvec)`, ``R * p``
+    Exponential map, :math:`\exp(\valg)`, ``exp(w)``
+    Logarithmic map, :math:`\log(\vgrp)`, ``log(R)``
+    Manifold plus, :math:`\vgrp \boxplus \valg = \exp(\valg) \circ \vgrp`, ``R + w``
+    Manifold minus, :math:`\vgrp_1 \boxminus \vgrp_2 = \log(\vgrp_1 \circ \vgrp_2^{-1})`, ``R - R``
 ```
 
-Above, `$\mathbf  \Phi$` or `R` represents a Lie group element,
-`$\mathbf \varphi$`  or `w` represents a Lie algebra element,
-`$\mathbf p$` or `p` represents a translation,
-`$a$` or `a` represents a scalar,
-and `$\mathbf v$` or `v` represents any element of `$ \mathbb R^n $`, `$so(3)$` or `$se(3)$`.
+Above, `$\vgrp$` or `R` represents a Lie group element, `$\valg$`  or `w` represents a Lie
+algebra element, `$\vvec$` and `p` represents a translation. The following operations are
+supported for Euclidean elements, where `$\vvecg$` or `v` represents any element of
+`$\R{n}$`, `$\so3$` or `$\se3$`, and `$a$` or `a` represents a scalar:vector
 
+
+```eval_rst
+.. csv-table:: Supported vector operations
+   :header: Operation, "", Code
+   :widths: 30, 10, 50
+
+    Sum, :math:`\vvecg+\vvecg`, ``v + v``
+    Difference, :math:`\vvecg-\vvecg`, ``v - v``
+    Negation, :math:`-\vvecg`, ``-v``
+    Scalar multiplication, :math:`a\vvecg`, ``a * v``
+    Scalar division, :math:`\vvecg/a`, ``v / a``
+    Dot product, :math:`\vvecg \cdot \vvecg`, "``dot(v, a)``"
+```
+
+These operations are supported for affine points, `$\vvec$`:
+
+```eval_rst
+.. csv-table:: Supported point operations
+   :header: Operation, "", Code
+   :widths: 30, 10, 30
+
+    Translation between points, :math:`\vvec - \vvec = \vvecg`, ``p - p``
+    Point translation, :math:`\vvec + \vvecg = \vvec`, ``p + v``
+    Point translation, :math:`\vvec - \vvecg = \vvec`, ``p - v``
+```
