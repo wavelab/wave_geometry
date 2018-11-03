@@ -116,12 +116,40 @@ struct add_frames<NoFrame, NoFrame, NoFrame> {
     using to = Derived;
 };
 
+
 /** Output functor for use by framed expressions */
 template <typename... Frames>
-struct WrapWithFrames {
+struct WrapWithFrames;
+
+// Case for two frames
+template <typename FL, typename FR>
+struct WrapWithFrames<FL, FR> {
     template <typename Arg>
-    auto operator()(Arg &&leaf) const -> Framed<tmp::remove_cr_t<Arg>, Frames...> {
-        using FramedType = Framed<tmp::remove_cr_t<Arg>, Frames...>;
+    auto operator()(Arg &&leaf) const -> Framed<tmp::remove_cr_t<Arg>, FL, FR> {
+        using FramedType = Framed<tmp::remove_cr_t<Arg>, FL, FR>;
+        return FramedType{typename FramedType::from_unframed{}, std::forward<Arg>(leaf)};
+    }
+};
+
+// Case for three frames
+template <typename FL, typename FM, typename FR>
+struct WrapWithFrames<FL, FM, FR> {
+    template <typename Arg,
+              typename std::enable_if_t<has_three_decorators<Arg>{}, bool> = true>
+    auto operator()(Arg &&leaf) const -> Framed<tmp::remove_cr_t<Arg>, FL, FM, FR> {
+        using FramedType = Framed<tmp::remove_cr_t<Arg>, FL, FM, FR>;
+        return FramedType{typename FramedType::from_unframed{}, std::forward<Arg>(leaf)};
+    }
+
+    // Wrap a point<A, B> with frames given as A, A, B
+    // Simplifies the implementation of points by reusing some vector traits
+    // @todo cleanup? See also middle_or_left_frame_impl.
+    template <
+      typename Arg,
+      typename std::enable_if_t<has_two_decorators<Arg>{} && std::is_same<FL, FM>{},
+                                bool> = true>
+    auto operator()(Arg &&leaf) const -> Framed<tmp::remove_cr_t<Arg>, FL, FR> {
+        using FramedType = Framed<tmp::remove_cr_t<Arg>, FL, FR>;
         return FramedType{typename FramedType::from_unframed{}, std::forward<Arg>(leaf)};
     }
 };
@@ -153,6 +181,25 @@ struct frames_traits_base : traits<WrappedLeaf> {
     using OutputFunctor = WrapWithFrames<Frames...>;
 };
 
+// Get either the middle or the left frame for MiddleFrameOf
+// This slight hack allows points to have a MiddleFrameOf trait. Points declared as
+// A_p_B (e.g. PointFd<A, B>) are internally treated as A_p_AB.
+// @todo clean up?
+template <typename Derived, typename = void>
+struct middle_or_left_frame_impl;
+
+template <typename Derived>
+struct middle_or_left_frame_impl<Derived,
+                                 std::enable_if_t<has_three_decorators<Derived>{}>> {
+    using type = typename internal::eval_traits<Derived>::MiddleFrame;
+};
+
+template <typename Derived>
+struct middle_or_left_frame_impl<Derived,
+                                 std::enable_if_t<!has_three_decorators<Derived>{}>> {
+    using type = typename internal::eval_traits<Derived>::LeftFrame;
+};
+
 }  // namespace internal
 
 // These aliases don't follow the usual naming convention and are in the main namespace
@@ -165,7 +212,7 @@ using LeftFrameOf = typename internal::eval_traits<tmp::remove_cr_t<Derived>>::L
 /** Gets an expression's middle frame descriptor */
 template <typename Derived>
 using MiddleFrameOf =
-  typename internal::eval_traits<tmp::remove_cr_t<Derived>>::MiddleFrame;
+  typename internal::middle_or_left_frame_impl<tmp::remove_cr_t<Derived>>::type;
 
 /** Gets an expression's right frame descriptor */
 template <typename Derived>

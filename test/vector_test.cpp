@@ -30,6 +30,7 @@ class VectorTest : public testing::Test {
     using LeafABC = Framed<Leaf, FrameA, FrameB, FrameC>;
     using LeafABA = Framed<Leaf, FrameA, FrameB, FrameA>;
     using LeafACA = Framed<Leaf, FrameA, FrameC, FrameA>;
+    using LeafACB = Framed<Leaf, FrameA, FrameC, FrameB>;
     using LeafAAC = Framed<Leaf, FrameA, FrameA, FrameC>;
     using LeafBAC = Framed<Leaf, FrameB, FrameA, FrameC>;
 
@@ -74,7 +75,27 @@ TYPED_TEST_P(VectorTest, negate) {
     CHECK_JACOBIANS(true, -t1, t1);
 }
 
-TYPED_TEST_P(VectorTest, squaredNorm) {
+TYPED_TEST_P(VectorTest, subtract) {
+    const auto t1 = TestFixture::LeafAAB::Random();
+    const auto t2 = TestFixture::LeafACB::Random();
+    const auto result = typename TestFixture::LeafAAC{t1 - t2};
+    const auto eigen_result = typename TestFixture::EigenVector{t1.value() - t2.value()};
+
+    EXPECT_APPROX(eigen_result, result.value());
+    CHECK_JACOBIANS(TestFixture::IsFramed, t1 - t2, t1, t2);
+}
+
+TYPED_TEST_P(VectorTest, subtractFlippedFrames) {
+    const auto t1 = TestFixture::LeafABC::Random();
+    const auto t2 = TestFixture::LeafABA::Random();
+    const auto result = typename TestFixture::LeafAAC{t1 - t2};
+    const auto eigen_result = typename TestFixture::EigenVector{t1.value() - t2.value()};
+
+    EXPECT_APPROX(eigen_result, result.value());
+    CHECK_JACOBIANS(TestFixture::IsFramed, t1 - t2, t1, t2);
+}
+
+TYPED_TEST_P(VectorTest, squaredNormExpr) {
     const auto t1 = TestFixture::LeafAAB::Random();
 
     // Note .squaredNorm() returns an expression, which here is implicitly converted to a
@@ -91,7 +112,7 @@ TYPED_TEST_P(VectorTest, squaredNorm) {
     CHECK_JACOBIANS(true, t1.squaredNorm(), t1);
 }
 
-TYPED_TEST_P(VectorTest, norm) {
+TYPED_TEST_P(VectorTest, normExpr) {
     const auto t1 = TestFixture::LeafAAB::Random();
 
     // Note .norm() returns an expression, which here is implicitly converted to a double
@@ -102,7 +123,7 @@ TYPED_TEST_P(VectorTest, norm) {
     CHECK_JACOBIANS(true, t1.norm(), t1);
 }
 
-TYPED_TEST_P(VectorTest, normalize) {
+TYPED_TEST_P(VectorTest, normalizeExpr) {
     const auto t1 = TestFixture::LeafAAB::Random();
 
     // Note .norm() returns an expression, which here is implicitly converted to a double
@@ -203,9 +224,11 @@ TYPED_TEST_P(VectorTest, scaleDivideByExpressionRight) {
 REGISTER_TYPED_TEST_CASE_P(VectorTest,
                            addWithFrameCast,
                            negate,
-                           squaredNorm,
-                           norm,
-                           normalize,
+                           subtract,
+                           subtractFlippedFrames,
+                           squaredNormExpr,
+                           normExpr,
+                           normalizeExpr,
                            dotProduct,
                            addNorms,
                            scaleLeft,

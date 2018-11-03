@@ -45,7 +45,7 @@ class Point : public PointBase<Point<ImplType>>,
 namespace internal {
 
 template <typename ImplType>
-struct traits<Point<ImplType>> : vector_leaf_traits_base<Point<ImplType>> {
+struct traits<Point<ImplType>> : point_leaf_traits_base<Point<ImplType>> {
     using TangentType = Translation<typename ImplType::PlainObject>;
     using TangentBlocks = tmp::type_list<TangentType>;
 };
@@ -56,8 +56,10 @@ struct traits<Point<ImplType>> : vector_leaf_traits_base<Point<ImplType>> {
 
 using Pointd = Point<Eigen::Vector3d>;
 
-template <typename F1, typename F2, typename F3>
-using PointFd = Framed<Pointd, F1, F2, F3>;
+/** A 3D point whose position is defined by by the vector TranslationFd<F1, F1, F2>.
+ */
+template <typename F1, typename F2>
+using PointFd = Framed<Pointd, F1, F2>;
 
 }  // namespace wave
 

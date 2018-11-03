@@ -53,11 +53,10 @@ namespace internal {
 /** Base for traits of a vector or affine expression using an Eigen vector type for
  * storage.*/
 template <typename Derived>
-struct vector_leaf_traits_base;
+struct vector_impl_leaf_traits_base;
 
 template <template <typename...> class Tmpl, typename ImplType_>
-struct vector_leaf_traits_base<Tmpl<ImplType_>> : leaf_traits_base<Tmpl<ImplType_>>,
-                                                  frameable_vector_traits {
+struct vector_impl_leaf_traits_base<Tmpl<ImplType_>> : leaf_traits_base<Tmpl<ImplType_>> {
  private:
     using Derived = Tmpl<ImplType_>;
 
@@ -74,6 +73,23 @@ struct vector_leaf_traits_base<Tmpl<ImplType_>> : leaf_traits_base<Tmpl<ImplType
     using Scalar = typename ImplType::Scalar;
     using PlainType = Tmpl<typename ImplType::PlainObject>;
     enum : int { Size = ImplType::SizeAtCompileTime, TangentSize = Size };
+};
+
+/** Base for traits of a vector expression using an Eigen vector type for storage,
+ * and frameable with three frame descriptors */
+template <typename Derived>
+struct vector_leaf_traits_base : vector_impl_leaf_traits_base<Derived>,
+                                 frameable_vector_traits {};
+
+/** Base for traits of a point expression using an Eigen vector type for storage,
+ * and frameable with two frame descriptors */
+template <typename Derived>
+struct point_leaf_traits_base : vector_impl_leaf_traits_base<Derived>,
+                                frameable_transform_traits {
+ private:
+    // TangentType must be redefined for points. Make private here to fail noticeably.
+    using typename vector_impl_leaf_traits_base<Derived>::TangentType;
+    using typename vector_impl_leaf_traits_base<Derived>::TangentBlocks;
 };
 
 /** Helper to construct a vector expression given a leaf of the same kind */
