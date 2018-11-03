@@ -11,7 +11,13 @@ WAVE_GEOMETRY_ADD_TEST(scalar_expression_test scalar_expression_test.cpp
   scalar_expression_op_test.cpp
   scalar_ref_test.cpp)
 
-WAVE_GEOMETRY_ADD_TYPED_TEST(vector_expression_test vector_expression_test.cpp
+WAVE_GEOMETRY_ADD_TYPED_TEST(affine_test affine_test.cpp
+  AffineTest TYPES
+  wave::Translationd
+  wave::RelativeRotationd
+  wave::Twistd)
+
+WAVE_GEOMETRY_ADD_TYPED_TEST(vector_test vector_test.cpp
   VectorTest TYPES
   wave::Translationd
   wave::Translation<Eigen::Vector3f>
