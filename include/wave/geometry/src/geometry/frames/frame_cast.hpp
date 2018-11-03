@@ -47,8 +47,8 @@ struct FrameCast<F1, F2, F3, Rhs>
  */
 template <typename F1, typename F2, typename F3, typename Rhs>
 auto frame_cast(const ExpressionBase<Rhs> &rhs) -> TICK_FUNCTION_REQUIRES(
-  internal::has_three_decorators<Rhs>{})(FrameCast<F1, F2, F3, Rhs>) {
-    return FrameCast<F1, F2, F3, Rhs>{rhs.derived()};
+  internal::has_three_decorators<Rhs>{})(FrameCast<F1, F2, F3, internal::cr_arg_t<Rhs>>) {
+    return FrameCast<F1, F2, F3, internal::cr_arg_t<Rhs>>{rhs.derived()};
 }
 
 /**
@@ -58,8 +58,8 @@ auto frame_cast(const ExpressionBase<Rhs> &rhs) -> TICK_FUNCTION_REQUIRES(
  */
 template <typename F1, typename F2, typename F3, typename Rhs>
 auto frame_cast(ExpressionBase<Rhs> &&rhs) -> TICK_FUNCTION_REQUIRES(
-  internal::has_three_decorators<Rhs>{})(FrameCast<F1, F2, F3, Rhs &&>) {
-    return FrameCast<F1, F2, F3, Rhs &&>{std::move(rhs.derived())};
+  internal::has_three_decorators<Rhs>{})(FrameCast<F1, F2, F3, internal::arg_t<Rhs>>) {
+    return FrameCast<F1, F2, F3, internal::arg_t<Rhs>>{std::move(rhs.derived())};
 }
 
 /**
@@ -68,9 +68,9 @@ auto frame_cast(ExpressionBase<Rhs> &&rhs) -> TICK_FUNCTION_REQUIRES(
  * @tparam F1, F2 the new frame descriptors
  */
 template <typename F1, typename F2, typename Rhs>
-auto frame_cast(const ExpressionBase<Rhs> &rhs)
-  -> TICK_FUNCTION_REQUIRES(internal::has_two_decorators<Rhs>{})(FrameCast<F1, F2, Rhs>) {
-    return FrameCast<F1, F2, Rhs>{rhs.derived()};
+auto frame_cast(const ExpressionBase<Rhs> &rhs) -> TICK_FUNCTION_REQUIRES(
+  internal::has_two_decorators<Rhs>{})(FrameCast<F1, F2, internal::cr_arg_t<Rhs>>) {
+    return FrameCast<F1, F2, internal::cr_arg_t<Rhs>>{rhs.derived()};
 }
 
 /**
@@ -80,8 +80,8 @@ auto frame_cast(const ExpressionBase<Rhs> &rhs)
  */
 template <typename F1, typename F2, typename Rhs>
 auto frame_cast(ExpressionBase<Rhs> &&rhs) -> TICK_FUNCTION_REQUIRES(
-  internal::has_two_decorators<Rhs>{})(FrameCast<F1, F2, Rhs &&>) {
-    return FrameCast<F1, F2, Rhs &&>{std::move(rhs.derived())};
+  internal::has_two_decorators<Rhs>{})(FrameCast<F1, F2, internal::arg_t<Rhs>>) {
+    return FrameCast<F1, F2, internal::arg_t<Rhs>>{std::move(rhs.derived())};
 }
 
 
