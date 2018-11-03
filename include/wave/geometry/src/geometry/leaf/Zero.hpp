@@ -66,12 +66,12 @@ auto evalImpl(expr<Convert, Leaf>, const Zero<Leaf> &) -> Leaf {
 }
 
 template <typename Lhs, typename Rhs>
-decltype(auto) evalImpl(expr<Sum>, const VectorBase<Lhs> &lhs, const Zero<Rhs> &) {
+decltype(auto) evalImpl(expr<Sum>, const AffineBase<Lhs> &lhs, const Zero<Rhs> &) {
     return lhs.derived();
 }
 
 template <typename Lhs, typename Rhs>
-decltype(auto) evalImpl(expr<Sum>, const Zero<Lhs> &, const VectorBase<Rhs> &rhs) {
+decltype(auto) evalImpl(expr<Sum>, const Zero<Lhs> &, const AffineBase<Rhs> &rhs) {
     return rhs.derived();
 }
 

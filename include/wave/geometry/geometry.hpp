@@ -34,6 +34,8 @@
 #include "src/geometry/leaf/AngleAxisRotation.hpp"
 #include "src/geometry/base/RelativeRotationBase.hpp"
 #include "src/geometry/leaf/RelativeRotation.hpp"
+#include "src/geometry/base/PointBase.hpp"
+#include "src/geometry/leaf/Point.hpp"
 #include "src/geometry/base/TranslationBase.hpp"
 #include "src/geometry/leaf/Translation.hpp"
 #include "src/geometry/leaf/Zero.hpp"
@@ -46,6 +48,7 @@
 
 // Expressions
 #include "src/geometry/op/Sum.hpp"
+#include "src/geometry/op/Subtract.hpp"
 #include "src/geometry/op/Rotate.hpp"
 #include "src/geometry/op/Transform.hpp"
 #include "src/geometry/op/Compose.hpp"

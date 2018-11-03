@@ -129,13 +129,13 @@ TYPED_TEST(ScalarOpTest, subtractExprFromScalarLeftRvalue1) {
 
     const auto expr = s1 - wave::Scalar<TypeParam>{this->b()};
     EXPECT_EQ(this->a() - this->b(), eval(expr));
-    CHECK_JACOBIANS(true, expr, s1, expr.rhs().rhs());
+    CHECK_JACOBIANS(true, expr, s1, expr.rhs());
 }
 
 TYPED_TEST(ScalarOpTest, subtractExprFromScalarLeftRvalue2) {
     const auto expr = this->a() - wave::Scalar<TypeParam>{this->b()};
     EXPECT_EQ(this->a() - this->b(), eval(expr));
-    CHECK_JACOBIANS(false, expr, expr.lhs(), expr.rhs().rhs());
+    CHECK_JACOBIANS(false, expr, expr.lhs(), expr.rhs());
 }
 
 TYPED_TEST(ScalarOpTest, subtractExprFromScalarRight) {
@@ -152,7 +152,7 @@ TYPED_TEST(ScalarOpTest, subtractExprFromScalarRightRvalue) {
 
     const auto expr = s2 - this->a();
     EXPECT_EQ(this->b() - this->a(), eval(expr));
-    CHECK_JACOBIANS(false, expr, s2, expr.rhs().rhs());
+    CHECK_JACOBIANS(false, expr, s2, expr.rhs());
 }
 
 TYPED_TEST(ScalarOpTest, subtractExprFromScalarRightRvalue1) {
@@ -166,5 +166,5 @@ TYPED_TEST(ScalarOpTest, subtractExprFromScalarRightRvalue1) {
 TYPED_TEST(ScalarOpTest, subtractExprFromScalarRightRvalue2) {
     const auto expr = wave::Scalar<TypeParam>{this->b()} - this->a();
     EXPECT_EQ(this->b() - this->a(), eval(expr));
-    CHECK_JACOBIANS(false, expr, expr.lhs(), expr.rhs().rhs());
+    CHECK_JACOBIANS(false, expr, expr.lhs(), expr.rhs());
 }

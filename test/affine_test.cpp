@@ -20,8 +20,8 @@ class AffineTest : public testing::Test {
 
     // Used for CHECK_JACOBIANS macro
     static constexpr bool IsFramed = Params::IsFramed;
-    static constexpr bool LeafIsNotVector = !std::is_same<Leaf, Vector>{};
-    static constexpr bool IsFramedOrDifferent = IsFramed || LeafIsNotVector;
+    static constexpr bool DifferentLeafAndVector = !std::is_same<Leaf, Vector>{};
+    static constexpr bool IsFramedOrDifferent = IsFramed || DifferentLeafAndVector;
 
     using FrameA = typename Params::FrameA;
     using FrameB = typename Params::FrameB;
@@ -36,12 +36,14 @@ class AffineTest : public testing::Test {
     using LeafABA = Framed<Leaf, FrameA, FrameB, FrameA>;
     using LeafACA = Framed<Leaf, FrameA, FrameC, FrameA>;
     using LeafAAC = Framed<Leaf, FrameA, FrameA, FrameC>;
+    using LeafACB = Framed<Leaf, FrameA, FrameC, FrameB>;
     using LeafBAC = Framed<Leaf, FrameB, FrameA, FrameC>;
     using VectorAAB = Framed<Vector, FrameA, FrameA, FrameB>;
     using VectorABC = Framed<Vector, FrameA, FrameB, FrameC>;
     using VectorABA = Framed<Vector, FrameA, FrameB, FrameA>;
     using VectorACA = Framed<Vector, FrameA, FrameC, FrameA>;
     using VectorAAC = Framed<Vector, FrameA, FrameA, FrameC>;
+    using VectorACB = Framed<Vector, FrameA, FrameC, FrameB>;
     using VectorBAC = Framed<Vector, FrameB, FrameA, FrameC>;
 
     using ZeroLeafAAB = wave::Zero<LeafAAB>;
@@ -176,9 +178,19 @@ TYPED_TEST_P(AffineTest, constructRandom) {
 }
 
 TYPED_TEST_P(AffineTest, subtract) {
-    const auto t1 = TestFixture::LeafAAC::Random();
-    const auto t2 = TestFixture::LeafABC::Random();
-    const auto result = typename TestFixture::LeafAAB{t1 - t2};
+    const auto t1 = TestFixture::LeafAAB::Random();
+    const auto t2 = TestFixture::LeafACB::Random();
+    const auto result = typename TestFixture::VectorAAC{t1 - t2};
+    const auto eigen_result = typename TestFixture::EigenVector{t1.value() - t2.value()};
+
+    EXPECT_APPROX(eigen_result, result.value());
+    CHECK_JACOBIANS(TestFixture::IsFramed, t1 - t2, t1, t2);
+}
+
+TYPED_TEST_P(AffineTest, subtractFlippedFrames) {
+    const auto t1 = TestFixture::LeafABC::Random();
+    const auto t2 = TestFixture::LeafABA::Random();
+    const auto result = typename TestFixture::VectorAAC{t1 - t2};
     const auto eigen_result = typename TestFixture::EigenVector{t1.value() - t2.value()};
 
     EXPECT_APPROX(eigen_result, result.value());
@@ -193,7 +205,7 @@ TYPED_TEST_P(AffineTest, addLeafAndVector) {
     const auto eigen_result = typename TestFixture::EigenVector{t1.value() + t2.value()};
 
     EXPECT_APPROX(eigen_result, result.value());
-    CHECK_JACOBIANS(TestFixture::IsFramed, t1 + t2, t1, t2);
+    CHECK_JACOBIANS(TestFixture::IsFramedOrDifferent, t1 + t2, t1, t2);
 }
 
 TYPED_TEST_P(AffineTest, addVectorAndLeaf) {
@@ -204,7 +216,7 @@ TYPED_TEST_P(AffineTest, addVectorAndLeaf) {
     const auto eigen_result = typename TestFixture::EigenVector{t1.value() + t2.value()};
 
     EXPECT_APPROX(eigen_result, result.value());
-    CHECK_JACOBIANS(TestFixture::IsFramed, t2 + t1, t2, t1);
+    CHECK_JACOBIANS(TestFixture::IsFramedOrDifferent, t2 + t1, t2, t1);
 }
 
 TYPED_TEST_P(AffineTest, addVectorWithFrameCast) {
@@ -221,7 +233,7 @@ TYPED_TEST_P(AffineTest, addVectorWithFrameCast) {
     const auto eigen_result = typename TestFixture::EigenVector{t1.value() + t2.value()};
 
     EXPECT_APPROX(eigen_result, result.value());
-    CHECK_JACOBIANS(false, expr, t1);
+    CHECK_JACOBIANS(TestFixture::DifferentLeafAndVector, expr, t1, t2);
 }
 
 TYPED_TEST_P(AffineTest, addMultiple) {
@@ -246,13 +258,23 @@ TYPED_TEST_P(AffineTest, addTemporaryVector) {
 }
 
 TYPED_TEST_P(AffineTest, subtractVector) {
-    const auto t1 = TestFixture::LeafAAC::Random();
-    const auto t2 = TestFixture::VectorABC::Random();
-    const auto result = typename TestFixture::LeafAAB{t1 - t2};
+    const auto t1 = TestFixture::LeafAAB::Random();
+    const auto t2 = TestFixture::VectorACB::Random();
+    const auto result = typename TestFixture::LeafAAC{t1 - t2};
     const auto eigen_result = typename TestFixture::EigenVector{t1.value() - t2.value()};
 
     EXPECT_APPROX(eigen_result, result.value());
-    CHECK_JACOBIANS(TestFixture::IsFramed, t1 - t2, t1, t2);
+    CHECK_JACOBIANS(TestFixture::IsFramedOrDifferent, t1 - t2, t1, t2);
+}
+
+TYPED_TEST_P(AffineTest, subtractVectorFlippedFrames) {
+    const auto t1 = TestFixture::LeafABC::Random();
+    const auto t2 = TestFixture::VectorABA::Random();
+    const auto result = typename TestFixture::LeafAAC{t1 - t2};
+    const auto eigen_result = typename TestFixture::EigenVector{t1.value() - t2.value()};
+
+    EXPECT_APPROX(eigen_result, result.value());
+    CHECK_JACOBIANS(TestFixture::IsFramedOrDifferent, t1 - t2, t1, t2);
 }
 
 TYPED_TEST_P(AffineTest, constructFromZeroLeaf) {
@@ -318,12 +340,14 @@ REGISTER_TYPED_TEST_CASE_P(AffineTest,
                            directConstructFromExpr,
                            constructRandom,
                            subtract,
+                           subtractFlippedFrames,
                            addLeafAndVector,
                            addVectorAndLeaf,
                            addVectorWithFrameCast,
                            addMultiple,
                            addTemporaryVector,
                            subtractVector,
+                           subtractVectorFlippedFrames,
                            constructFromZeroLeaf,
                            addVectorAndZeroLeaf,
                            addZeroLeafAndVector,

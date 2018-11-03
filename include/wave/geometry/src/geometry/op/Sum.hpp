@@ -4,14 +4,14 @@
 
 #ifndef WAVE_GEOMETRY_SUM_HPP
 #define WAVE_GEOMETRY_SUM_HPP
-#include <iostream>
+
 namespace wave {
 
 /** An expression representing the vector sum of two vector expressions
  * This expression can be applied to pairs of Translation or RelativeRotation expressions
  * */
 template <typename Lhs, typename Rhs>
-struct Sum : internal::base_tmpl_t<Lhs, Rhs, Sum<Lhs, Rhs>>,
+struct Sum : internal::sum_base_tmpl_t<Lhs, Rhs>,
              internal::binary_storage_for<Sum<Lhs, Rhs>> {
     static_assert(
       internal::same_base_tmpl<typename internal::eval_traits<Lhs>::TangentType,
@@ -35,6 +35,37 @@ struct Sum : internal::base_tmpl_t<Lhs, Rhs, Sum<Lhs, Rhs>>,
 };
 
 namespace internal {
+
+// Chooses the conceptual base for Sum.
+// Case for point + vector: choose point's base
+template <typename Lhs, typename Rhs>
+struct sum_base_tmpl<
+  Lhs,
+  Rhs,
+  std::enable_if_t<same_base_tmpl<typename eval_traits<Lhs>::TangentType, Rhs>{} &&
+                   !same_base_tmpl<Lhs, typename eval_traits<Rhs>::TangentType>{}>> {
+    using type = base_tmpl_t<Lhs, Sum<Lhs, Rhs>>;
+};
+
+// Case for vector + point: choose point's base
+template <typename Lhs, typename Rhs>
+struct sum_base_tmpl<
+  Lhs,
+  Rhs,
+  std::enable_if_t<!same_base_tmpl<typename eval_traits<Lhs>::TangentType, Rhs>{} &&
+                   same_base_tmpl<Lhs, typename eval_traits<Rhs>::TangentType>{}>> {
+    using type = base_tmpl_t<Rhs, Sum<Lhs, Rhs>>;
+};
+
+// Case for vector + vector: choose vectors' base (which must match)
+template <typename Lhs, typename Rhs>
+struct sum_base_tmpl<
+  Lhs,
+  Rhs,
+  std::enable_if_t<same_base_tmpl<typename eval_traits<Lhs>::TangentType, Rhs>{} &&
+                   same_base_tmpl<Lhs, typename eval_traits<Rhs>::TangentType>{}>> {
+    using type = base_tmpl_t<Lhs, Rhs, Sum<Lhs, Rhs>>;
+};
 
 // Traits for sum of the form AB + BC
 template <typename Lhs, typename Rhs>

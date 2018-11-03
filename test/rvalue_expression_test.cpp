@@ -77,7 +77,7 @@ TYPED_TEST(RvalueTest, addTemporaryExpr2) {
     // Subtraction with rvalue
     const auto expr = t1 - typename TestFixture::LeafACB{v2};
 
-    // Minus with rvalue
+    // Addition of Minus with rvalue
     const auto expr2 = expr + -(typename TestFixture::LeafAAC{v3});
 
     const auto result = typename TestFixture::LeafAAA{expr2};
@@ -85,20 +85,17 @@ TYPED_TEST(RvalueTest, addTemporaryExpr2) {
     const auto eigen_result = typename TestFixture::Vector{t1.value() - v2 - v3};
     EXPECT_APPROX(eigen_result, result.value());
 
-    // Note the user would need to know the leaf is at rhs().rhs() because Minus is its
-    // own unary expression. This kind of Jacobian evaluation is not expected from the
+    // Note this kind of Jacobian evaluation through accessors is not expected from the
     // user, but we make sure it works anyways.
-    CHECK_JACOBIANS(TestFixture::IsFramed, expr, expr.lhs(), expr.rhs().rhs());
+    CHECK_JACOBIANS(TestFixture::IsFramed, expr, expr.lhs(), expr.rhs());
     CHECK_JACOBIANS(TestFixture::IsFramed,
                     expr2,
                     expr2.lhs().lhs(),
-                    expr2.lhs().rhs().rhs(),
+                    expr2.lhs().rhs(),
                     expr2.rhs().rhs());
 
-
     // We can do the same but refer to expr
-    CHECK_JACOBIANS(
-      TestFixture::IsFramed, expr2, t1, expr.rhs().rhs(), expr2.rhs().rhs());
+    CHECK_JACOBIANS(TestFixture::IsFramed, expr2, t1, expr.rhs(), expr2.rhs().rhs());
     EXPECT_EQ(&expr, &expr2.lhs());
 }
 

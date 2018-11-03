@@ -32,6 +32,9 @@ struct Conversion;
 template <typename Lhs, typename Rhs>
 struct Sum;
 
+template <typename Lhs, typename Rhs>
+struct Subtract;
+
 template <typename Rhs>
 struct Minus;
 
@@ -134,6 +137,21 @@ class Identity;
 template <typename ScalarType>
 class Scalar;
 
+namespace internal {
+
+// Chooses the conceptual base for Sum
+template <typename Lhs, typename Rhs, typename = void>
+struct sum_base_tmpl;
+template <typename Lhs, typename Rhs>
+using sum_base_tmpl_t = typename sum_base_tmpl<Lhs, Rhs>::type;
+
+// Chooses the conceptual base for Subtract
+template <typename Lhs, typename Rhs, typename = void>
+struct subtract_base_tmpl;
+template <typename Lhs, typename Rhs>
+using subtract_base_tmpl_t = typename subtract_base_tmpl<Lhs, Rhs>::type;
+
+}  // namespace internal
 }  // namespace wave
 
 #endif  // WAVE_GEOMETRY_GEOMETRY_FORWARD_DECLARATIONS_HPP

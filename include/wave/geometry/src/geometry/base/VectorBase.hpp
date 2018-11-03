@@ -92,6 +92,14 @@ auto evalImpl(expr<Sum>, const VectorBase<Lhs> &lhs, const VectorBase<Rhs> &rhs)
     return plain_output_t<Lhs>{lhs.derived().value() + rhs.derived().value()};
 }
 
+/** Implementation of difference between affine and vector leaf
+ *
+ * Assume spaces have already been checked.
+ */
+template <typename Lhs, typename Rhs>
+auto evalImpl(expr<Subtract>, const AffineBase<Lhs> &lhs, const VectorBase<Rhs> &rhs) {
+    return plain_output_t<Lhs>{lhs.derived().value() - rhs.derived().value()};
+}
 
 /** Implementation of Minus for a vector leaf
  */

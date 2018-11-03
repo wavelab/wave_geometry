@@ -37,7 +37,7 @@ struct AffineBase : ExpressionBase<Derived> {
     /** Fuzzy comparison - see Eigen::DenseBase::isApprox() */
     template <typename R, TICK_REQUIRES(internal::same_base_tmpl_i<Derived, R>{})>
     bool isApprox(
-      const VectorBase<R> &rhs,
+      const AffineBase<R> &rhs,
       const Scalar &prec = Eigen::NumTraits<Scalar>::dummy_precision()) const {
         return this->eval().value().isApprox(rhs.eval().value(), prec);
     }
@@ -80,6 +80,16 @@ auto evalImpl(expr<Sum>, const AffineBase<Lhs> &lhs, const VectorBase<Rhs> &rhs)
 template <typename Lhs, typename Rhs>
 auto evalImpl(expr<Sum>, const VectorBase<Lhs> &lhs, const AffineBase<Rhs> &rhs) {
     return plain_output_t<Rhs>{lhs.derived().value() + rhs.derived().value()};
+}
+
+/** Implementation of difference between two affine leaves
+ *
+ * Assume spaces have already been checked.
+ */
+template <typename Lhs, typename Rhs>
+auto evalImpl(expr<Subtract>, const AffineBase<Lhs> &lhs, const AffineBase<Rhs> &rhs) {
+    using TangentType = typename traits<Lhs>::TangentType;
+    return plain_output_t<TangentType>{lhs.derived().value() - rhs.derived().value()};
 }
 
 /** Implementation of Random for an affine leaf
@@ -125,22 +135,11 @@ WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator+, Sum, VectorBase, AffineBase)
  */
 template <typename L, typename R>
 auto operator-(const AffineBase<L> &lhs, const AffineBase<R> &rhs) {
-    return lhs.derived() + (-rhs.derived());
+    return Subtract<internal::cr_arg_t<L>, internal::cr_arg_t<R>>{lhs.derived(),
+                                                                  rhs.derived()};
 }
 
-// Overloads for rvalues
-template <typename L, typename R>
-auto operator-(AffineBase<L> &&lhs, const AffineBase<R> &rhs) {
-    return std::move(lhs).derived() + (-rhs.derived());
-}
-template <typename L, typename R>
-auto operator-(const AffineBase<L> &lhs, AffineBase<R> &&rhs) {
-    return lhs.derived() + (-std::move(rhs).derived());
-}
-template <typename L, typename R>
-auto operator-(AffineBase<L> &&lhs, AffineBase<R> &&rhs) {
-    return std::move(lhs).derived() + (-std::move(rhs).derived());
-}
+WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator-, Subtract, AffineBase, AffineBase)
 
 }  // namespace wave
 

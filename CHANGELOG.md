@@ -5,6 +5,8 @@
 - `dynamic` module with heap-allocated, dynamically-composable `Proxy` expressions
 - `estimation` module with uncertain objects and noise models
 - N-ary expressions
+- `Point` expressions representing true 3D affine points. Unlike translations, points
+  cannot be added or scaled.
 - Documentation built with Sphinx
 
 ### Backward-incompatible API changes
@@ -23,6 +25,7 @@
 - Reorganized and renamed storage base classes
 - .translation() and .rotation() methods work on all transform expressions (not just leaves)
 - Faster exponential map to quaternions
+- `Subtract` expression represents subtraction, replacing combination of sum and negation.
 
 ## [0.3.0](https://github.com/wavelab/wave_geometry/compare/0.2.0...0.3.0) (2018-08-19)
 ### New features
