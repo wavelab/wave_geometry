@@ -48,6 +48,7 @@ WAVE_GEOMETRY_ADD_TEST(index_sequence_test util/index_sequence_test.cpp)
 WAVE_GEOMETRY_ADD_TEST(type_list_test util/type_list_test.cpp)
 WAVE_GEOMETRY_ADD_TEST(util_cross_matrix util/cross_matrix_test.cpp)
 WAVE_GEOMETRY_ADD_TEST(identity_matrix_test util/identity_matrix_test.cpp)
+WAVE_GEOMETRY_ADD_TEST(util_math_test util/math_test.cpp)
 
 # dynamic
 WAVE_GEOMETRY_ADD_TEST(dynamic_expression_test.cpp dynamic_expression_test.cpp)

@@ -72,20 +72,7 @@ decltype(auto) jacobianImpl(expr<Inverse>,
 template <typename ImplType>
 auto evalImpl(expr<LogMap>, const MatrixRotation<ImplType> &rhs) ->
   typename traits<MatrixRotation<ImplType>>::TangentType {
-    using Scalar = scalar_t<MatrixRotation<ImplType>>;
-
-    // From http://ethaneade.com/lie.pdf
-    using std::acos;
-    using std::sin;
-    const auto &m = rhs.value();
-    const auto angle = acos((m.trace() - Scalar{1}) / Scalar{2});
-
-    if (angle * angle > Eigen::NumTraits<Scalar>::epsilon()) {
-        return uncrossMatrix(angle / (Scalar{2} * sin(angle)) * (m - m.transpose()));
-    } else {
-        // Very small angle
-        return uncrossMatrix(Scalar{0.5} * (m - m.transpose()));
-    }
+    return ::wave::rotationVectorFromMatrix(rhs.value());
 }
 
 /** Implements composition of rotation matrices */

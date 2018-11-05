@@ -111,6 +111,29 @@ inline auto rotationVectorFromQuaternion(const Eigen::QuaternionBase<Derived> &q
     }
 }
 
+/** Calculates logarithmic map of a rotation matrix, obtaining a rotation vector
+ */
+template <typename Derived>
+inline auto rotationVectorFromMatrix(const Eigen::MatrixBase<Derived> &rotation_mat)
+  -> Eigen::Matrix<typename Derived::Scalar, 3, 1> {
+    EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(Derived, 3, 3);
+    using Scalar = typename Derived::Scalar;
+    using std::acos;
+    using std::sin;
+    const auto &m = rotation_mat.derived();
+
+    // From http://ethaneade.com/lie.pdf
+    const auto angle = acos((m.trace() - Scalar{1}) / Scalar{2});
+
+    if (angle * angle > Eigen::NumTraits<Scalar>::epsilon()) {
+        return uncrossMatrix(angle / (Scalar{2} * sin(angle)) * (m - m.transpose()));
+    } else {
+        // Very small angle
+        return uncrossMatrix(Scalar{0.5} * (m - m.transpose()));
+    }
+}
+
+
 }  // namespace wave
 
 #endif  // WAVE_GEOMETRY_UTIL_MATH_HPP
