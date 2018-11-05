@@ -42,7 +42,7 @@ inline Mat3 expMapM(const Vec3 &v) {
 }
 
 inline Quat expMapQ(const Vec3 &v) {
-    return wave::quaternionFromExpMap(v);
+    return wave::quaternionFromRotationVector(v);
 }
 
 inline Mat3 expMapQM(const Vec3 &v) {

@@ -64,7 +64,7 @@ auto uncrossMatrix(const Eigen::MatrixBase<Derived> &skew)
  * exponential map," Journal of graphics tools, 1998.
  */
 template <typename Derived>
-inline auto quaternionFromExpMap(const Eigen::MatrixBase<Derived> &rotation_vec)
+inline auto quaternionFromRotationVector(const Eigen::MatrixBase<Derived> &rotation_vec)
   -> Eigen::Quaternion<typename Derived::Scalar> {
     using Scalar = typename Derived::Scalar;
     using std::cos;

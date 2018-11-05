@@ -97,12 +97,12 @@ struct traits<RelativeRotation<ImplType>>
  * expmap_bench.cpp, this method is faster than the Rodrigues formula expmap to matrix,
  * even after the conversion.
  *
- * @see wave::quaternionFromExpMap()
+ * @see wave::quaternionFromRotationVector()
  */
 template <typename ImplType>
 auto evalImpl(expr<ExpMap>, const RelativeRotation<ImplType> &rhs) {
     using QType = Eigen::Quaternion<typename ImplType::Scalar>;
-    return QuaternionRotation<QType>{::wave::quaternionFromExpMap(rhs.value())};
+    return QuaternionRotation<QType>{::wave::quaternionFromRotationVector(rhs.value())};
 }
 
 /** Jacobian of exp map of a relative rotation */

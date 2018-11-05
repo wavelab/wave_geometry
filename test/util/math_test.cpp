@@ -5,7 +5,7 @@ TEST(ExpMapTest, quaternionMatchesEigenAA) {
     const auto v = Eigen::Vector3d{Eigen::Vector3d::Random()};
     const auto a = Eigen::AngleAxisd{v.norm(), v.normalized()};
 
-    const auto res_q = wave::quaternionFromExpMap(v);
+    const auto res_q = wave::quaternionFromRotationVector(v);
     const auto expected = Eigen::Quaterniond{a};
     EXPECT_APPROX(expected, res_q);
 }
