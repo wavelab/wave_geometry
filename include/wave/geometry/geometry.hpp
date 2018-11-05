@@ -60,6 +60,7 @@
 #include "src/geometry/op/LogMap.hpp"
 #include "src/geometry/op/BoxPlus.hpp"
 #include "src/geometry/op/BoxMinus.hpp"
+#include "src/geometry/op/Perturb.hpp"
 #include "src/geometry/op/Minus.hpp"
 #include "src/geometry/op/Scale.hpp"
 #include "src/geometry/op/Product.hpp"

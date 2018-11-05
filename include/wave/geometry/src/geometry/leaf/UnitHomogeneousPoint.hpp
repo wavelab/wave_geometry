@@ -50,12 +50,32 @@ template <typename ImplType>
 struct traits<UnitHomogeneousPoint<ImplType>>
     : point_leaf_traits_base<UnitHomogeneousPoint<ImplType>> {
  private:
-    using EigenVector3 = Eigen::Matrix<typename ImplType::Scalar, 3, 1>;
+    using Scalar_ = typename ImplType::Scalar;
+    using EigenVector3 = Eigen::Matrix<Scalar_, 3, 1>;
 
  public:
     using TangentType = Translation<EigenVector3>;
     using TangentBlocks = tmp::type_list<TangentType>;
+    using ConvertTo = tmp::type_list<HomogeneousPoint<Eigen::Matrix<Scalar_, 4, 1>>>;
 };
+
+/** Converts an unnormalized HomogeneousPoint to spherically normalized
+ */
+template <typename ToImpl, typename FromImpl>
+auto evalImpl(expr<Convert, UnitHomogeneousPoint<ToImpl>>,
+              const HomogeneousPoint<FromImpl> &rhs) {
+    return UnitHomogeneousPoint<ToImpl>{rhs.value().normalized()};
+}
+
+/** Implements manifold subtraction of homogeneous points
+ */
+template <typename Lhs, typename Rhs>
+auto evalImpl(expr<HomMinus>,
+              const UnitHomogeneousPoint<Lhs> &lhs,
+              const UnitHomogeneousPoint<Rhs> &rhs) {
+    using TangentType = typename traits<Lhs>::TangentType;
+    return TangentType{};
+}
 
 }  // namespace internal
 

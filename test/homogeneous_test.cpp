@@ -16,6 +16,7 @@ class HomogeneousTest : public testing::Test {
     // The affine (actually Euclidean) vector that is the difference type of Leaf
     using Vector = typename wave::internal::traits<Leaf>::TangentType;
 
+    using EigenVector3 = Eigen::Matrix<Scalar, 3, 1>;
     using EigenVector4 = Eigen::Matrix<Scalar, 4, 1>;
 
 
@@ -168,6 +169,18 @@ TYPED_TEST_P(HomogeneousTest, constructRandom) {
                   "Random() returns non-plain type");
 }
 
+TYPED_TEST_P(HomogeneousTest, deperturbExpr) {
+    const auto t1 = TestFixture::LeafAB::Random();
+    const auto t2 = TestFixture::LeafAC::Random();
+    const auto result = typename TestFixture::VectorACB{deperturb(t1, t2)};
+    const auto eigen_result =
+      typename TestFixture::EigenVector3{(t1.value() - t2.value()).template head<3>()};
+
+    EXPECT_APPROX(eigen_result, result.value());
+    CHECK_JACOBIANS(TestFixture::IsFramed, deperturb(t1, t2), t1, t2);
+}
+
+
 // When adding a test it must also be added to the REGISTER_TYPED_TEST_CASE_P call below.
 // Yes, it's redundant; apparently the drawback of using type-parameterized tests.
 REGISTER_TYPED_TEST_CASE_P(HomogeneousTest,
@@ -180,4 +193,5 @@ REGISTER_TYPED_TEST_CASE_P(HomogeneousTest,
                            copyAssign,
                            moveAssign,
                            directConstructFromExpr,
-                           constructRandom);
+                           constructRandom,
+                           deperturbExpr);

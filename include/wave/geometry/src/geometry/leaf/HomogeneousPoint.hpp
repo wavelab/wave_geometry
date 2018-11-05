@@ -49,12 +49,34 @@ template <typename ImplType>
 struct traits<HomogeneousPoint<ImplType>>
     : point_leaf_traits_base<HomogeneousPoint<ImplType>> {
  private:
-    using EigenVector3 = Eigen::Matrix<typename ImplType::Scalar, 3, 1>;
+    using Scalar_ = typename ImplType::Scalar;
+    using EigenVector3 = Eigen::Matrix<Scalar_, 3, 1>;
 
  public:
     using TangentType = Translation<EigenVector3>;
     using TangentBlocks = tmp::type_list<TangentType>;
+    using ConvertTo = tmp::type_list<UnitHomogeneousPoint<Eigen::Quaternion<Scalar_>>>;
 };
+
+/** Implements "conversion" between HomogeneousPoint storage types
+ *
+ * While this seems trivial, it is needed for the case the template params are not the
+ * same.
+ */
+template <typename ToImpl, typename FromImpl>
+auto evalImpl(expr<Convert, HomogeneousPoint<ToImpl>>,
+              const HomogeneousPoint<FromImpl> &rhs) {
+    return HomogeneousPoint<ToImpl>{rhs.derived().value()};
+}
+
+/** Converts (trivially) from a spherically normalized homogeneous point
+ */
+template <typename ToImpl, typename FromImpl>
+auto evalImpl(expr<Convert, HomogeneousPoint<ToImpl>>,
+              const UnitHomogeneousPoint<FromImpl> &rhs) {
+    return HomogeneousPoint<ToImpl>{rhs.value().coeffs()};
+}
+
 
 }  // namespace internal
 

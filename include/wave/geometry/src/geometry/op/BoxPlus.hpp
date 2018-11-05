@@ -40,7 +40,7 @@ struct BoxPlus : internal::base_tmpl_t<Lhs, BoxPlus<Lhs, Rhs>>,
 };
 
 
-/** An expression representing the manifold subtraction of a compound +-manifold element
+/** An expression representing manifold addition to a compound +-manifold element
  *
  * @f[ S \times R^n \to S @f]
  */

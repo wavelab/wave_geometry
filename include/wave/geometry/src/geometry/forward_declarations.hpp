@@ -86,6 +86,18 @@ struct CompoundBoxPlus;
 template <typename Lhs, typename Rhs>
 struct CompoundBoxMinus;
 
+template <typename Lhs, typename Rhs>
+struct HomPlus;
+
+template <typename Lhs, typename Rhs>
+struct HomMinus;
+
+template <typename Lhs, typename Rhs>
+struct PerturbPlus;
+
+template <typename Lhs, typename Rhs>
+struct PerturbMinus;
+
 template <typename ImplType>
 class MatrixRotation;
 
@@ -115,6 +127,15 @@ struct TranslationBase;
 
 template <typename ImplType>
 class Translation;
+
+template <typename ImplType>
+class Point;
+
+template <typename ImplType>
+class HomogeneousPoint;
+
+template <typename ImplType>
+class UnitHomogeneousPoint;
 
 template <typename Derived>
 class TransformBase;
