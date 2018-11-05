@@ -15,7 +15,6 @@ struct HomogeneousPointBase : public ProjectiveBase<Derived> {
     using BaseTmpl = HomogeneousPointBase<T>;
 };
 
-
 /** Applies a small perturbation to a homogeneous point
  */
 template <typename L, typename R, TICK_REQUIRES(internal::rhs_is_tangent_of_lhs<L, R>{})>
@@ -45,13 +44,21 @@ WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(deperturb,
                                    HomogeneousPointBase)
 
 namespace internal {
-/** Implementation of Random for a rotation leaf
+/** Implements Random for homogeneous point leaves
  *
  * Produces a random spherically normalized homogeneous point
  */
 template <typename Leaf, typename Rhs>
 auto evalImpl(expr<Random, Leaf>, const HomogeneousPointBase<Rhs> &) {
-    return Leaf{traits<Leaf>::ImplType::Random().normalized()};
+    return Leaf{::wave::randomQuaternion<scalar_t<Rhs>>().coeffs()};
+}
+
+/** Implements Zero for homogeneous points */
+template <typename Leaf,
+          std::enable_if_t<std::is_base_of<HomogeneousPointBase<Leaf>, Leaf>{}, bool> = 0>
+auto evalImpl(expr<Convert, Leaf>, const Zero<Leaf> &) -> Leaf {
+    using S = typename traits<Leaf>::Scalar;
+    return Leaf{S{0}, S{0}, S{0}, S{1}};
 }
 
 /** Implements perturbation of a homogeneous point  */
@@ -64,6 +71,24 @@ auto evalImpl(expr<PerturbPlus>,
     return plain_output_t<Lhs>{p.x() + v.x(), p.y() + v.y(), p.z() + v.z(), p.w()};
 }
 
+/** Jacobian of perturbation of a homogeneous point wrt the point */
+template <typename Val, typename Lhs, typename Rhs>
+auto leftJacobianImpl(expr<PerturbPlus>,
+                      const HomogeneousPointBase<Val> &,
+                      const HomogeneousPointBase<Lhs> &,
+                      const TranslationBase<Rhs> &) {
+    return identity_t<Val>{};
+}
+
+/** Jacobian of perturbation of a homogeneous point wrt the perturbation */
+template <typename Val, typename Lhs, typename Rhs>
+auto rightJacobianImpl(expr<PerturbPlus>,
+                       const HomogeneousPointBase<Val> &,
+                       const HomogeneousPointBase<Lhs> &,
+                       const TranslationBase<Rhs> &) {
+    return jacobian_t<Val, Rhs>::Identity();
+}
+
 /** Implements deperturbation of a homogeneous point  */
 template <typename Lhs, typename Rhs>
 auto evalImpl(expr<PerturbMinus>,
@@ -72,6 +97,24 @@ auto evalImpl(expr<PerturbMinus>,
     const auto &a = lhs.derived().value();
     const auto &b = rhs.derived().value();
     return typename traits<Lhs>::TangentType{a.x() - b.x(), a.y() - b.y(), a.z() - b.z()};
+}
+
+/** Left Jacobian of deperturbation of a homogeneous point */
+template <typename Val, typename Lhs, typename Rhs>
+auto leftJacobianImpl(expr<PerturbMinus>,
+                      const TranslationBase<Val> &,
+                      const HomogeneousPointBase<Lhs> &,
+                      const HomogeneousPointBase<Rhs> &) {
+    return jacobian_t<Val, Lhs>::Identity();
+}
+
+/** Right Jacobian of deperturbation of a homogeneous point */
+template <typename Val, typename Lhs, typename Rhs>
+auto rightJacobianImpl(expr<PerturbMinus>,
+                       const TranslationBase<Val> &,
+                       const HomogeneousPointBase<Lhs> &,
+                       const HomogeneousPointBase<Rhs> &) {
+    return -jacobian_t<Val, Rhs>::Identity();
 }
 
 }  // namespace internal

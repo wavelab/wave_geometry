@@ -21,6 +21,23 @@ struct ProjectiveBase : ExpressionBase<Derived> {
     static auto Random() -> OutputType {
         return ::wave::Random<OutputType>{}.eval();
     }
+
+    /** Fuzzy comparison of two homogeneous point elements
+     *
+     * For now, performs box minus of the points and compares the resulting vector
+     * to zero - see Eigen::DenseBase::isZero()
+     *
+     * @todo optimize. A faster per-parametrization comparison (e.g. are two quaternions
+     * close?) may be desired. It is harder to implement for non-unique representations.
+     */
+    template <typename R, TICK_REQUIRES(internal::same_base_tmpl_i<Derived, R>{})>
+    bool isApprox(
+      const ProjectiveBase<R> &rhs,
+      const Scalar &prec = Eigen::NumTraits<Scalar>::dummy_precision()) const {
+        const auto diff = eval(internal::unframed_cast(this->derived()) -
+                               internal::unframed_cast(rhs.derived()));
+        return diff.value().isZero(prec);
+    }
 };
 
 
@@ -28,11 +45,11 @@ struct ProjectiveBase : ExpressionBase<Derived> {
  */
 template <typename L, typename R>
 auto operator-(const ProjectiveBase<L> &lhs, const ProjectiveBase<R> &rhs) {
-    return HomMinus<internal::cr_arg_t<L>, internal::cr_arg_t<R>>{lhs.derived(),
+    return BoxMinus<internal::cr_arg_t<L>, internal::cr_arg_t<R>>{lhs.derived(),
                                                                   rhs.derived()};
 }
 
-WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator-, HomMinus, ProjectiveBase, ProjectiveBase)
+WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator-, BoxMinus, ProjectiveBase, ProjectiveBase)
 
 /** Applies the manifold plus operator to a transform element
  */

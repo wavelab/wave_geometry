@@ -12,7 +12,7 @@ namespace wave {
  */
 template <typename Leaf>
 class Zero : public internal::base_tmpl_t<Leaf, Zero<Leaf>> {
-    TICK_TRAIT_CHECK(internal::is_vector_leaf<Leaf>);
+    TICK_TRAIT_CHECK(internal::is_leaf_expression<Leaf>);
     using ImplType = typename internal::traits<Leaf>::ImplType;
     using Scalar = typename Eigen::internal::traits<ImplType>::Scalar;
     using Vec3 = Eigen::Matrix<Scalar, 3, 1>;
@@ -60,7 +60,8 @@ auto evalImpl(expr<Zero>, const Zero<Leaf> &) -> Zero<eval_t<Leaf>> {
     return Zero<eval_t<Leaf>>{};
 }
 
-template <typename Leaf>
+// Convert is where Zero actually turns into a regular leaf with a zero value
+template <typename Leaf, std::enable_if_t<is_vector_leaf<Leaf>{}, bool> = 0>
 auto evalImpl(expr<Convert, Leaf>, const Zero<Leaf> &) -> Leaf {
     return Leaf{traits<Leaf>::ImplType::Zero()};
 }

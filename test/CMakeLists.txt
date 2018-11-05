@@ -37,7 +37,8 @@ WAVE_GEOMETRY_ADD_TYPED_TEST(manifold_test manifold_test.cpp
 
 WAVE_GEOMETRY_ADD_TYPED_TEST(homogeneous_test homogeneous_test.cpp
   HomogeneousTest TYPES
-  wave::HomogeneousPointd)
+  wave::HomogeneousPointd
+  wave::UnitHomogeneousPointd)
 
 WAVE_GEOMETRY_ADD_TEST(rvalue_expression_test rvalue_expression_test.cpp)
 

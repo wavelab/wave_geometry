@@ -54,6 +54,7 @@ struct traits<HomogeneousPoint<ImplType>>
  public:
     using TangentType = Translation<Eigen::Matrix<Scalar_, 3, 1>>;
     using TangentBlocks = tmp::type_list<TangentType>;
+    enum : int { TangentSize = 3 };
     using ConvertTo = tmp::type_list<UnitHomogeneousPoint<Eigen::Quaternion<Scalar_>>>;
 };
 

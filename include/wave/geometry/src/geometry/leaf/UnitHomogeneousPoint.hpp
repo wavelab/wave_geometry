@@ -43,10 +43,13 @@ class UnitHomogeneousPoint
     explicit UnitHomogeneousPoint(const Eigen::QuaternionBase<QDerived> &q)
         : Storage{typename Storage::init_storage{}, q.derived()} {}
 
-    /** Construct from four scalars */
-    UnitHomogeneousPoint(Scalar x, Scalar y, Scalar z, Scalar w) {
-        this->storage << x, y, z, w;
-    }
+    /** Construct from four scalars
+     *
+     * @note this constructor does not match Eigen::Quaternion's constructor order,
+     * though it does match Eigen::Quaternion's storage order,
+     */
+    UnitHomogeneousPoint(Scalar x, Scalar y, Scalar z, Scalar w)
+        : Storage{typename Storage::init_storage{}, w, x, y, z} {}
 };
 
 namespace internal {
@@ -77,14 +80,75 @@ auto evalImpl(expr<Convert, UnitHomogeneousPoint<ToImpl>>,
     return UnitHomogeneousPoint<ToImpl>{rhs.value().normalized()};
 }
 
-/** Implements manifold subtraction of homogeneous points
+/** Implements quasi-"inverse" for BoxMinus of spherical homogeneous points
+ */
+template <typename Rhs>
+auto evalImpl(expr<Inverse>, const UnitHomogeneousPoint<Rhs> &rhs) {
+    return makeLeaf<UnitHomogeneousPoint>(rhs.value().conjugate());
+}
+
+/** Jacobian of "inverse"  of spherical homogeneous points, for BoxMinus */
+template <typename Val, typename Rhs>
+auto jacobianImpl(expr<Inverse>,
+                  const UnitHomogeneousPoint<Val> &q_inv,
+                  const UnitHomogeneousPoint<Rhs> &)
+  -> jacobian_t<UnitHomogeneousPoint<Val>, UnitHomogeneousPoint<Rhs>> {
+    return -q_inv.value().toRotationMatrix();
+}
+
+/** Implements quasi-"logmap" for BoxMinus of spherical homogeneous points
+ */
+template <typename Rhs>
+auto evalImpl(expr<LogMap>, const UnitHomogeneousPoint<Rhs> &rhs) {
+    using VType = typename traits<UnitHomogeneousPoint<Rhs>>::TangentType;
+    return VType{::wave::rotationVectorFromQuaternion(rhs.value())};
+}
+
+/** Jacobian of "logmap" for BoxMinus of spherical homogeneous points
+ */
+template <typename Val, typename Rhs>
+auto jacobianImpl(expr<LogMap>,
+                  const TranslationBase<Val> &val,
+                  const HomogeneousPointBase<Rhs> &) -> jacobian_t<Val, Rhs> {
+    return ::wave::jacobianOfRotationLogMap(val.derived().value());
+}
+
+/** Implements quasi-"expmap" for BoxPlus of spherical homogeneous points
+ * @todo reorganize? Expmap of translation may be unexpected.
+ */
+template <typename ImplType>
+auto evalImpl(expr<ExpMap>, const Translation<ImplType> &rhs) {
+    using QType = Eigen::Quaternion<typename ImplType::Scalar>;
+    return UnitHomogeneousPoint<QType>{::wave::quaternionFromRotationVector(rhs.value())};
+}
+
+/** Implements quasi-"compose" for manifold operations on spherical homogeneous points
  */
 template <typename Lhs, typename Rhs>
-auto evalImpl(expr<HomMinus>,
+auto evalImpl(expr<Compose>,
               const UnitHomogeneousPoint<Lhs> &lhs,
               const UnitHomogeneousPoint<Rhs> &rhs) {
-    return typename traits<UnitHomogeneousPoint<Lhs>>::TangentType{
-      ::wave::rotationVectorFromQuaternion(lhs.value().conjugate() * rhs.value())};
+    // Use Eigen's implementation
+    return plain_eval_t<UnitHomogeneousPoint<Lhs>>{lhs.value() * rhs.value()};
+}
+
+/** Left jacobian of "compose" of spherical homogeneous points */
+template <typename Val, typename Lhs, typename Rhs>
+auto leftJacobianImpl(expr<Compose>,
+                      const HomogeneousPointBase<Val> &,
+                      const HomogeneousPointBase<Lhs> &,
+                      const HomogeneousPointBase<Rhs> &) -> jacobian_t<Val, Rhs> {
+    return identity_t<Val>{};
+}
+
+/** Right jacobian of "compose" of spherical homogeneous points */
+template <typename Val, typename Lhs, typename Rhs>
+auto rightJacobianImpl(expr<Compose>,
+                       const UnitHomogeneousPoint<Val> &,
+                       const UnitHomogeneousPoint<Lhs> &lhs,
+                       const UnitHomogeneousPoint<Rhs> &)
+  -> jacobian_t<UnitHomogeneousPoint<Val>, UnitHomogeneousPoint<Rhs>> {
+    return lhs.value().toRotationMatrix();
 }
 
 /** Implements manifold addition to homogeneous points
