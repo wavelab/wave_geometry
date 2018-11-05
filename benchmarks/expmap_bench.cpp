@@ -42,27 +42,7 @@ inline Mat3 expMapM(const Vec3 &v) {
 }
 
 inline Quat expMapQ(const Vec3 &v) {
-    Quat q;
-
-    using std::cos;
-    using std::sin;
-    using std::sqrt;
-    const Scalar angle2 = v.squaredNorm();
-    const Scalar angle = sqrt(angle2);
-    Scalar s;
-    Scalar c;
-
-    if (angle2 * angle2 > Eigen::NumTraits<Scalar>::epsilon()) {
-        s = sin(angle / 2) / angle;
-        c = cos(angle / 2);
-    } else {
-        s = Scalar{0.5} + angle2 / 48;
-        c = 1 - angle / 8;
-    }
-
-    // storage order x, y, z, w
-    q.coeffs() << s * v, c;
-    return q;
+    return wave::quaternionFromExpMap(v);
 }
 
 inline Mat3 expMapQM(const Vec3 &v) {
@@ -80,7 +60,7 @@ inline void BM_expMapQFn(benchmark::State &state) {
             const Quat result = Fn(vs[i]);
 
             benchmark::DoNotOptimize(result);
-            DEBUG_ASSERT_APPROX(expMapM(vs[i]), result);
+            DEBUG_ASSERT_APPROX(expMapM(vs[i]), result.matrix());
         }
     }
 }
