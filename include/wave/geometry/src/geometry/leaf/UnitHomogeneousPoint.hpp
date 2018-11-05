@@ -161,6 +161,20 @@ auto rightJacobianImpl(expr<Compose>,
     return lhs.value().toRotationMatrix();
 }
 
+/** Right jacobian of "compose" of spherical homogeneous points with other expressions,
+ * such as Identity or HomogeneousPoint
+ * @todo redundant? clean up */
+template <typename Val, typename Lhs, typename Rhs>
+auto rightJacobianImpl(expr<Compose>,
+                       const HomogeneousPointBase<Val> &,
+                       const HomogeneousPointBase<Lhs> &lhs,
+                       const HomogeneousPointBase<Rhs> &) -> jacobian_t<Val, Rhs> {
+    using Scalar = typename traits<Lhs>::Scalar;
+    const auto &q =
+      UnitHomogeneousPoint<Eigen::Quaternion<Scalar>>{lhs.derived().value()};
+    return q.value().toRotationMatrix();
+}
+
 /** Implements manifold addition to homogeneous points
  */
 template <typename Lhs, typename Rhs>

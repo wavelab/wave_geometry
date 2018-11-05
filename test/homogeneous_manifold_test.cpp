@@ -1,13 +1,11 @@
 /**
  * @file
  * @author lkoppel
- * Tests idenities of manifold expressions on homogeneous points
+ * Tests identities of manifold expressions on homogeneous points
  *
  * @see manifold_test.cpp
  */
 #include "manifold_test.cpp"
-
-using LeafTypes = test_types_list<wave::UnitHomogeneousPointd>;
 
 namespace wave {
 // Workaround for applying ManifoldTest to homogeneous points:
@@ -36,5 +34,3 @@ auto log(const HomogeneousPointBase<R> &rhs) {
 }
 
 }  // namespace wave
-
-INSTANTIATE_TYPED_TEST_CASE_P(Homogeneous, ManifoldTest, LeafTypes);

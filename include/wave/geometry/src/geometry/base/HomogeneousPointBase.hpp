@@ -68,11 +68,14 @@ auto evalImpl(expr<Random, Leaf>, const HomogeneousPointBase<Rhs> &) {
 }
 
 /** Implements Identity (zero point) for homogeneous points */
-template <typename Leaf,
-          std::enable_if_t<std::is_base_of<HomogeneousPointBase<Leaf>, Leaf>{}, bool> = 0>
-auto evalImpl(expr<Convert, Leaf>, const Identity<Leaf> &) {
-    using S = typename traits<Leaf>::Scalar;
-    return Leaf{S{0}, S{0}, S{0}, S{1}};
+template <typename ToLeaf,
+          typename FromLeaf,
+          std::enable_if_t<std::is_base_of<HomogeneousPointBase<ToLeaf>, ToLeaf>{} &&
+                             std::is_base_of<HomogeneousPointBase<FromLeaf>, FromLeaf>{},
+                           bool> = 0>
+auto evalImpl(expr<Convert, ToLeaf>, const Identity<FromLeaf> &) {
+    using S = typename traits<ToLeaf>::Scalar;
+    return ToLeaf{S{0}, S{0}, S{0}, S{1}};
 }
 
 /** Implements perturbation of a homogeneous point  */

@@ -70,17 +70,13 @@ decltype(auto) evalImpl(expr<Inverse>, const Identity<Rhs> &rhs) {
 };
 
 template <typename Lhs, typename Rhs>
-decltype(auto) evalImpl(expr<Compose>,
-                        const TransformBase<Lhs> &lhs,
-                        const Identity<Rhs> &) {
-    return lhs.derived();
+decltype(auto) evalImpl(expr<Compose>, const Lhs &lhs, const Identity<Rhs> &) {
+    return lhs;
 };
 
 template <typename Lhs, typename Rhs>
-decltype(auto) evalImpl(expr<Compose>,
-                        const Identity<Lhs> &,
-                        const TransformBase<Rhs> &rhs) {
-    return rhs.derived();
+decltype(auto) evalImpl(expr<Compose>, const Identity<Lhs> &, const Rhs &rhs) {
+    return rhs;
 };
 
 template <typename Lhs, typename Rhs>
