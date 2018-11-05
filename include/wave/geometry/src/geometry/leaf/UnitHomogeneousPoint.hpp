@@ -33,10 +33,15 @@ class UnitHomogeneousPoint
 
     WAVE_DEFAULT_COPY_AND_MOVE_FUNCTIONS(UnitHomogeneousPoint)
 
-    /** Construct from Eigen Matrix object */
+    /** Constructs from an Eigen 4-vector */
     template <typename OtherDerived>
     UnitHomogeneousPoint(const Eigen::MatrixBase<OtherDerived> &m)
         : Storage{typename Storage::init_storage{}, m.derived()} {}
+
+    /** Constructs from an Eigen quaternion object */
+    template <typename QDerived>
+    explicit UnitHomogeneousPoint(const Eigen::QuaternionBase<QDerived> &q)
+        : Storage{typename Storage::init_storage{}, q.derived()} {}
 
     /** Construct from four scalars */
     UnitHomogeneousPoint(Scalar x, Scalar y, Scalar z, Scalar w) {
@@ -46,17 +51,22 @@ class UnitHomogeneousPoint
 
 namespace internal {
 
-template <typename ImplType>
-struct traits<UnitHomogeneousPoint<ImplType>>
-    : point_leaf_traits_base<UnitHomogeneousPoint<ImplType>> {
- private:
-    using Scalar_ = typename ImplType::Scalar;
-    using EigenVector3 = Eigen::Matrix<Scalar_, 3, 1>;
+template <typename ImplType_>
+struct traits<UnitHomogeneousPoint<ImplType_>>
+    : leaf_traits_base<UnitHomogeneousPoint<ImplType_>>, frameable_transform_traits {
+    using ImplType = ImplType_;
+    using Scalar = typename ImplType::Scalar;
 
- public:
-    using TangentType = Translation<EigenVector3>;
+    template <typename NewImplType>
+    using rebind = UnitHomogeneousPoint<NewImplType>;
+
+    using TangentType = Translation<Eigen::Matrix<Scalar, 3, 1>>;
     using TangentBlocks = tmp::type_list<TangentType>;
-    using ConvertTo = tmp::type_list<HomogeneousPoint<Eigen::Matrix<Scalar_, 4, 1>>>;
+    enum : int { TangentSize = 3 };
+
+    using PlainType =
+      UnitHomogeneousPoint<typename Eigen::internal::traits<ImplType>::PlainObject>;
+    using ConvertTo = tmp::type_list<HomogeneousPoint<Eigen::Matrix<Scalar, 4, 1>>>;
 };
 
 /** Converts an unnormalized HomogeneousPoint to spherically normalized
@@ -73,8 +83,18 @@ template <typename Lhs, typename Rhs>
 auto evalImpl(expr<HomMinus>,
               const UnitHomogeneousPoint<Lhs> &lhs,
               const UnitHomogeneousPoint<Rhs> &rhs) {
-    using TangentType = typename traits<Lhs>::TangentType;
-    return TangentType{};
+    return typename traits<UnitHomogeneousPoint<Lhs>>::TangentType{
+      ::wave::rotationVectorFromQuaternion(lhs.value().conjugate() * rhs.value())};
+}
+
+/** Implements manifold addition to homogeneous points
+ */
+template <typename Lhs, typename Rhs>
+auto evalImpl(expr<HomPlus>,
+              const UnitHomogeneousPoint<Lhs> &lhs,
+              const VectorBase<Rhs> &rhs) {
+    return plain_output_t<UnitHomogeneousPoint<Lhs>>{
+      ::wave::quaternionFromRotationVector(rhs.derived().value()) * lhs.value()};
 }
 
 }  // namespace internal

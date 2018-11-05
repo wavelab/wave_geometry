@@ -66,6 +66,7 @@ auto uncrossMatrix(const Eigen::MatrixBase<Derived> &skew)
 template <typename Derived>
 inline auto quaternionFromRotationVector(const Eigen::MatrixBase<Derived> &rotation_vec)
   -> Eigen::Quaternion<typename Derived::Scalar> {
+    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
     using Scalar = typename Derived::Scalar;
     using std::cos;
     using std::sin;

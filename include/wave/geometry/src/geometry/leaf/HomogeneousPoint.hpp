@@ -32,7 +32,7 @@ class HomogeneousPoint : public HomogeneousPointBase<HomogeneousPoint<ImplType>>
 
     WAVE_DEFAULT_COPY_AND_MOVE_FUNCTIONS(HomogeneousPoint)
 
-    /** Construct from Eigen Matrix object */
+    /** Constructs from an Eigen 4-vector */
     template <typename OtherDerived>
     HomogeneousPoint(const Eigen::MatrixBase<OtherDerived> &m)
         : Storage{typename Storage::init_storage{}, m.derived()} {}
@@ -50,10 +50,9 @@ struct traits<HomogeneousPoint<ImplType>>
     : point_leaf_traits_base<HomogeneousPoint<ImplType>> {
  private:
     using Scalar_ = typename ImplType::Scalar;
-    using EigenVector3 = Eigen::Matrix<Scalar_, 3, 1>;
 
  public:
-    using TangentType = Translation<EigenVector3>;
+    using TangentType = Translation<Eigen::Matrix<Scalar_, 3, 1>>;
     using TangentBlocks = tmp::type_list<TangentType>;
     using ConvertTo = tmp::type_list<UnitHomogeneousPoint<Eigen::Quaternion<Scalar_>>>;
 };

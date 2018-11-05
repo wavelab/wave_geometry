@@ -32,7 +32,7 @@ struct HomPlus : internal::base_tmpl_t<Lhs, HomPlus<Lhs, Rhs>>,
  * @todo reorganize / combine with BoxPlus
  */
 template <typename Lhs, typename Rhs>
-struct HomMinus : internal::base_tmpl_t<Lhs, HomMinus<Lhs, Rhs>>,
+struct HomMinus : internal::base_tmpl_t<Lhs, Rhs, HomMinus<Lhs, Rhs>>,
                   internal::binary_storage_for<HomMinus<Lhs, Rhs>> {
  private:
     using Storage = internal::binary_storage_for<HomMinus<Lhs, Rhs>>;

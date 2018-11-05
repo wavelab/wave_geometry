@@ -61,8 +61,7 @@ auto evalImpl(expr<PerturbPlus>,
               const TranslationBase<Rhs> &rhs) {
     const auto &p = lhs.derived().value();
     const auto &v = rhs.derived().value();
-    return
-      typename traits<Lhs>::PlainType{p.x() + v.x(), p.y() + v.y(), p.z() + v.z(), p.w()};
+    return plain_output_t<Lhs>{p.x() + v.x(), p.y() + v.y(), p.z() + v.z(), p.w()};
 }
 
 /** Implements deperturbation of a homogeneous point  */
