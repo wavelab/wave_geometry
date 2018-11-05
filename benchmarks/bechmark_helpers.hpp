@@ -16,11 +16,11 @@
 /** Call ASSERT_APPROX only in debug mode */
 #define DEBUG_ASSERT_APPROX(a, b) ASSERT_APPROX(a, b)
 /** Call ASSERT_APPROX_PREC only in debug mode */
-#define DEBUG_ASSERT_APPROX_PREC(a, b) ASSERT_APPROX_PREC(a, b)
+#define DEBUG_ASSERT_APPROX_PREC(a, b, prec) ASSERT_APPROX_PREC(a, b, prec)
 #else
 #define DEBUG_ASSERT_EQ(a, b)
 #define DEBUG_ASSERT_APPROX(a, b)
-#define DEBUG_ASSERT_APPROX_PREC(a, b)
+#define DEBUG_ASSERT_APPROX_PREC(a, b, prec)
 #endif
 
 /** Return a vector of random objects of type T, using setRandom() */

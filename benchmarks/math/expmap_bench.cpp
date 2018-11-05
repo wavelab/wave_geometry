@@ -1,8 +1,8 @@
 #include <benchmark/benchmark.h>
 #include <wave/geometry/geometry.hpp>
-#include "bechmark_helpers.hpp"
+#include "../bechmark_helpers.hpp"
 
-/** Return a vector of random objects of type T, using setRandom() */
+/** Return a vector of random Eigen matrices with the given norm */
 template <typename T>
 std::vector<T, Eigen::aligned_allocator<T>> randomSmallVectors(int N, double norm) {
     std::vector<T, Eigen::aligned_allocator<T>> v(N);

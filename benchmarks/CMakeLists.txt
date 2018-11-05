@@ -4,7 +4,7 @@ set(CMAKE_VERBOSE_MAKEFILE ON)
 
 wave_geometry_add_benchmark(util_cross_matrix_bench util_cross_matrix_bench.cpp)
 wave_geometry_add_benchmark(util_identity_bench util_identity_bench.cpp)
-wave_geometry_add_benchmark(expmap_bench expmap_bench.cpp)
-
+wave_geometry_add_benchmark(expmap_bench math/expmap_bench.cpp)
+wave_geometry_add_benchmark(logmap_bench math/logmap_bench.cpp)
 
 add_subdirectory(rotate_chain)
