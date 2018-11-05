@@ -83,7 +83,6 @@ namespace internal {
 template <typename ImplType>
 struct traits<Twist<ImplType>> : vector_leaf_traits_base<Twist<ImplType>> {
     using Scalar = typename ImplType::Scalar;
-    using ExpType = MatrixRigidTransform<Eigen::Matrix<Scalar, 4, 4>>;
     using TangentBlocks = std::tuple<RelativeRotation<Eigen::Matrix<Scalar, 3, 1>>,
                                      Translation<Eigen::Matrix<Scalar, 3, 1>>>;
 };
@@ -93,13 +92,13 @@ struct traits<Twist<ImplType>> : vector_leaf_traits_base<Twist<ImplType>> {
  * @todo - evaluate to either
  */
 template <typename ImplType>
-auto evalImpl(expr<ExpMap>, const Twist<ImplType> &rhs) ->
-  typename traits<Twist<ImplType>>::ExpType {
+auto evalImpl(expr<ExpMap>, const Twist<ImplType> &rhs)
+  -> MatrixRigidTransform<Eigen::Matrix<typename ImplType::Scalar, 4, 4>> {
     using Scalar = typename ImplType::Scalar;
     using Mat3 = Eigen::Matrix<Scalar, 3, 3>;
 
     // For now, calculate expmap in two parts
-    typename traits<Twist<ImplType>>::ExpType out{};
+    MatrixRigidTransform<Eigen::Matrix<typename ImplType::Scalar, 4, 4>> out{};
 
     // Equations: see http://ethaneade.com/lie.pdf
     // @todo optimize

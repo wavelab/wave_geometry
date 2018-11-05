@@ -86,10 +86,7 @@ namespace internal {
 
 template <typename ImplType>
 struct traits<RelativeRotation<ImplType>>
-    : vector_leaf_traits_base<RelativeRotation<ImplType>> {
-    // Type of exponential map, currently used by expmap of Zero expression
-    using ExpType = MatrixRotation<Eigen::Matrix<typename ImplType::Scalar, 3, 3>>;
-};
+    : vector_leaf_traits_base<RelativeRotation<ImplType>> {};
 
 /** Implements exp map of a relative rotation into a quaternion rotation
  *

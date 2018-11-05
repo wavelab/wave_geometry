@@ -88,7 +88,8 @@ decltype(auto) evalImpl(expr<Minus>, const Zero<Rhs> &rhs) {
 
 template <typename Rhs>
 auto evalImpl(expr<ExpMap>, const Zero<Rhs> &) {
-    return Identity<typename traits<Rhs>::ExpType>{};
+    using ExpType = eval_t_unary<expr<ExpMap>, eval_t<Rhs>>;
+    return Identity<ExpType>{};
 }
 
 /** Jacobian of exp map of a zero element */

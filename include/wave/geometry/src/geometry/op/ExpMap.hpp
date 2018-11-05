@@ -12,9 +12,10 @@ namespace wave {
  * @tparam Rhs The relative rotation expression in so(3)
  */
 template <typename Rhs>
-struct ExpMap
-    : internal::base_tmpl_t<typename internal::eval_traits<Rhs>::ExpType, ExpMap<Rhs>>,
-      internal::unary_storage_for<ExpMap<Rhs>> {
+struct ExpMap : internal::base_tmpl_t<
+                  internal::eval_t_unary<internal::expr<ExpMap>, internal::eval_t<Rhs>>,
+                  ExpMap<Rhs>>,
+                internal::unary_storage_for<ExpMap<Rhs>> {
  private:
     using Storage = internal::unary_storage_for<ExpMap<Rhs>>;
 
