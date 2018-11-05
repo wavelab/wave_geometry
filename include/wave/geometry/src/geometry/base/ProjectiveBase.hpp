@@ -55,12 +55,12 @@ WAVE_OVERLOAD_FUNCTION_FOR_RVALUES(operator-, BoxMinus, ProjectiveBase, Projecti
  */
 template <typename L, typename R, TICK_REQUIRES(internal::rhs_is_tangent_of_lhs<L, R>{})>
 auto operator+(const ProjectiveBase<L> &lhs, const VectorBase<R> &rhs) {
-    return HomPlus<internal::cr_arg_t<L>, internal::cr_arg_t<R>>{lhs.derived(),
+    return BoxPlus<internal::cr_arg_t<L>, internal::cr_arg_t<R>>{lhs.derived(),
                                                                  rhs.derived()};
 }
 
 WAVE_OVERLOAD_FUNCTION_FOR_RVALUES_REQ(operator+,
-                                       HomPlus,
+                                       BoxPlus,
                                        ProjectiveBase,
                                        VectorBase,
                                        TICK_REQUIRES(

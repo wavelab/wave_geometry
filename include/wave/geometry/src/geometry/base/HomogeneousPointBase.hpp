@@ -11,8 +11,22 @@ namespace wave {
 /** Base class for homogeneous points in P^3 */
 template <typename Derived>
 struct HomogeneousPointBase : public ProjectiveBase<Derived> {
+ private:
+    using OutputType = internal::plain_output_t<Derived>;
+
+ public:
     template <typename T>
     using BaseTmpl = HomogeneousPointBase<T>;
+
+    /** Returns an expression representing the homogeneous point (0, 0, 0, 1) */
+    static auto Identity() {
+        return ::wave::Identity<OutputType>();
+    }
+
+    /** Returns an expression representing the homogeneous point (0, 0, 0, 1) */
+    static auto Zero() {
+        return Identity();
+    }
 };
 
 /** Applies a small perturbation to a homogeneous point
@@ -53,10 +67,10 @@ auto evalImpl(expr<Random, Leaf>, const HomogeneousPointBase<Rhs> &) {
     return Leaf{::wave::randomQuaternion<scalar_t<Rhs>>().coeffs()};
 }
 
-/** Implements Zero for homogeneous points */
+/** Implements Identity (zero point) for homogeneous points */
 template <typename Leaf,
           std::enable_if_t<std::is_base_of<HomogeneousPointBase<Leaf>, Leaf>{}, bool> = 0>
-auto evalImpl(expr<Convert, Leaf>, const Zero<Leaf> &) -> Leaf {
+auto evalImpl(expr<Convert, Leaf>, const Identity<Leaf> &) {
     using S = typename traits<Leaf>::Scalar;
     return Leaf{S{0}, S{0}, S{0}, S{1}};
 }

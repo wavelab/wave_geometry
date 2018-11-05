@@ -53,7 +53,6 @@ class ManifoldTest : public testing::Test {
 
     // Static traits checks
     TICK_TRAIT_CHECK(wave::internal::is_leaf_expression<LeafAB>);
-    TICK_TRAIT_CHECK(wave::internal::is_derived_transform<LeafAB>);
     TICK_TRAIT_CHECK(wave::internal::is_binary_expression<wave::Compose<Leaf, Leaf>>);
     TICK_TRAIT_CHECK(
       wave::internal::is_binary_expression<wave::BoxPlus<LeafAB, RelLeafAAB>>);

@@ -61,7 +61,7 @@ auto evalImpl(expr<Zero>, const Zero<Leaf> &) -> Zero<eval_t<Leaf>> {
 }
 
 // Convert is where Zero actually turns into a regular leaf with a zero value
-template <typename Leaf, std::enable_if_t<is_vector_leaf<Leaf>{}, bool> = 0>
+template <typename Leaf>
 auto evalImpl(expr<Convert, Leaf>, const Zero<Leaf> &) -> Leaf {
     return Leaf{traits<Leaf>::ImplType::Zero()};
 }

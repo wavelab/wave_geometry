@@ -122,6 +122,16 @@ auto evalImpl(expr<ExpMap>, const Translation<ImplType> &rhs) {
     return UnitHomogeneousPoint<QType>{::wave::quaternionFromRotationVector(rhs.value())};
 }
 
+/** Jacobian of "expmap" for BoxPlus of spherical homogeneous points */
+template <typename Val, typename Rhs>
+auto jacobianImpl(expr<ExpMap>,
+                  const HomogeneousPointBase<Val> &val,
+                  const TranslationBase<Rhs> &rhs) -> jacobian_t<Val, Rhs> {
+    // Jacobian needs the SO(3) result as a rotation matrix
+    return ::wave::jacobianOfRotationLogMap(val.derived().value().matrix(),
+                                            rhs.derived().value());
+}
+
 /** Implements quasi-"compose" for manifold operations on spherical homogeneous points
  */
 template <typename Lhs, typename Rhs>
