@@ -164,6 +164,32 @@ inline auto jacobianOfRotationLogMap(const Eigen::MatrixBase<Derived> &rotation_
     //        }
 }
 
+/** Local Jacobian of exponential map of a rotation
+ *
+ * @param rotation_mat the result of the exponential map as a rotation matrix.
+ * @param rotation_vec the input to the exponential map
+ */
+template <typename MDerived, typename VDerived>
+inline auto jacobianOfRotationLogMap(const Eigen::MatrixBase<MDerived> &rotation_mat,
+                                     const Eigen::MatrixBase<VDerived> &rotation_vec)
+  -> Eigen::Matrix<typename MDerived::Scalar, 3, 3> {
+    EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(MDerived, 3, 3);
+    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(VDerived, 3);
+    using Scalar = typename MDerived::Scalar;
+    using Jacobian = Eigen::Matrix<Scalar, 3, 3>;
+    const auto &phi = rotation_vec.derived();
+    const auto &C = rotation_mat.derived();
+
+    // Bloesch Equation 80, with adjustment for near-zero case
+    const auto pcross = crossMatrix(phi);  // cross-matrix of the so(3) input
+    const auto n2 = phi.squaredNorm();     // squared norm of the input
+    if (n2 > Eigen::NumTraits<Scalar>::epsilon()) {
+        return ((Jacobian::Identity() - C) * pcross + (phi * phi.transpose())) / n2;
+    } else {
+        return Jacobian::Identity() + Scalar{0.5} * pcross;
+    }
+}
+
 
 }  // namespace wave
 

@@ -108,20 +108,8 @@ auto jacobianImpl(expr<ExpMap>,
                   const RotationBase<Val> &val,
                   const RelativeRotation<ImplType> &rhs)
   -> jacobian_t<Val, RelativeRotation<ImplType>> {
-    using Jacobian = jacobian_t<Val, RelativeRotation<ImplType>>;
-    using Scalar = typename ImplType::Scalar;
-    const auto &phi = rhs.value();
-    const auto &C =
-      val.derived().value().matrix();  // Rotation matrix of the SO(3) output
-
-    // Bloesch Equation 80, with adjustment for near-zero case
-    const auto pcross = crossMatrix(phi);  // cross-matrix of the so(3) input
-    const auto n2 = phi.squaredNorm();     // squared norm of the input
-    if (n2 > Eigen::NumTraits<Scalar>::epsilon()) {
-        return ((Jacobian::Identity() - C) * pcross + (phi * phi.transpose())) / n2;
-    } else {
-        return Jacobian::Identity() + Scalar{0.5} * pcross;
-    }
+    // Jacobian needs the SO(3) result as a rotation matrix
+    return ::wave::jacobianOfRotationLogMap(val.derived().value().matrix(), rhs.value());
 }
 
 }  // namespace internal
