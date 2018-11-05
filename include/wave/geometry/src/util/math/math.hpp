@@ -54,7 +54,7 @@ auto uncrossMatrix(const Eigen::MatrixBase<Derived> &skew)
       skew(2, 1), skew(0, 2), skew(1, 0)};
 }
 
-/** Implements exp map of a relative rotation into a quaternion rotation
+/** Calculates exponential map of a rotation vector into a quaternion
  *
  * When evaluating a rotation matrix, a conversion is needed. However, as shown by
  * expmap_bench.cpp, this method is faster than the Rodrigues formula expmap to matrix,
@@ -89,6 +89,26 @@ inline auto quaternionFromExpMap(const Eigen::MatrixBase<Derived> &rotation_vec)
     // storage order x, y, z, w
     q.coeffs() << s * v, c;
     return q;
+}
+
+/** Calculates "logarithmic map" of a quaternion, obtaining a rotation vector
+ */
+template <typename Derived>
+inline auto rotationVectorFromQuaternion(const Eigen::QuaternionBase<Derived> &quaternion)
+  -> Eigen::Matrix<typename Derived::Scalar, 3, 1> {
+    using Scalar = typename Derived::Scalar;
+    using Vec3 = Eigen::Matrix<Scalar, 3, 1>;
+    using std::abs;
+    using std::atan2;
+    const auto &q = quaternion.derived();
+
+    const Scalar norm = q.vec().norm();
+    if (norm > Eigen::NumTraits<Scalar>::epsilon()) {
+        return Vec3{q.vec() / norm * 2 * atan2(norm, abs(q.w()))};
+    } else {
+        // limit as q.w() -> 1
+        return Vec3{2 * q.vec()};
+    }
 }
 
 }  // namespace wave

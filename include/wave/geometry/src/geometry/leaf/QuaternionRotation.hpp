@@ -76,8 +76,12 @@ auto jacobianImpl(expr<Inverse>,
     return -q_inv.value().toRotationMatrix();
 }
 
-// No log map of quaternion. It will be automatically converted to rotation matrix
-// @todo maybe implement
+/** Implements log map (conversion to rotation matrix) of a quaternion */
+template <typename ImplType>
+auto evalImpl(expr<LogMap>, const QuaternionRotation<ImplType> &rhs) {
+    using VType = typename traits<QuaternionRotation<ImplType>>::TangentType;
+    return VType{::wave::rotationVectorFromQuaternion(rhs.value())};
+}
 
 /** Implements composition of quaternions */
 template <typename Lhs, typename Rhs>
