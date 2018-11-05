@@ -97,17 +97,17 @@ template <typename Derived>
 inline auto rotationVectorFromQuaternion(const Eigen::QuaternionBase<Derived> &quaternion)
   -> Eigen::Matrix<typename Derived::Scalar, 3, 1> {
     using Scalar = typename Derived::Scalar;
-    using Vec3 = Eigen::Matrix<Scalar, 3, 1>;
     using std::abs;
     using std::atan2;
+    using std::copysign;
     const auto &q = quaternion.derived();
 
     const Scalar norm = q.vec().norm();
     if (norm > Eigen::NumTraits<Scalar>::epsilon()) {
-        return Vec3{q.vec() / norm * 2 * atan2(norm, abs(q.w()))};
+        return 2 * atan2(norm, abs(q.w())) * q.vec() / copysign(norm, q.w());
     } else {
         // limit as q.w() -> 1
-        return Vec3{2 * q.vec()};
+        return 2 * q.vec();
     }
 }
 

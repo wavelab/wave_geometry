@@ -11,19 +11,32 @@ TEST(ExpMapTest, quaternionMatchesEigenAA) {
 }
 
 TEST(LogMapTest, quaternionMatchesEigenAA) {
-    const auto q = wave::RotationQd::Random().value();
-    const auto a = Eigen::AngleAxisd{q};
+    for (int reps = 100; reps--;) {
+        const auto q = wave::RotationQd::Random().value();
+        const auto a = Eigen::AngleAxisd{q};
 
-    const auto res_q = wave::rotationVectorFromQuaternion(q);
-    const auto expected = Eigen::Vector3d{a.axis() * a.angle()};
-    EXPECT_APPROX(expected, res_q);
+        const auto res_q = wave::rotationVectorFromQuaternion(q);
+        const auto expected = Eigen::Vector3d{a.axis() * a.angle()};
+        ASSERT_APPROX(expected, res_q);
+
+        // The inverse rotation produces an opposite vector
+        const auto res_q_n = wave::rotationVectorFromQuaternion(q.conjugate());
+        ASSERT_APPROX(-expected, res_q_n);
+    }
 }
 
 TEST(LogMapTest, matrixMatchesEigenAA) {
-    const auto q = wave::RotationQd::Random().value();
-    const auto a = Eigen::AngleAxisd{q};
+    for (int reps = 100; reps--;) {
+        const auto q = wave::RotationQd::Random().value();
+        const auto a = Eigen::AngleAxisd{q};
+        const auto m = q.matrix();
 
-    const auto res_m = wave::rotationVectorFromMatrix(q.matrix());
-    const auto expected = Eigen::Vector3d{a.axis() * a.angle()};
-    EXPECT_APPROX(expected, res_m);
+        const auto res_m = wave::rotationVectorFromMatrix(m);
+        const auto expected = Eigen::Vector3d{a.axis() * a.angle()};
+        ASSERT_APPROX(expected, res_m);
+
+        // The inverse rotation produces an opposite vector
+        const auto res_q_n = wave::rotationVectorFromMatrix(m.transpose());
+        ASSERT_APPROX(-expected, res_q_n);
+    }
 }
