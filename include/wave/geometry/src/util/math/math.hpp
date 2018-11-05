@@ -134,6 +134,36 @@ inline auto rotationVectorFromMatrix(const Eigen::MatrixBase<Derived> &rotation_
     }
 }
 
+/** Local Jacobian of logarithmic map of a rotation
+ *
+ * @param rotation_vec the result of the logmap.
+ * The Jacobian is independent of the original rotation's parametrization.
+ */
+template <typename Derived>
+inline auto jacobianOfRotationLogMap(const Eigen::MatrixBase<Derived> &rotation_vec)
+  -> Eigen::Matrix<typename Derived::Scalar, 3, 3> {
+    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
+    using Scalar = typename Derived::Scalar;
+    using Jacobian = Eigen::Matrix<Scalar, 3, 3>;
+    using std::cos;
+    using std::sin;
+    const auto &phi = rotation_vec.derived();
+
+    // From http://ethaneade.org/exp_diff.pdf
+    const auto theta2 = phi.squaredNorm();
+    const auto theta = sqrt(theta2);
+    const auto A = sin(theta) / theta;
+    const auto B = (Scalar{1} - cos(theta)) / theta2;
+
+    //        if (theta2 > Eigen::NumTraits<Scalar>::epsilon()) {
+    return Jacobian::Identity() - Scalar{0.5} * crossMatrix(phi) +
+           ((B - Scalar{0.5} * A) / (Scalar{1} - cos(theta))) * crossMatrix(phi) *
+             crossMatrix(phi);
+    //        } else {
+    // @todo small input
+    //        }
+}
+
 
 }  // namespace wave
 

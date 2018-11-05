@@ -39,24 +39,7 @@ template <typename Val, typename Rhs>
 auto jacobianImpl(expr<LogMap>,
                   const RelativeRotation<Val> &val,
                   const RotationBase<Rhs> &) -> jacobian_t<RelativeRotation<Val>, Rhs> {
-    using Scalar = scalar_t<Rhs>;
-    using Jacobian = jacobian_t<RelativeRotation<Val>, Rhs>;
-    const auto &phi = val.value();
-    // From http://ethaneade.org/exp_diff.pdf
-    using std::cos;
-    using std::sin;
-    const auto theta2 = phi.squaredNorm();
-    const auto theta = sqrt(theta2);
-    const auto A = sin(theta) / theta;
-    const auto B = (Scalar{1} - cos(theta)) / theta2;
-
-    //        if (theta2 > Eigen::NumTraits<Scalar>::epsilon()) {
-    return Jacobian::Identity() - Scalar{0.5} * crossMatrix(phi) +
-           ((B - Scalar{0.5} * A) / (Scalar{1} - cos(theta))) * crossMatrix(phi) *
-             crossMatrix(phi);
-    //        } else {
-    // @todo small input
-    //        }
+    return ::wave::jacobianOfRotationLogMap(val.value());
 }
 
 }  // namespace internal

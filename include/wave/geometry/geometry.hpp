@@ -9,8 +9,6 @@
 
 #include "core.hpp"
 
-#include "src/util/math/CrossMatrix.hpp"
-
 #include "src/geometry/forward_declarations.hpp"
 #include "src/geometry/type_traits.hpp"
 

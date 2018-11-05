@@ -24,8 +24,9 @@
 #include "src/util/meta/template_helpers.hpp"
 #include "src/util/meta/index_sequence.hpp"
 #include "src/util/meta/type_list.hpp"
-#include "src/util/math/math.hpp"
+#include "src/util/math/CrossMatrix.hpp"
 #include "src/util/math/IdentityMatrix.hpp"
+#include "src/util/math/math.hpp"
 #include "src/util/math/MatrixMap.hpp"
 
 // Forward declarations and standalone type traits
