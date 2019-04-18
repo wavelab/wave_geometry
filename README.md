@@ -13,6 +13,16 @@
 Source code is available under the [MIT License](LICENSE).
 Documentation is [available online](https://wavelab.github.io/wave_geometry/).
 
+If you use this library, please cite the following paper in your work:
+
+Koppel, Leonid and Waslander, Steven L., "Manifold Geometry with Fast Automatic Derivatives and Coordinate Frame Semantics Checking in C++." In 15th Conference on Computer and Robot Vision (CRV), Toronto, ON, 2018.
+
+@inproceedings{koppel2018manifold,
+  title={Manifold Geometry with Fast Automatic Derivatives and Coordinate Frame Semantics Checking in {C++}},
+  author={Koppel, Leonid and Waslander, Steven L.},
+  booktitle={15th Conference on Computer and Robot Vision (CRV)},
+  year={2018},
+}
 
 ## Features
 
