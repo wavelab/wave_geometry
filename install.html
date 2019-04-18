@@ -1,0 +1,379 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Install &mdash; wave_geometry 0.4.0-dev documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'0.4.0-dev',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Manifold operations" href="manifold_operations.html" />
+    <link rel="prev" title="wave_geometry" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  
+
+<div style="display:none">
+
+
+\(
+\newcommand{\bm}[1]{\boldsymbol{#1}}
+\newcommand{\defeq}{\triangleq}
+\newcommand{\liegrp}[2]{\mathrm{#1}(#2)}
+\newcommand{\liealg}[2]{\mathfrak{#1}(#2)}
+\newcommand{\SO}[1]{\liegrp{SO}{#1}}
+\newcommand{\SE}[1]{\liegrp{SE}{#1}}
+\newcommand{\so}[1]{\liealg{so}{#1}}
+\newcommand{\se}[1]{\liealg{se}{#1}}
+\newcommand{\Spin}[1]{\liegrp{Spin}{#1}}
+\newcommand{\R}[1]{\mathbb{R}^{#1}}
+\renewcommand{\P}[1]{\mathbb{P}^{#1}}
+\newcommand{\T}[1]{\mathbb{T}^{#1}}
+\renewcommand{\S}[1]{S^{#1}}
+\newcommand{\Frame}[1]{\mathcal F_{#1}}
+\renewcommand{\v}[1]{\bm{\mathbf{#1}}}
+\newcommand{\vh}[1]{\bm{#1}}
+\newcommand{\vhm}[1]{\bm{#1}}
+\newcommand{\pt}[1]{#1}
+\newcommand{\vecpt}[1]{\overrightarrow{\pt{#1}}}
+\newcommand{\en}[1]{\mathqzc{#1}}
+\newcommand{\vs}[1]{\mathcal{#1}}
+\newcommand{\f}[3]{{}_{#2} \v{#1}_{#3}}
+\newcommand{\F}[2]{\v{#1}_{#2}}
+\newcommand{\fh}[3]{{}_{#2} \vh{#1}_{#3}}
+\newcommand{\Fh}[2]{\vh{#1}_{#2}}
+\newcommand{\trans}{^{\mkern-1.5mu\mathsf{T}}}
+\newcommand{\inv}{^{-1}}
+\newcommand{\origin}{\pt O}
+\newcommand{\elvec}{p}
+\newcommand{\fvec}[2]{\f{\elvec}{#1}{#2}}
+\newcommand{\fvech}[2]{\fh{\elvec}{#1}{#2}}
+\newcommand{\vvec}{\v{\elvec}}
+\newcommand{\elvecg}{v}
+\newcommand{\fvecg}[2]{\f{\elvecg}{#1}{#2}}
+\newcommand{\vvecg}{\v{\elvecg}}
+\newcommand{\elrot}{R}
+\newcommand{\frot}[1]{\F{\elrot}{#1}}
+\newcommand{\vrot}{\v{\elrot}}
+\newcommand{\eltf}{T}
+\newcommand{\ftf}[1]{\F{\eltf}{#1}}
+\newcommand{\vtf}{\v{\eltf}}
+\newcommand{\elgrp}{\Phi}
+\newcommand{\fgrp}[1]{\F{\elgrp}{#1}}
+\newcommand{\vgrp}{\v{\elgrp}}
+\newcommand{\elalg}{\varphi}
+\newcommand{\falg}[2]{\f{\elalg}{#1}{#2}}
+\newcommand{\valg}{\v{\elalg}}
+\newcommand{\elq}{q}
+\newcommand{\fq}[1]{\F{\elq}{#1}}
+\newcommand{\vq}{\v{\elq}}
+\newcommand{\elrotmat}{C}
+\newcommand{\frotmat}[1]{\F{\elrotmat}{#1}}
+\newcommand{\vrotmat}{\v{\elrotmat}}
+\newcommand{\Grp}{G}
+\newcommand{\Op}{\circ}
+\newcommand{\El}{\en g}
+\newcommand{\ElB}{\en h}
+\newcommand{\AlgEl}{\v X}
+\newcommand{\AlgElB}{\v Y}
+\newcommand{\Id}{\en e}
+\newcommand{\Alg}{\mathfrak{g}}
+\newcommand{\Tan}{\vs T}
+\newcommand{\sevec}{\v\xi}
+\newcommand{\setvec}{\v\rho}
+\newcommand{\tvec}{\v t}
+\newcommand{\rotvec}{\v\phi}
+\newcommand{\hatop}{\wedge}
+\newcommand{\crossop}{\times}
+\newcommand{\Ad}{\mathrm{Ad}}
+\newcommand{\ad}{\mathrm{ad}}
+\newcommand{\alg}{\mathrm{alg}}
+\newcommand{\eye}{\v I}
+\newcommand{\zeros}{\v 0}
+\)
+
+</div>
+
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> wave_geometry
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Install</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#get-the-source-code">Get the source code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-on-linux">Install on Linux</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#use-in-a-cmake-project">Use in a CMake project</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="manifold_operations.html">Manifold operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="autodiff.html">Automatic differentiation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="frame_semantics.html">Coordinate frame semantics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dynamic_expressions.html">Dynamic expressions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="storage.html">Storage and <code class="docutils literal notranslate"><span class="pre">auto</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cite.html">Cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">wave_geometry</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Install</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="install">
+<h1>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="get-the-source-code">
+<h2>Get the source code<a class="headerlink" href="#get-the-source-code" title="Permalink to this headline">¶</a></h2>
+<p>The latest version of wave_geometry is available <a class="reference external" href="https://github.com/wavelab/wave_geometry">on GitHub</a>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/wavelab/wave_geometry
+</pre></div>
+</div>
+</div>
+<div class="section" id="dependencies">
+<h2>Dependencies<a class="headerlink" href="#dependencies" title="Permalink to this headline">¶</a></h2>
+<p>wave_geometry requires:</p>
+<ul class="simple">
+<li>an existing installation of <a class="reference external" href="http://eigen.tuxfamily.org">Eigen</a> 3.3.2 or above</li>
+<li>an existing installation of Boost 1.58 or above (header-only libraries)</li>
+<li>a C++17 compiler (tested on GCC 6.5, clang 5.0)</li>
+</ul>
+<p>It has only been tested on Linux.</p>
+</div>
+<div class="section" id="install-on-linux">
+<h2>Install on Linux<a class="headerlink" href="#install-on-linux" title="Permalink to this headline">¶</a></h2>
+<p>wave_geometry is a header-only library, meaning no compilation is required to use it in your project.
+It can be installed with CMake.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> wave_geometry
+mkdir build
+<span class="nb">cd</span> build
+cmake .. -DBUILD_TESTING<span class="o">=</span>OFF
+sudo make install
+</pre></div>
+</div>
+<p>Setting the <code class="docutils literal notranslate"><span class="pre">BUILD_TESTING</span></code> option to <code class="docutils literal notranslate"><span class="pre">ON</span></code> (the default) will build unit tests,
+and <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">test</span></code> will run them.</p>
+<p>As an alternative to <code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">install</span></code>, the CMake option <code class="docutils literal notranslate"><span class="pre">-DEXPORT_BUILD=ON</span></code> will
+make the build directory findable by other CMake projects without installation.</p>
+</div>
+<div class="section" id="use-in-a-cmake-project">
+<h2>Use in a CMake project<a class="headerlink" href="#use-in-a-cmake-project" title="Permalink to this headline">¶</a></h2>
+<p>Once wave_geometry has been either installed or exported by CMake, it can be used in
+your project’s <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> file as follows:</p>
+<div class="highlight-cmake notranslate"><div class="highlight"><pre><span></span><span class="nb">cmake_minimum_required</span><span class="p">(</span><span class="s">VERSION</span> <span class="s">3.8</span><span class="p">)</span>
+<span class="nb">project</span><span class="p">(</span><span class="s">example</span><span class="p">)</span>
+
+<span class="nb">set</span><span class="p">(</span><span class="s">CMAKE_CXX_STANDARD</span> <span class="s">17</span><span class="p">)</span>
+
+<span class="nb">find_package</span><span class="p">(</span><span class="s">wave_geometry</span> <span class="s">REQUIRED</span><span class="p">)</span>
+
+<span class="nb">add_executable</span><span class="p">(</span><span class="s">example</span> <span class="s">example.cpp</span><span class="p">)</span>
+<span class="nb">target_link_libraries</span><span class="p">(</span><span class="s">example</span> <span class="s">wave_geometry</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In your C++ file, write:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="cp">#include</span> <span class="cpf">&lt;wave/geometry/geometry.hpp&gt;</span><span class="cp"></span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="manifold_operations.html" class="btn btn-neutral float-right" title="Manifold operations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="wave_geometry" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Leonid Koppel (Waterloo Autonomous Vehicles Laboratory)
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: master
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="develop/install.html">develop</a></dd>
+            <dd><a href="master/install.html">master</a></dd>
+        </dl>
+    </div>
+</div>
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

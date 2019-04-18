@@ -1,0 +1,379 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Coordinate frame semantics &mdash; wave_geometry 0.4.0-dev documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'./',
+              VERSION:'0.4.0-dev',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/theme_overrides.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Dynamic expressions" href="dynamic_expressions.html" />
+    <link rel="prev" title="Automatic differentiation" href="autodiff.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+  
+
+<div style="display:none">
+
+
+\(
+\newcommand{\bm}[1]{\boldsymbol{#1}}
+\newcommand{\defeq}{\triangleq}
+\newcommand{\liegrp}[2]{\mathrm{#1}(#2)}
+\newcommand{\liealg}[2]{\mathfrak{#1}(#2)}
+\newcommand{\SO}[1]{\liegrp{SO}{#1}}
+\newcommand{\SE}[1]{\liegrp{SE}{#1}}
+\newcommand{\so}[1]{\liealg{so}{#1}}
+\newcommand{\se}[1]{\liealg{se}{#1}}
+\newcommand{\Spin}[1]{\liegrp{Spin}{#1}}
+\newcommand{\R}[1]{\mathbb{R}^{#1}}
+\renewcommand{\P}[1]{\mathbb{P}^{#1}}
+\newcommand{\T}[1]{\mathbb{T}^{#1}}
+\renewcommand{\S}[1]{S^{#1}}
+\newcommand{\Frame}[1]{\mathcal F_{#1}}
+\renewcommand{\v}[1]{\bm{\mathbf{#1}}}
+\newcommand{\vh}[1]{\bm{#1}}
+\newcommand{\vhm}[1]{\bm{#1}}
+\newcommand{\pt}[1]{#1}
+\newcommand{\vecpt}[1]{\overrightarrow{\pt{#1}}}
+\newcommand{\en}[1]{\mathqzc{#1}}
+\newcommand{\vs}[1]{\mathcal{#1}}
+\newcommand{\f}[3]{{}_{#2} \v{#1}_{#3}}
+\newcommand{\F}[2]{\v{#1}_{#2}}
+\newcommand{\fh}[3]{{}_{#2} \vh{#1}_{#3}}
+\newcommand{\Fh}[2]{\vh{#1}_{#2}}
+\newcommand{\trans}{^{\mkern-1.5mu\mathsf{T}}}
+\newcommand{\inv}{^{-1}}
+\newcommand{\origin}{\pt O}
+\newcommand{\elvec}{p}
+\newcommand{\fvec}[2]{\f{\elvec}{#1}{#2}}
+\newcommand{\fvech}[2]{\fh{\elvec}{#1}{#2}}
+\newcommand{\vvec}{\v{\elvec}}
+\newcommand{\elvecg}{v}
+\newcommand{\fvecg}[2]{\f{\elvecg}{#1}{#2}}
+\newcommand{\vvecg}{\v{\elvecg}}
+\newcommand{\elrot}{R}
+\newcommand{\frot}[1]{\F{\elrot}{#1}}
+\newcommand{\vrot}{\v{\elrot}}
+\newcommand{\eltf}{T}
+\newcommand{\ftf}[1]{\F{\eltf}{#1}}
+\newcommand{\vtf}{\v{\eltf}}
+\newcommand{\elgrp}{\Phi}
+\newcommand{\fgrp}[1]{\F{\elgrp}{#1}}
+\newcommand{\vgrp}{\v{\elgrp}}
+\newcommand{\elalg}{\varphi}
+\newcommand{\falg}[2]{\f{\elalg}{#1}{#2}}
+\newcommand{\valg}{\v{\elalg}}
+\newcommand{\elq}{q}
+\newcommand{\fq}[1]{\F{\elq}{#1}}
+\newcommand{\vq}{\v{\elq}}
+\newcommand{\elrotmat}{C}
+\newcommand{\frotmat}[1]{\F{\elrotmat}{#1}}
+\newcommand{\vrotmat}{\v{\elrotmat}}
+\newcommand{\Grp}{G}
+\newcommand{\Op}{\circ}
+\newcommand{\El}{\en g}
+\newcommand{\ElB}{\en h}
+\newcommand{\AlgEl}{\v X}
+\newcommand{\AlgElB}{\v Y}
+\newcommand{\Id}{\en e}
+\newcommand{\Alg}{\mathfrak{g}}
+\newcommand{\Tan}{\vs T}
+\newcommand{\sevec}{\v\xi}
+\newcommand{\setvec}{\v\rho}
+\newcommand{\tvec}{\v t}
+\newcommand{\rotvec}{\v\phi}
+\newcommand{\hatop}{\wedge}
+\newcommand{\crossop}{\times}
+\newcommand{\Ad}{\mathrm{Ad}}
+\newcommand{\ad}{\mathrm{ad}}
+\newcommand{\alg}{\mathrm{alg}}
+\newcommand{\eye}{\v I}
+\newcommand{\zeros}{\v 0}
+\)
+
+</div>
+
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> wave_geometry
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0.4.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Install</a></li>
+<li class="toctree-l1"><a class="reference internal" href="manifold_operations.html">Manifold operations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="autodiff.html">Automatic differentiation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Coordinate frame semantics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dynamic_expressions.html">Dynamic expressions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="storage.html">Storage and <code class="docutils literal notranslate"><span class="pre">auto</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cite.html">Cite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">wave_geometry</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Coordinate frame semantics</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="coordinate-frame-semantics">
+<h1>Coordinate frame semantics<a class="headerlink" href="#coordinate-frame-semantics" title="Permalink to this headline">¶</a></h1>
+<p>Representing poses without confusion is notoriously difficult, and mistakes such as using a quantity expressed in the wrong coordinate frame have bogged down many a robotics project. wave_geometry provides built-in coordinate frame semantics checking. It extends <a class="reference external" href="http://paulfurgale.info/news/2014/6/9/representing-robot-pose-the-good-the-bad-and-the-ugly">Furgale’s recommended notation</a> by putting semantic information into the language type system.</p>
+<p>Some examples:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="33%" />
+<col width="33%" />
+<col width="33%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">In math</th>
+<th class="head">In English</th>
+<th class="head">In wave_geometry</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td><span class="math notranslate nohighlight">\({}_A\mathbf{p}_{BC}\)</span></td>
+<td>The vector from frame B to frame C, expressed in frame A</td>
+<td><code class="docutils literal notranslate"><span class="pre">Framed&lt;Translationd,</span> <span class="pre">A,</span> <span class="pre">B,</span> <span class="pre">C&gt;</span></code> or <code class="docutils literal notranslate"><span class="pre">TranslationFd&lt;A,</span> <span class="pre">B,</span> <span class="pre">C&gt;</span></code></td>
+</tr>
+<tr class="row-odd"><td><span class="math notranslate nohighlight">\({}_A\mathbf\omega_{BC}\)</span></td>
+<td>The angular velocity of frame C with respect to frame B, expressed in frame A</td>
+<td><code class="docutils literal notranslate"><span class="pre">Framed&lt;RelativeRotatiod,</span> <span class="pre">A,</span> <span class="pre">B,</span> <span class="pre">C&gt;</span></code> or <code class="docutils literal notranslate"><span class="pre">RelativeRotationFd&lt;A,</span> <span class="pre">B,</span> <span class="pre">C&gt;</span></code></td>
+</tr>
+<tr class="row-even"><td><span class="math notranslate nohighlight">\(\mathbf{R}_{AB}\)</span></td>
+<td>The rotation between frame A and frame B, such that <span class="math notranslate nohighlight">\({}_A\mathbf{p}_{BC}={}\mathbf{R}_{AB}({}_B\mathbf{p}_{BC})\)</span></td>
+<td><code class="docutils literal notranslate"><span class="pre">Framed&lt;RotationMd,</span> <span class="pre">A,</span> <span class="pre">B&gt;</span></code> or <code class="docutils literal notranslate"><span class="pre">RotationMFd&lt;A,</span> <span class="pre">B&gt;</span></code></td>
+</tr>
+</tbody>
+</table>
+<p>Here, <code class="docutils literal notranslate"><span class="pre">A</span></code>, <code class="docutils literal notranslate"><span class="pre">B</span></code> and <code class="docutils literal notranslate"><span class="pre">C</span></code> are types which do nothing but represent a coordinate frame; more descriptive names can be used if desired.</p>
+<p>Coordinate frame semantics checking can detect invalid operations <em>at compile time</em>. Consider this code:</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="k">struct</span> <span class="n">BodyFrame</span><span class="p">;</span>  
+<span class="k">struct</span> <span class="n">CameraFrame</span><span class="p">;</span>  
+<span class="k">struct</span> <span class="n">WorldFrame</span><span class="p">;</span>  
+  
+<span class="n">wave</span><span class="o">::</span><span class="n">RotationMFd</span><span class="o">&lt;</span><span class="n">WorldFrame</span><span class="p">,</span> <span class="n">BodyFrame</span><span class="o">&gt;</span> <span class="n">r1</span><span class="p">;</span>  
+<span class="n">wave</span><span class="o">::</span><span class="n">RotationMFd</span><span class="o">&lt;</span><span class="n">CameraFrame</span><span class="p">,</span> <span class="n">WorldFrame</span><span class="o">&gt;</span> <span class="n">r2</span><span class="p">;</span>  
+  
+<span class="c1">// Let&#39;s get the rotation between World and Camera (maybe)</span>
+<span class="n">wave</span><span class="o">::</span><span class="n">RotationMFd</span><span class="o">&lt;</span><span class="n">WorldFrame</span><span class="p">,</span> <span class="n">CameraFrame</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">r1</span> <span class="o">*</span> <span class="n">r2</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>This code has a mistake, but is saved by semantics checking. When we try to compile it, we get the following error message (from clang 5, not showing colours):</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="go">In file included from /.../example.cpp:1:</span>
+<span class="go">In file included from /.../wave/geometry/geometry.hpp:45:</span>
+<span class="go">/.../wave/geometry/src/geometry/op/Compose.hpp:22:5: error: static_assert failed &quot;Adjacent frames do not match&quot;</span>
+<span class="go">    static_assert(std::is_same&lt;RightFrameOf&lt;Lhs&gt;, LeftFrameOf&lt;Rhs&gt;&gt;(),</span>
+<span class="go">    ^             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="go">/.../example.cpp:31:60: note: in instantiation of template class &#39;wave::Compose&lt;wave::Framed&lt;wave::MatrixRotation&lt;Eigen::Matrix&lt;double, 3, 3, 0, 3, 3&gt; &gt;, WorldFrame, BodyFrame&gt;, wave::Framed&lt;wave::MatrixRotation&lt;Eigen::Matrix&lt;double, 3, 3, 0, 3, 3&gt; &gt;, CameraFrame, WorldFrame&gt; &gt;&#39; requested here</span>
+<span class="go">    wave::RotationMFd&lt;WorldFrame, CameraFrame&gt; result = r1 * r2;</span>
+<span class="go">                                                           ^</span>
+</pre></div>
+</div>
+<p>The corrected code compiles successfully.</p>
+<div class="highlight-cpp notranslate"><div class="highlight"><pre><span></span><span class="c1">// Let&#39;s get the rotation between World and Camera (fixed)  </span>
+<span class="n">wave</span><span class="o">::</span><span class="n">RotationMFd</span><span class="o">&lt;</span><span class="n">WorldFrame</span><span class="p">,</span> <span class="n">CameraFrame</span><span class="o">&gt;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">r1</span> <span class="o">*</span> <span class="n">inverse</span><span class="p">(</span><span class="n">r2</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>In addition to making code safer and more readable, using coordinate frame semantics actually makes wave_geometry’s autodiff faster by providing extra type information.</p>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="dynamic_expressions.html" class="btn btn-neutral float-right" title="Dynamic expressions" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="autodiff.html" class="btn btn-neutral float-left" title="Automatic differentiation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Leonid Koppel (Waterloo Autonomous Vehicles Laboratory)
+
+    </p>
+  </div> 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+<div class="rst-versions" data-toggle="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+        <span class="fa fa-book"> Other Versions</span>
+        v: develop
+        <span class="fa fa-caret-down"></span>
+    </span>
+    <div class="rst-other-versions">
+        <dl>
+            <dt>Branches</dt>
+            <dd><a href="frame_semantics.html">develop</a></dd>
+            <dd><a href="../master/frame_semantics.html">master</a></dd>
+        </dl>
+    </div>
+</div>
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
