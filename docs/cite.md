@@ -8,6 +8,5 @@ wave_geometry is described in a [conference paper](https://arxiv.org/abs/1805.01
   author={Koppel, Leonid and Waslander, Steven L.},
   booktitle={15th Conference on Computer and Robot Vision (CRV)},
   year={2018},
-  note = {to be published}
 }
 ```
