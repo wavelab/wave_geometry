@@ -129,6 +129,30 @@ TYPED_TEST_P(RotationTest, rotateVector) {
     CHECK_JACOBIANS(true, r1 * p1, r1, p1);
 }
 
+TYPED_TEST_P(RotationTest, rotateVectorByInverse) {
+    const auto r1 = TestFixture::LeafAB::Random();
+    const auto p1 = TestFixture::PointAAB::Random();
+    const auto expr = inverse(r1) * p1;
+    const auto p2_single = typename TestFixture::PointBAB{expr};
+
+    const auto eigen_result = (r1.value().matrix().transpose() * p1.value()).eval();
+    EXPECT_APPROX(eigen_result, p2_single.value());
+    CHECK_JACOBIANS(true, expr, r1, p1);
+
+    // Test that calls to expr.jacobian(x) work the same as evalWithJacobians().
+    //
+    // As in other tests, CHECK_JACOBIANS checks all Jacobian evaluators, but some
+    // high-level glue code that constructs the evaluators isn't checked by that macro.
+    // Check it here for a few cases.
+    const auto [p2, J_p2_wrt_r1, J_p2_wrt_p1] = expr.evalWithJacobians(r1, p1);
+    const auto J_p2_wrt_r1_single = expr.jacobian(r1);
+    const auto J_p2_wrt_p1_single = expr.jacobian(p1);
+
+    EXPECT_APPROX(p2_single, p2);
+    EXPECT_APPROX(J_p2_wrt_p1, J_p2_wrt_p1_single);
+    EXPECT_APPROX(J_p2_wrt_r1, J_p2_wrt_r1_single);
+}
+
 TYPED_TEST_P(RotationTest, inverseExpr) {
     const auto r1 = TestFixture::LeafAB::Random();
     const auto r2 = typename TestFixture::LeafBA{inverse(r1)};
@@ -202,6 +226,7 @@ REGISTER_TYPED_TEST_CASE_P(RotationTest,
                            assignViaGetter,
                            getTranslation,
                            rotateVector,
+                           rotateVectorByInverse,
                            inverseExpr,
                            composeWithM,
                            composeWithQ,

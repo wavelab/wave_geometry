@@ -262,7 +262,9 @@ auto evaluateTypedJacobian(const ExpressionBase<Derived> &expr,
     // Note since we don't return the value, we don't need the user-facing OutputType
     using OutType = eval_output_t<Derived>;
     const auto &v_eval = prepareEvaluatorTo<OutType>(expr.derived());
-    internal::TypedJacobianEvaluator<Derived, TargetDerived> j_eval{v_eval, target};
+    using ExprType = tmp::remove_cr_t<decltype(v_eval.expr)>;
+
+    internal::TypedJacobianEvaluator<ExprType, TargetDerived> j_eval{v_eval, target};
     const auto &result = j_eval.jacobian();
     return result;
 }
