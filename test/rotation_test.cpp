@@ -144,7 +144,10 @@ TYPED_TEST_P(RotationTest, rotateVectorByInverse) {
     // As in other tests, CHECK_JACOBIANS checks all Jacobian evaluators, but some
     // high-level glue code that constructs the evaluators isn't checked by that macro.
     // Check it here for a few cases.
-    const auto [p2, J_p2_wrt_r1, J_p2_wrt_p1] = expr.evalWithJacobians(r1, p1);
+    typename TestFixture::PointBAB p2;  // gcc-6 support
+                                        // @todo gcc-7: update to structured binding
+    typename TestFixture::Matrix3 J_p2_wrt_r1, J_p2_wrt_p1;
+    std::tie(p2, J_p2_wrt_r1, J_p2_wrt_p1) = expr.evalWithJacobians(r1, p1);
     const auto J_p2_wrt_r1_single = expr.jacobian(r1);
     const auto J_p2_wrt_p1_single = expr.jacobian(p1);
 
