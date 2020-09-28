@@ -1,7 +1,4 @@
 dist: trusty
-# Use sudo environment just because it currently has more memory, and there is less chance
-# of the expensive AddressSanitizer build running out.
-sudo: required
 language: cpp
 
 branches:
@@ -75,8 +72,10 @@ jobs:
         - ./scripts/ci/ci_make_docs.bash
       deploy:
         provider: pages
+        strategy: git
         skip-cleanup: true
-        github-token: $GITHUB_TOKEN  # Set in the settings page of your repository, as a secure variable
+        github-token:
+          secure: "EOLR86znU3Y8BoqI/cDYqAO4U0P2T4Xlobfh4F1GC9kyaeFvCcDIyKEtlhWxrxo3QhwCQPXE9HSXZDGfkLn1rWGAKltmYC7fteZbp39jmV7FTC+lL/JnS7499ojGRj0hSP7kmNwKyjkjJnDMHdx8xAyg3D1VmoCU27fyu8ayQrdMzbtarVndJ+Nnmro46cMlEIWEDdEIhIqJ8ffgHbZpMbONt79YnHgY1b+hKgtP8815K9g+UG2F7MYajRSJs7OZdw1XQpNNL0gEgEjHvsbq18OPqSRmb3cp5bgp912p9lKQLId/ATSoxoU0eoGYXSaIN3vcZSXrA91Go1UChWKULuKM1oTUqKJoJnCI1p6KyB5/dMoJv4AKblP/9t3pO1BK7ZPfS7plxWN982yfUVPL7BfnwpkuYNcHUmD4ukBqcrCuHshXO770v+C6KpgUVQWHEc4vpXWz+9goLd3U2VLsJKJ5LYffMLuzmdY4XpSdXwJKLQAunsrJ2m1JMNFqZUbxYpvnNsjw/To3jwsFsZdIHnY5yW6NSIu+WaAeQJ1j8oeuggAIyUW3IUAFPq30hYW1oiwNBuj8lHW9B52mrjLaMuSoleGkeIrRUDSedaDSVAYk9LKQibglCOag7QFArzNcdOjFnqcsIOUR7+yYGcLS3itA3aK6Fr7MXXwSvkK6vEQ="
         local-dir: $DOCS_BUILD_DIR
         on:
           all_branches: true  # branches limited by the below condition
