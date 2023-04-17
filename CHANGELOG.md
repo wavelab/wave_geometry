@@ -39,7 +39,7 @@
 ### Deprecated support
 - C++11 support is deprecated. The next release will use C++17.
 - Eigen 3.2.92 (3.3-beta2) is not officially supported. It works as of this release, but
-only 3.3.2 is tested in CI.
+only 3.3.7 is tested in CI.
 
 ### Fixes and minor changes
 - Expressions can be differentiated w.r.t. their stored contents

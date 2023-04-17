@@ -64,7 +64,7 @@ ELSE(TARGET wave)
   ENDIF(BUILD_BENCHMARKS)
 
   # We use header-only parts of boost: boost::optional
-  FIND_PACKAGE(Boost 1.58 REQUIRED)
+  FIND_PACKAGE(Boost 1.71 REQUIRED)
 ENDIF(TARGET wave)
 
 IF(BUILD_TESTING)

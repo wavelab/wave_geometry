@@ -2,12 +2,12 @@
 # wrapping an old version of Eigen.
 
 # Try config-file search only
-find_package(Eigen3 3.2.92 QUIET NO_MODULE)
+find_package(Eigen3 3.3.7 QUIET NO_MODULE)
 if(Eigen3_FOUND)
   message(STATUS "Found Eigen: ${EIGEN3_INCLUDE_DIR}")
 else()
   # Try using FindEigen3.cmake (needed for older distributions)
-  find_package(Eigen3 3.2.92 REQUIRED)
+  find_package(Eigen3 3.3.7 REQUIRED)
 endif()
 
 # For older Eigen there may not be a Eigen3::Eigen target. Make one.
